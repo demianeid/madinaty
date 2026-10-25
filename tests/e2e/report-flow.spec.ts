@@ -24,6 +24,8 @@ test.describe("Citizen Report Creation & Lifecycle Journey", () => {
     // 2. Navigate to report creation page
     await page.goto("/reports/new");
     await expect(page.getByRole("heading", { name: /تسجيل بلاغ/ })).toBeVisible({ timeout: 15000 });
+    // Wait for categories to finish loading from API
+    await expect(page.locator("select option")).not.toHaveCount(0, { timeout: 15000 });
 
     // 3. Fill in report details
     await page.fill('input[placeholder*="مثال:"]', "هبوط إسفلتي عميق في التقاطع الرئيسي");

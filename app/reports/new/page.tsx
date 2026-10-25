@@ -125,6 +125,12 @@ export default function NewReportPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
+
+    if (!categoryId) {
+      setErrorMessage("يرجى اختيار تصنيف البلاغ قبل الإرسال.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -427,7 +433,7 @@ export default function NewReportPage() {
 
                 <button
                   type="submit"
-                  disabled={isSubmitting || isUploading}
+                  disabled={isSubmitting || isUploading || categoriesLoading || !categoryId}
                   className="rounded-xl bg-emerald-600 px-8 py-3 text-sm font-bold text-white shadow-md hover:bg-emerald-700 disabled:opacity-50 transition-colors"
                 >
                   {isSubmitting ? "جاري الإرسال والتحقق..." : "إرسال البلاغ الآن"}
