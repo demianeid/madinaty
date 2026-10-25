@@ -1,0 +1,520 @@
+// Madinaty Database Schema
+// PostgreSQL with Prisma ORM
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
+
+enum UserRole {
+  CITIZEN
+  STAFF
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING
+}
+
+enum MembershipRole {
+  VIEWER
+  TRIAGE
+  OPERATOR
+  AUTHORITY_ADMIN
+}
+
+enum ReportStatus {
+  NEW
+  UNDER_REVIEW
+  ASSIGNED
+  IN_PROGRESS
+  WAITING_FOR_RESIDENT
+  RESOLVED
+  REJECTED
+  CLOSED
+  CLOSED_NO_RESPONSE
+  REOPENED
+}
+
+enum ReportPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ReportVisibility {
+  PRIVATE
+  PUBLIC_PENDING
+  PUBLIC
+}
+
+enum ModerationState {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AppealStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum DeliveryChannel {
+  IN_APP
+  EMAIL
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum OutboxStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// -----------------------------------------------------------------------------
+// Authentication Models (Better Auth Compatible)
+// -----------------------------------------------------------------------------
+
+model User {
+  id              String      @id @default(cuid())
+  name            String
+  email           String      @unique
+  emailVerified   Boolean     @default(false)
+  image           String?
+  phoneNumber     String?
+  role            UserRole    @default(CITIZEN)
+  status          UserStatus  @default(ACTIVE)
+  preferredLocale String      @default("ar")
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  deletedAt       DateTime?
+
+  sessions        Session[]
+  accounts        Account[]
+  memberships     AuthorityMembership[]
+  reports         Report[]               @relation("CitizenReports")
+  assignedReports Report[]               @relation("AssignedStaffReports")
+  updates         ReportUpdate[]
+  internalNotes   InternalNote[]
+  appeals         Appeal[]               @relation("CitizenAppeals")
+  reviewedAppeals Appeal[]               @relation("StaffReviewedAppeals")
+  ratings         Rating[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+
+  @@index([email])
+  @@index([role, status])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+// -----------------------------------------------------------------------------
+// Municipal Authorities & Scopes
+// -----------------------------------------------------------------------------
+
+model Authority {
+  id           String                @id @default(cuid())
+  name         String
+  nameAr       String
+  slug         String                @unique
+  description  String?
+  contactEmail String
+  isActive     Boolean               @default(true)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  memberships  AuthorityMembership[]
+  serviceAreas ServiceArea[]
+  routingRules RoutingRule[]
+  reports      Report[]
+  categories   Category[]            @relation("DefaultAuthorityCategories")
+
+  @@index([slug])
+  @@index([isActive])
+}
+
+model AuthorityMembership {
+  id             String         @id @default(cuid())
+  userId         String
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  authorityId    String
+  authority      Authority      @relation(fields: [authorityId], references: [id], onDelete: Cascade)
+  membershipRole MembershipRole @default(OPERATOR)
+  isActive       Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@unique([userId, authorityId])
+  @@index([userId, isActive])
+  @@index([authorityId, isActive])
+}
+
+model ServiceArea {
+  id          String        @id @default(cuid())
+  authorityId String
+  authority   Authority     @relation(fields: [authorityId], references: [id], onDelete: Cascade)
+  name        String
+  nameAr      String
+  polygon     Json?         // GeoJSON geometry boundary
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  routingRules RoutingRule[]
+
+  @@index([authorityId, isActive])
+}
+
+model Category {
+  id                 String        @id @default(cuid())
+  key                String        @unique // e.g. "road-hazards", "street-lighting"
+  domain             String        @default("municipal")
+  labelAr            String
+  labelEn            String
+  descriptionAr      String?
+  descriptionEn      String?
+  defaultAuthorityId String?
+  defaultAuthority   Authority?    @relation("DefaultAuthorityCategories", fields: [defaultAuthorityId], references: [id], onDelete: SetNull)
+  isActive           Boolean       @default(true)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  reports            Report[]
+  routingRules       RoutingRule[]
+
+  @@index([key])
+  @@index([isActive])
+}
+
+model RoutingRule {
+  id            String       @id @default(cuid())
+  categoryId    String
+  category      Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  serviceAreaId String?
+  serviceArea   ServiceArea? @relation(fields: [serviceAreaId], references: [id], onDelete: SetNull)
+  authorityId   String
+  authority     Authority    @relation(fields: [authorityId], references: [id], onDelete: Cascade)
+  priority      ReportPriority @default(MEDIUM)
+  isActive      Boolean      @default(true)
+  version       Int          @default(1)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([categoryId, isActive])
+  @@index([authorityId, isActive])
+}
+
+// -----------------------------------------------------------------------------
+// Report Domain Models
+// -----------------------------------------------------------------------------
+
+model Report {
+  id                 String           @id @default(cuid())
+  publicReference    String           @unique // e.g. "MD-7K9M-2P4R"
+  createdById        String
+  createdBy          User             @relation("CitizenReports", fields: [createdById], references: [id], onDelete: Restrict)
+  categoryId         String
+  category           Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  authorityId        String?
+  authority          Authority?       @relation(fields: [authorityId], references: [id], onDelete: SetNull)
+  assignedToId       String?
+  assignedTo         User?            @relation("AssignedStaffReports", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  title              String
+  description        String
+  status             ReportStatus     @default(NEW)
+  priority           ReportPriority   @default(MEDIUM)
+
+  latitude           Float
+  longitude          Float
+  addressText        String?
+  locationPrecision  String?          // e.g. "EXACT", "APPROXIMATE", "DISTRICT"
+  visibility         ReportVisibility @default(PUBLIC_PENDING)
+
+  aiValidationResult String?          // "VALID", "INVALID", "UNCERTAIN"
+  aiConfidence       Float?
+  aiReviewState      String?          // e.g. "PENDING_REVIEW", "PASSED"
+  routingRuleVersion Int?
+
+  canonicalReportId  String?
+  canonicalReport    Report?          @relation("DuplicateLinkCanonical", fields: [canonicalReportId], references: [id], onDelete: SetNull)
+  duplicateReports   Report[]         @relation("DuplicateLinkCanonical")
+
+  resolutionSummary  String?
+  version            Int              @default(1) // Optimistic concurrency lock
+
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  submittedAt        DateTime         @default(now())
+  resolvedAt         DateTime?
+  closedAt           DateTime?
+  deletedAt          DateTime?
+
+  media              ReportMedia[]
+  statusHistory      ReportStatusHistory[]
+  assignmentHistory  ReportAssignmentHistory[]
+  updates            ReportUpdate[]
+  internalNotes      InternalNote[]
+  appeals            Appeal[]
+  ratings            Rating[]
+  notifications      Notification[]
+  duplicateSourceLinks DuplicateLink[] @relation("SourceReportDuplicates")
+  duplicateTargetLinks DuplicateLink[] @relation("TargetReportDuplicates")
+
+  @@index([publicReference])
+  @@index([createdById, createdAt(sort: Desc)])
+  @@index([authorityId, status, createdAt(sort: Desc)])
+  @@index([status, createdAt(sort: Desc)])
+  @@index([categoryId, createdAt(sort: Desc)])
+  @@index([latitude, longitude])
+}
+
+model ReportMedia {
+  id              String          @id @default(cuid())
+  reportId        String?
+  report          Report?         @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  storageProvider String          @default("cloudinary")
+  storageKey      String          // Secure asset ID / path
+  mimeType        String
+  sizeBytes       Int
+  width           Int?
+  height          Int?
+  uploadedById    String
+  moderationState ModerationState @default(PENDING)
+  sha256          String?
+  isResolutionPhoto Boolean       @default(false)
+  createdAt       DateTime        @default(now())
+
+  @@index([reportId])
+}
+
+model ReportStatusHistory {
+  id          String       @id @default(cuid())
+  reportId    String
+  report      Report       @relation(fields: [reportId], references: [id], onDelete: Restrict)
+  fromStatus  ReportStatus?
+  toStatus    ReportStatus
+  reason      String?
+  changedById String?
+  actorType   String       @default("USER") // "USER", "SYSTEM_CRON", "ADMIN_OVERRIDE"
+  metadata    Json?
+  createdAt   DateTime     @default(now())
+
+  @@index([reportId, createdAt(sort: Desc)])
+}
+
+model ReportAssignmentHistory {
+  id                 String    @id @default(cuid())
+  reportId           String
+  report             Report    @relation(fields: [reportId], references: [id], onDelete: Restrict)
+  fromAuthorityId    String?
+  toAuthorityId      String?
+  fromAssigneeId     String?
+  toAssigneeId       String?
+  reason             String?
+  changedById        String
+  routingRuleVersion Int?
+  createdAt          DateTime  @default(now())
+
+  @@index([reportId, createdAt(sort: Desc)])
+}
+
+model ReportUpdate {
+  id        String    @id @default(cuid())
+  reportId  String
+  report    Report    @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  body      String
+  isPublic  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  editedAt  DateTime?
+
+  @@index([reportId, createdAt])
+}
+
+model InternalNote {
+  id        String    @id @default(cuid())
+  reportId  String
+  report    Report    @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  body      String
+  createdAt DateTime  @default(now())
+  editedAt  DateTime?
+
+  @@index([reportId, createdAt])
+}
+
+model Appeal {
+  id          String       @id @default(cuid())
+  reportId    String
+  report      Report       @relation(fields: [reportId], references: [id], onDelete: Restrict)
+  createdById String
+  createdBy   User         @relation("CitizenAppeals", fields: [createdById], references: [id], onDelete: Restrict)
+  reason      String
+  status      AppealStatus @default(PENDING)
+  reviewedById String?
+  reviewedBy  User?        @relation("StaffReviewedAppeals", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewNote  String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  resolvedAt  DateTime?
+
+  @@index([reportId, status])
+}
+
+model Rating {
+  id          String   @id @default(cuid())
+  reportId    String
+  report      Report   @relation(fields: [reportId], references: [id], onDelete: Restrict)
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  score       Int      // 1 to 5
+  comment     String?
+  createdAt   DateTime @default(now())
+
+  @@unique([reportId, createdById])
+  @@index([reportId])
+}
+
+model DuplicateLink {
+  id             String   @id @default(cuid())
+  sourceReportId String
+  sourceReport   Report   @relation("SourceReportDuplicates", fields: [sourceReportId], references: [id], onDelete: Restrict)
+  targetReportId String
+  targetReport   Report   @relation("TargetReportDuplicates", fields: [targetReportId], references: [id], onDelete: Restrict)
+  relation       String   @default("DUPLICATE_OF")
+  confidence     Float?
+  createdById    String
+  createdAt      DateTime @default(now())
+
+  @@unique([sourceReportId, targetReportId])
+  @@index([targetReportId])
+}
+
+// -----------------------------------------------------------------------------
+// Notifications & Auditing
+// -----------------------------------------------------------------------------
+
+model Notification {
+  id        String                 @id @default(cuid())
+  userId    String
+  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reportId  String?
+  report    Report?                @relation(fields: [reportId], references: [id], onDelete: SetNull)
+  type      String                 // "REPORT_STATUS_CHANGED", "INFO_REQUESTED", etc.
+  title     String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime               @default(now())
+
+  deliveries NotificationDelivery[]
+
+  @@index([userId, readAt, createdAt(sort: Desc)])
+}
+
+model NotificationDelivery {
+  id             String          @id @default(cuid())
+  notificationId String
+  notification   Notification    @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  channel        DeliveryChannel @default(IN_APP)
+  status         DeliveryStatus  @default(PENDING)
+  attemptCount   Int             @default(0)
+  lastError      String?
+  sentAt         DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([notificationId, status])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String?
+  actorUser   User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorType   String   @default("USER") // "USER", "SYSTEM", "CRON"
+  action      String   // e.g. "USER_ROLE_CHANGED", "AUTHORITY_MEMBERSHIP_REVOKED"
+  entityType  String   // e.g. "Report", "User", "Authority"
+  entityId    String
+  requestId   String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([actorUserId, createdAt(sort: Desc)])
+  @@index([entityType, entityId])
+}
+
+model OutboxEvent {
+  id           String       @id @default(cuid())
+  eventType    String       // e.g. "REPORT_STATUS_UPDATED", "SEND_EMAIL"
+  aggregateId  String
+  payload      Json
+  status       OutboxStatus @default(PENDING)
+  attemptCount Int          @default(0)
+  availableAt  DateTime     @default(now())
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([status, availableAt])
+}
