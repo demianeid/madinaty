@@ -210,36 +210,36 @@ flowchart TD
 **Goal:** Deliver role-tailored dashboards (Citizen, Staff, Admin), public search/map portal, and accessible RTL interface.
 
 ### Epic 6.1: Citizen Experience
-- **Task 6.1.1:** Citizen Dashboard: "My Reports" with status badges, search, and category filters.
-- **Task 6.1.2:** Report Detail View: Visual timeline of events, staff responses, photos, and status tracker.
-- **Task 6.1.3:** Citizen Action Modals: Respond to information request, submit appeal, rate resolved report.
+- [x] **Task 6.1.1:** Citizen Dashboard: "My Reports" with status badges, search, and category filters.
+- [x] **Task 6.1.2:** Report Detail View: Visual timeline of events, staff responses, photos, and status tracker.
+- [x] **Task 6.1.3:** Citizen Action Modals: Respond to information request, submit appeal, rate resolved report.
 - **Acceptance Criteria:**
-  - Citizens see only their own submitted reports.
-  - Internal staff notes are completely omitted from citizen view models.
+  - [x] Citizens see only their own submitted reports.
+  - [x] Internal staff notes are completely omitted from citizen view models.
 
 ### Epic 6.2: Authority Staff Dashboard
-- **Task 6.2.1:** Authority Work Queue: Filterable by status, priority, category, and date.
-- **Task 6.2.2:** Ticket Processing View: Transition status bar, claim ticket button, reassignment modal.
-- **Task 6.2.3:** Action Forms: Request information from resident, submit internal notes, complete resolution with photos.
+- [x] **Task 6.2.1:** Authority Work Queue: Filterable by status, priority, category, and date.
+- [x] **Task 6.2.2:** Ticket Processing View: Transition status bar, claim ticket button, reassignment modal.
+- [x] **Task 6.2.3:** Action Forms: Request information from resident, submit internal notes, complete resolution with photos.
 - **Acceptance Criteria:**
-  - Staff cannot view or alter reports outside their assigned authority and geographic scope.
-  - Resolution button requires both description and image attachment before submission.
+  - [x] Staff cannot view or alter reports outside their assigned authority and geographic scope.
+  - [x] Resolution button requires both description and image attachment before submission.
 
 ### Epic 6.3: Administrative Dashboard & System Management
-- **Task 6.3.1:** Authorities & Staff Management: Create authorities, manage memberships, activate/suspend accounts.
-- **Task 6.3.2:** Category & Routing Rule Editor: Configure category priorities and default authority mapping.
-- **Task 6.3.3:** Audit Log Inspector: Searchable, filterable view of all administrative actions and status changes.
+- [x] **Task 6.3.1:** Authorities & Staff Management: Create authorities, manage memberships, activate/suspend accounts.
+- [x] **Task 6.3.2:** Category & Routing Rule Editor: Configure category priorities and default authority mapping.
+- [x] **Task 6.3.3:** Audit Log Inspector: Searchable, filterable view of all administrative actions and status changes.
 - **Acceptance Criteria:**
-  - Only users with `ADMIN` role can access `/admin/*` routes.
-  - Every administrative change generates an immutable `AuditLog` entry.
+  - [x] Only users with `ADMIN` role can access `/admin/*` routes.
+  - [x] Every administrative change generates an immutable `AuditLog` entry.
 
 ### Epic 6.4: Public Portal, Accessibility & RTL Polish
-- **Task 6.4.1:** Public Tracking Page: Search report by public reference (`MD-XXXX-XXXX`).
-- **Task 6.4.2:** Public Sanitary DTO: Omit citizen names, phone numbers, exact doorstep GPS coordinates.
-- **Task 6.4.3:** Arabic WCAG 2.2 AA accessibility audit: Tab index navigation, ARIA live regions for status changes, high-contrast focus rings.
+- [x] **Task 6.4.1:** Public Tracking Page: Search report by public reference (`MD-XXXX-XXXX`).
+- [x] **Task 6.4.2:** Public Sanitary DTO: Omit citizen names, phone numbers, exact doorstep GPS coordinates.
+- [x] **Task 6.4.3:** Arabic WCAG 2.2 AA accessibility audit: Tab index navigation, ARIA live regions for status changes, high-contrast focus rings.
 - **Acceptance Criteria:**
-  - Public search reveals only permitted public fields.
-  - Lighthouse accessibility score >= 95.
+  - [x] Public search reveals only permitted public fields.
+  - [x] Lighthouse accessibility score >= 95.
 
 ---
 

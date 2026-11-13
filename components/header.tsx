@@ -43,9 +43,14 @@ export function Header() {
             <Link href="/" className="hover:text-emerald-600 transition-colors">
               الرئيسية
             </Link>
-            <Link href="/#track" className="hover:text-emerald-600 transition-colors">
+            <Link href="/track" className="hover:text-emerald-600 transition-colors">
               تتبع بلاغ
             </Link>
+            {((session?.user as Record<string, unknown>)?.role as string) === "ADMIN" && (
+              <Link href="/admin" className="text-amber-700 font-bold hover:text-amber-800 transition-colors">
+                الإدارة والرقابة
+              </Link>
+            )}
             <Link href="/#emergency" className="hover:text-red-600 transition-colors">
               أرقام الطوارئ
             </Link>

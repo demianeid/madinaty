@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { generatePublicReference, validateTransition } from "@/lib/reports/lifecycle";
 import { AuthenticatedUser, ForbiddenError, NotFoundError } from "@/lib/auth/guards";
-import { validateReportCoordinates, DEFAULT_SERVICE_BOUNDARY } from "@/lib/reports/bounds";
+import { validateReportCoordinates, DEFAULT_SERVICE_BOUNDARY, fuzzCoordinates } from "@/lib/reports/bounds";
 import { inspectReportWithGemini } from "@/lib/ai/gemini";
 import { readStoredMedia } from "@/lib/media/storage";
 import {
@@ -812,4 +812,138 @@ export async function processExpiredAppealsCron() {
   }
 
   return { closedCount: closedReportIds.length, closedReportIds };
+}
+
+export interface PublicReportDTO {
+  publicReference: string;
+  title: string;
+  description: string;
+  status: ReportStatus;
+  category: {
+    labelAr: string;
+    key: string;
+  };
+  authority: {
+    nameAr: string;
+    slug: string;
+  } | null;
+  approximateLocation: {
+    latitude: number;
+    longitude: number;
+    addressText: string | null;
+  };
+  resolutionSummary: string | null;
+  createdAt: Date;
+  resolvedAt: Date | null;
+  closedAt: Date | null;
+  statusHistory: Array<{
+    toStatus: ReportStatus;
+    reason: string | null;
+    createdAt: Date;
+  }>;
+  publicUpdates: Array<{
+    body: string;
+    createdAt: Date;
+  }>;
+  resolutionPhotos: Array<{
+    id: string;
+    url: string;
+  }>;
+}
+
+/**
+ * Retrieves a public sanitized representation of a report by its public reference (MD-XXXX-XXXX).
+ * Strictly omits resident PII (names, phone numbers, exact doorstep GPS coordinates)
+ * and internal staff notes (Blueprint §7, Epic 6.4, Task 6.4.2).
+ */
+export async function getPublicReportByReference(
+  rawReference: string
+): Promise<PublicReportDTO | null> {
+  const reference = rawReference.trim().toUpperCase();
+
+  const report = await prisma.report.findUnique({
+    where: { publicReference: reference },
+    include: {
+      category: {
+        select: {
+          labelAr: true,
+          key: true,
+        },
+      },
+      authority: {
+        select: {
+          nameAr: true,
+          slug: true,
+        },
+      },
+      statusHistory: {
+        orderBy: { createdAt: "asc" },
+        select: {
+          toStatus: true,
+          reason: true,
+          createdAt: true,
+        },
+      },
+      updates: {
+        where: { isPublic: true },
+        orderBy: { createdAt: "asc" },
+        select: {
+          body: true,
+          createdAt: true,
+        },
+      },
+      media: {
+        where: { isResolutionPhoto: true },
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  if (!report || report.deletedAt !== null) {
+    return null;
+  }
+
+  // Fuzz coordinates to protect resident doorstep privacy (~110m radius)
+  const fuzzed = fuzzCoordinates(report.latitude, report.longitude, "APPROXIMATE");
+
+  return {
+    publicReference: report.publicReference,
+    title: report.title,
+    description: report.description,
+    status: report.status,
+    category: {
+      labelAr: report.category.labelAr,
+      key: report.category.key,
+    },
+    authority: report.authority
+      ? {
+          nameAr: report.authority.nameAr,
+          slug: report.authority.slug,
+        }
+      : null,
+    approximateLocation: {
+      latitude: fuzzed.latitude,
+      longitude: fuzzed.longitude,
+      addressText: report.addressText,
+    },
+    resolutionSummary: report.resolutionSummary,
+    createdAt: report.createdAt,
+    resolvedAt: report.resolvedAt,
+    closedAt: report.closedAt,
+    statusHistory: report.statusHistory.map((h) => ({
+      toStatus: h.toStatus,
+      reason: h.reason,
+      createdAt: h.createdAt,
+    })),
+    publicUpdates: report.updates.map((u) => ({
+      body: u.body,
+      createdAt: u.createdAt,
+    })),
+    resolutionPhotos: report.media.map((m) => ({
+      id: m.id,
+      url: `/api/media/${m.id}`,
+    })),
+  };
 }

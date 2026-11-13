@@ -1,10 +1,21 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 
 export default function HomePage() {
+  const router = useRouter();
+  const [trackingRef, setTrackingRef] = useState("");
+
+  const handleTrackSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (trackingRef.trim()) {
+      router.push(`/track?ref=${encodeURIComponent(trackingRef.trim().toUpperCase())}`);
+    }
+  };
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -49,21 +60,21 @@ export default function HomePage() {
               {/* Public Reference Quick Tracker */}
               <div id="track" className="mt-12 mx-auto max-w-lg rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
                 <form
-                  action="#"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                  }}
+                  onSubmit={handleTrackSubmit}
                   className="flex flex-col sm:flex-row items-center gap-2"
                 >
                   <input
                     type="text"
                     dir="ltr"
+                    value={trackingRef}
+                    onChange={(e) => setTrackingRef(e.target.value)}
                     placeholder="MD-XXXX-XXXX"
                     className="w-full uppercase font-mono tracking-wider rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-center focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    required
                   />
                   <button
-                    type="button"
-                    className="w-full sm:w-auto whitespace-nowrap rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 transition-colors"
+                    type="submit"
+                    className="w-full sm:w-auto whitespace-nowrap rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 transition-colors cursor-pointer"
                   >
                     استعلام عن بلاغ
                   </button>

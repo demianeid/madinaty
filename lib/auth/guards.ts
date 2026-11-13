@@ -101,6 +101,13 @@ export async function requireRole(
 }
 
 /**
+ * System administrator guard: ensures the authenticated user is an ADMIN.
+ */
+export async function requireAdmin(customHeaders?: Headers): Promise<AuthenticatedUser> {
+  return requireRole([UserRole.ADMIN], customHeaders);
+}
+
+/**
  * Authority scope guard: ensures the authenticated user is either a system ADMIN,
  * or active STAFF with valid membership in the specified authority.
  */

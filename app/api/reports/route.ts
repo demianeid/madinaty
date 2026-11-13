@@ -32,6 +32,7 @@ export async function GET(req: NextRequest) {
 
     const statusFilter = searchParams.get("status");
     const categoryFilter = searchParams.get("categoryId");
+    const searchQuery = searchParams.get("q");
 
     const whereClause: Record<string, unknown> = {
       deletedAt: null,
@@ -42,6 +43,13 @@ export async function GET(req: NextRequest) {
     }
     if (categoryFilter) {
       whereClause.categoryId = categoryFilter;
+    }
+    if (searchQuery && searchQuery.trim().length > 0) {
+      whereClause.OR = [
+        { title: { contains: searchQuery.trim(), mode: "insensitive" } },
+        { publicReference: { contains: searchQuery.trim().toUpperCase(), mode: "insensitive" } },
+        { description: { contains: searchQuery.trim(), mode: "insensitive" } },
+      ];
     }
 
     // Role-based visibility scoping
