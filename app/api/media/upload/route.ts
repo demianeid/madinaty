@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     const media = await prisma.reportMedia.create({
       data: {
         reportId,
-        storageProvider: "local_secure",
+        storageProvider: processed.storageProvider,
         storageKey: processed.storageKey,
         mimeType: processed.mimeType,
         sizeBytes: processed.sizeBytes,

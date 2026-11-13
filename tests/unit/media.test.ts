@@ -3,6 +3,9 @@ import {
   validateMagicBytes,
   processAndStoreMedia,
   readStoredMedia,
+  generateSignedMediaToken,
+  verifySignedMediaToken,
+  generateSignedMediaUrl,
   MAX_FILE_SIZE_BYTES,
 } from "@/lib/media/storage";
 import sharp from "sharp";
@@ -78,5 +81,55 @@ describe("Media Storage & Privacy Unit Tests", () => {
     expect(storedMeta.exif).toBeUndefined();
     expect(storedMeta.iptc).toBeUndefined();
     expect(storedMeta.xmp).toBeUndefined();
+  });
+
+  describe("Signed URL & Temporary Token Generation (Task 3.1.4)", () => {
+    it("generates a valid signed media token with expiration", () => {
+      const mediaId = "media_test_123";
+      const { token, expires } = generateSignedMediaToken(mediaId, 900);
+
+      expect(token).toBeDefined();
+      expect(typeof token).toBe("string");
+      expect(expires).toBeGreaterThan(Math.floor(Date.now() / 1000));
+
+      // Verify token
+      const isValid = verifySignedMediaToken(mediaId, token, expires);
+      expect(isValid).toBe(true);
+    });
+
+    it("rejects an expired signed token", () => {
+      const mediaId = "media_test_expired";
+      const pastTime = Math.floor(Date.now() / 1000) - 60; // 1 minute in the past
+      const { token } = generateSignedMediaToken(mediaId, -60);
+
+      const isValid = verifySignedMediaToken(mediaId, token, pastTime);
+      expect(isValid).toBe(false);
+    });
+
+    it("rejects a tampered or invalid signed token", () => {
+      const mediaId = "media_test_tamper";
+      const { expires } = generateSignedMediaToken(mediaId, 900);
+      const forgedToken = "a".repeat(64);
+
+      const isValid = verifySignedMediaToken(mediaId, forgedToken, expires);
+      expect(isValid).toBe(false);
+    });
+
+    it("rejects a token used for a different media ID", () => {
+      const mediaIdA = "media_test_A";
+      const mediaIdB = "media_test_B";
+      const { token, expires } = generateSignedMediaToken(mediaIdA, 900);
+
+      const isValid = verifySignedMediaToken(mediaIdB, token, expires);
+      expect(isValid).toBe(false);
+    });
+
+    it("generates a complete signed media URL with query params", () => {
+      const mediaId = "media_url_test";
+      const url = generateSignedMediaUrl(mediaId, "https://madinaty.local", 600);
+
+      expect(url).toContain("https://madinaty.local/api/media/media_url_test?token=");
+      expect(url).toContain("&expires=");
+    });
   });
 });

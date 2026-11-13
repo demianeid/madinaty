@@ -127,6 +127,7 @@ export const ALLOWED_TRANSITIONS: TransitionRule[] = [
   { from: ReportStatus.NEW, to: ReportStatus.UNDER_REVIEW, allowedRoles: "SYSTEM" },
   { from: ReportStatus.NEW, to: ReportStatus.UNDER_REVIEW, allowedRoles: [UserRole.STAFF, UserRole.ADMIN] },
   { from: ReportStatus.NEW, to: ReportStatus.ASSIGNED, allowedRoles: [UserRole.STAFF, UserRole.ADMIN] },
+  { from: ReportStatus.NEW, to: ReportStatus.REJECTED, allowedRoles: "SYSTEM", requiresReason: true },
   { from: ReportStatus.NEW, to: ReportStatus.REJECTED, allowedRoles: [UserRole.STAFF, UserRole.ADMIN], requiresReason: true },
 
   // From UNDER_REVIEW

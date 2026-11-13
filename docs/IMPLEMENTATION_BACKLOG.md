@@ -138,37 +138,37 @@ flowchart TD
 
 ---
 
-## 4. Phase 3 — Media Pipeline, Leaflet Maps & Gemini AI
+## 4. Phase 3 — Media Pipeline, Leaflet Maps & Gemini AI (Completed & Verified)
 
 **Goal:** Secure Cloudinary media storage, remove EXIF privacy data, embed Leaflet/OSM maps, and run server-side Gemini image validation.
 
 ### Epic 3.1: Private Media Pipeline & EXIF Scrubbing
-- **Task 3.1.1:** Setup Cloudinary server-side SDK with private asset storage (no permanent public URLs).
-- **Task 3.1.2:** Implement server-side upload verification: validate magic bytes (JPEG/PNG/WebP), reject files > 5 MB, limit max 5 files per action.
-- **Task 3.1.3:** Implement image metadata stripping: remove EXIF tags (specifically GPS coordinates and camera serial numbers).
-- **Task 3.1.4:** Implement signed URL generator with short time-to-live (e.g., 15 minutes) for authorized users only.
+- [x] **Task 3.1.1:** Setup Cloudinary server-side SDK with private asset storage (no permanent public URLs).
+- [x] **Task 3.1.2:** Implement server-side upload verification: validate magic bytes (JPEG/PNG/WebP), reject files > 5 MB, limit max 5 files per action.
+- [x] **Task 3.1.3:** Implement image metadata stripping: remove EXIF tags (specifically GPS coordinates and camera serial numbers).
+- [x] **Task 3.1.4:** Implement signed URL generator with short time-to-live (e.g., 15 minutes) for authorized users only.
 - **Acceptance Criteria:**
-  - Direct access to unauthorized image storage keys returns HTTP 403.
-  - Uploaded images retain zero EXIF metadata.
-  - Files masquerading with altered extensions (e.g., `.exe` renamed to `.jpg`) are rejected.
+  - [x] Direct access to unauthorized image storage keys returns HTTP 403.
+  - [x] Uploaded images retain zero EXIF metadata.
+  - [x] Files masquerading with altered extensions (e.g., `.exe` renamed to `.jpg`) are rejected.
 
 ### Epic 3.2: Leaflet & OpenStreetMap Integration
-- **Task 3.2.1:** Implement reusable React Leaflet map component with RTL Arabic controls and OSM tiles.
-- **Task 3.2.2:** Support interactive pin drop, manual coordinate entry, and optional browser geolocation.
-- **Task 3.2.3:** Server-side coordinate bounds validator: ensure coordinates fall within the defined municipal service area.
-- **Task 3.2.4:** Implement coordinate fuzzing/jitter for public views (protecting resident privacy).
+- [x] **Task 3.2.1:** Implement reusable React Leaflet map component with RTL Arabic controls and OSM tiles.
+- [x] **Task 3.2.2:** Support interactive pin drop, manual coordinate entry, and optional browser geolocation.
+- [x] **Task 3.2.3:** Server-side coordinate bounds validator: ensure coordinates fall within the defined municipal service area.
+- [x] **Task 3.2.4:** Implement coordinate fuzzing/jitter for public views (protecting resident privacy).
 - **Acceptance Criteria:**
-  - Pin drop correctly populates latitude/longitude in the submission form.
-  - Out-of-bounds coordinates trigger clear Arabic validation feedback.
-  - Public map views display district-level clusters rather than raw citizen doorstep pins.
+  - [x] Pin drop correctly populates latitude/longitude in the submission form.
+  - [x] Out-of-bounds coordinates trigger clear Arabic validation feedback.
+  - [x] Public map views display district-level clusters rather than raw citizen doorstep pins.
 
 ### Epic 3.3: Gemini Server-Side Inspection & Fail-Safe Fallback
-- **Task 3.3.1:** Implement server-side Gemini service wrapper with strict timeout (e.g., 5000ms) and retry limit.
-- **Task 3.3.2:** Send report image + description with structured prompt returning `VALID`, `INVALID`, or `UNCERTAIN` with reason.
-- **Task 3.3.3:** Implement fail-safe routing: If Gemini returns `UNCERTAIN`, times out, or errors, the report is saved and marked for human triage (`UNDER_REVIEW`). Automatic rejection on AI failure is strictly forbidden.
+- [x] **Task 3.3.1:** Implement server-side Gemini service wrapper with strict timeout (e.g., 5000ms) and retry limit.
+- [x] **Task 3.3.2:** Send report image + description with structured prompt returning `VALID`, `INVALID`, or `UNCERTAIN` with reason.
+- [x] **Task 3.3.3:** Implement fail-safe routing: If Gemini returns `UNCERTAIN`, times out, or errors, the report is saved and marked for human triage (`UNDER_REVIEW`). Automatic rejection on AI failure is strictly forbidden.
 - **Acceptance Criteria:**
-  - AI failures do not drop or fail report creation.
-  - Structured AI outputs are stored in `Report.aiValidationResult` for triage staff.
+  - [x] AI failures do not drop or fail report creation.
+  - [x] Structured AI outputs are stored in `Report.aiValidationResult` for triage staff.
 
 ---
 

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import sharp from "sharp";
 
 test.describe("Citizen Report Creation & Lifecycle Journey", () => {
   test("redirects unauthenticated user accessing /reports/new to login", async ({
@@ -30,13 +31,36 @@ test.describe("Citizen Report Creation & Lifecycle Journey", () => {
     // 3. Fill in report details
     await page.fill('input[placeholder*="مثال:"]', "هبوط إسفلتي عميق في التقاطع الرئيسي");
     await page.fill(
-      'textarea[placeholder*="صف المشكلة بدقة"]',
+      'textarea[placeholder*="صف المشكلة"]',
       "يوجد هبوط أرضي وحفرة عميقة في الأسفلت أمام المجمع الخدمي تعيق حركة المرور وتسبب خطراً على المركبات."
     );
     await page.fill('input[placeholder*="اسم الشارع"]', "شارع الأمل، الحي السكني الثاني");
 
-    // 4. Submit form
-    await page.click('button:has-text("إرسال البلاغ الآن")');
+    // Attach required photo (Phase 3 requirement)
+    const testImageBuffer = await sharp({
+      create: {
+        width: 120,
+        height: 120,
+        channels: 3,
+        background: { r: 80, g: 80, b: 80 },
+      },
+    })
+      .jpeg()
+      .toBuffer();
+
+    await page.setInputFiles('input[type="file"]', {
+      name: "pothole.jpg",
+      mimeType: "image/jpeg",
+      buffer: testImageBuffer,
+    });
+
+    // Wait for photo preview and upload to complete
+    await expect(page.locator('img[alt*="مرفق البلاغ"]')).toBeVisible({ timeout: 15000 });
+
+    // 4. Submit form (wait until button is enabled and shows "إرسال البلاغ الآن")
+    const submitBtn = page.locator('button[type="submit"]:has-text("إرسال البلاغ الآن")');
+    await expect(submitBtn).toBeEnabled({ timeout: 15000 });
+    await submitBtn.click();
 
     // 5. Expect success card with generated public reference MD-XXXX-XXXX
     await expect(page.getByRole("heading", { name: /تم استلام بلاغك بنجاح/ })).toBeVisible({ timeout: 15000 });

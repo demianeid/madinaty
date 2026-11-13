@@ -27,6 +27,7 @@ const serverEnvSchema = z.object({
     .enum(["development", "test", "production"])
     .default((process.env.NODE_ENV as "development" | "test" | "production") || "development"),
   GEMINI_API_KEY: z.string().optional(),
+  GEMINI_TIMEOUT_MS: z.coerce.number().default(15000),
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),

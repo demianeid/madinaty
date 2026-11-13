@@ -29,3 +29,17 @@ body {
 [dir="rtl"] {
   text-align: right;
 }
+
+/* AI Scan loader animations */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); opacity: 0; }
+  50%  { opacity: 1; }
+  100% { transform: translateX(100%);  opacity: 0; }
+}
+
+@keyframes scanline {
+  0%   { top: 0%;   opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}

@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/db/prisma";
 import { generatePublicReference, validateTransition } from "@/lib/reports/lifecycle";
 import { AuthenticatedUser, ForbiddenError, NotFoundError } from "@/lib/auth/guards";
+import { validateReportCoordinates, DEFAULT_SERVICE_BOUNDARY } from "@/lib/reports/bounds";
+import { inspectReportWithGemini } from "@/lib/ai/gemini";
+import { readStoredMedia } from "@/lib/media/storage";
 import {
   ReportStatus,
   ReportPriority,
@@ -11,14 +14,6 @@ import {
 } from "@prisma/client";
 import { z } from "zod";
 
-// Provisional bounding box for development (DEC-01)
-const PROVISIONAL_BOUNDS = {
-  minLat: 29.5,
-  maxLat: 31.5,
-  minLng: 30.5,
-  maxLng: 32.5,
-};
-
 export const createReportSchema = z.object({
   title: z
     .string()
@@ -26,13 +21,16 @@ export const createReportSchema = z.object({
     .max(100, "العنوان يجب ألا يتجاوز 100 حرف"),
   description: z
     .string()
-    .min(10, "يرجى كتابة وصف تفصيلي للمشكلة (10 أحرف على الأقل)")
+    .min(5, "يرجى كتابة وصف مختصر للمشكلة (5 أحرف على الأقل)")
     .max(2000, "الوصف لا يتجاوز 2000 حرف"),
   categoryId: z.string().min(1, "يرجى اختيار تصنيف البلاغ"),
   latitude: z.number().refine((lat) => lat >= -90 && lat <= 90, "إحداثيات العرض غير صحيحة"),
   longitude: z.number().refine((lng) => lng >= -180 && lng <= 180, "إحداثيات الطول غير صحيحة"),
   addressText: z.string().optional().default(""),
-  mediaIds: z.array(z.string()).max(5, "الحد الأقصى للصور هو 5 صور").optional().default([]),
+  mediaIds: z
+    .array(z.string())
+    .min(1, "يرجى إرفاق صورة واحدة على الأقل توثق المشكلة البلدية")
+    .max(5, "الحد الأقصى للصور هو 5 صور"),
   idempotencyKey: z.string().optional(),
 });
 
@@ -43,10 +41,10 @@ export type CreateReportInput = z.infer<typeof createReportSchema>;
  */
 export function isWithinServiceBounds(latitude: number, longitude: number): boolean {
   return (
-    latitude >= PROVISIONAL_BOUNDS.minLat &&
-    latitude <= PROVISIONAL_BOUNDS.maxLat &&
-    longitude >= PROVISIONAL_BOUNDS.minLng &&
-    longitude <= PROVISIONAL_BOUNDS.maxLng
+    latitude >= DEFAULT_SERVICE_BOUNDARY.minLat &&
+    latitude <= DEFAULT_SERVICE_BOUNDARY.maxLat &&
+    longitude >= DEFAULT_SERVICE_BOUNDARY.minLng &&
+    longitude <= DEFAULT_SERVICE_BOUNDARY.maxLng
   );
 }
 
@@ -60,16 +58,17 @@ export async function createReport(
   const input = createReportSchema.parse(rawInput);
 
   // Validate geographic bounds
-  if (!isWithinServiceBounds(input.latitude, input.longitude)) {
+  const coordsValidation = validateReportCoordinates(input.latitude, input.longitude);
+  if (!coordsValidation.valid) {
     throw new Error(
-      "الموقع المحدد يقع خارج النطاق الجغرافي المعتمد لخدمات البلدية حالياً."
+      coordsValidation.error || "الموقع المحدد يقع خارج النطاق الجغرافي المعتمد لخدمات البلدية حالياً."
     );
   }
 
   // Verify category exists and get default authority routing
   const category = await prisma.category.findUnique({
     where: { id: input.categoryId },
-    select: { id: true, defaultAuthorityId: true, isActive: true },
+    select: { id: true, key: true, labelAr: true, defaultAuthorityId: true, isActive: true },
   });
 
   if (!category || !category.isActive) {
@@ -84,7 +83,7 @@ export async function createReport(
     collisionCheck = await prisma.report.findUnique({ where: { publicReference } });
   }
 
-  return await prisma.$transaction(async (tx) => {
+  const createdReport = await prisma.$transaction(async (tx) => {
     // 1. Create Report
     const report = await tx.report.create({
       data: {
@@ -148,6 +147,97 @@ export async function createReport(
 
     return report;
   });
+
+  // 5. Post-creation Gemini validation (Blueprint §8, Backlog Task 3.3.2 & 3.3.3)
+  try {
+    const activeCategories = await prisma.category.findMany({
+      where: { isActive: true },
+      select: { key: true, labelAr: true, descriptionAr: true },
+    });
+
+    const mediaList =
+      input.mediaIds && input.mediaIds.length > 0
+        ? await prisma.reportMedia.findMany({
+            where: { id: { in: input.mediaIds } },
+            select: { id: true, storageKey: true, mimeType: true },
+          })
+        : [];
+
+    const mediaMap = new Map(mediaList.map((m) => [m.id, m]));
+    const orderedMediaList = input.mediaIds
+      ? input.mediaIds.map((id) => mediaMap.get(id)).filter(Boolean)
+      : [];
+
+    const imageBuffers: { buffer: Buffer; mimeType: string }[] = [];
+    for (const m of orderedMediaList) {
+      if (!m) continue;
+      try {
+        const { buffer } = await readStoredMedia(m.storageKey);
+        imageBuffers.push({ buffer, mimeType: m.mimeType });
+      } catch {
+        // If image reading fails, continue
+      }
+    }
+
+    const aiResult = await inspectReportWithGemini({
+      title: input.title,
+      description: input.description,
+      categoryKey: category.key,
+      categoryLabel: category.labelAr,
+      availableCategories: activeCategories.map((c) => ({
+        key: c.key,
+        labelAr: c.labelAr,
+        descriptionAr: c.descriptionAr || undefined,
+      })),
+      imageBuffers,
+    });
+
+    // AI Automated Routing and Rejection:
+    // If AI is INVALID (confirmed non-municipal content like ads, pets, food), reject immediately
+    // If AI is UNCERTAIN, route to UNDER_REVIEW for human triage
+    // If AI is VALID, keep as NEW
+    let finalStatus: ReportStatus = ReportStatus.NEW;
+    let reviewState = "PASSED";
+
+    if (aiResult.verdict === "INVALID") {
+      finalStatus = ReportStatus.REJECTED;
+      reviewState = "REJECTED_AUTOMATED";
+    } else if (aiResult.verdict === "UNCERTAIN") {
+      finalStatus = ReportStatus.UNDER_REVIEW;
+      reviewState = "PENDING_REVIEW";
+    }
+
+    const updated = await prisma.report.update({
+      where: { id: createdReport.id },
+      data: {
+        status: finalStatus,
+        aiValidationResult: aiResult.verdict,
+        aiConfidence: aiResult.confidence,
+        aiReviewState: reviewState,
+      },
+    });
+
+    if (finalStatus !== ReportStatus.NEW) {
+      await prisma.reportStatusHistory.create({
+        data: {
+          reportId: createdReport.id,
+          fromStatus: ReportStatus.NEW,
+          toStatus: finalStatus,
+          changedById: actor.id,
+          actorType: "SYSTEM",
+          reason:
+            finalStatus === ReportStatus.REJECTED
+              ? `رفض آلي بواسطة نظام الفحص الذكي: ${aiResult.reason}`
+              : `نظام الفحص الذكي: ${aiResult.reason}`,
+        },
+      });
+    }
+
+    return updated;
+  } catch {
+    // Fail-safe guarantee: return the created report even if Gemini inspection encounters unexpected error
+    return createdReport;
+  }
 }
 
 export interface TransitionReportParams {

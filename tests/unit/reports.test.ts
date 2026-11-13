@@ -11,14 +11,16 @@ import { ReportStatus, UserRole } from "@prisma/client";
 
 describe("Report Service & Domain Logic Unit Tests", () => {
   describe("Geographic Service Boundaries (DEC-01)", () => {
-    it("accepts coordinates within the municipal service bounds (Greater Cairo region)", () => {
-      // Cairo Downtown: 30.0444, 31.2357
-      expect(isWithinServiceBounds(30.0444, 31.2357)).toBe(true);
-      // New Cairo / Madinaty: 30.08, 31.62
-      expect(isWithinServiceBounds(30.08, 31.62)).toBe(true);
+    it("accepts coordinates within the municipal service bounds (Alexandria Governorate)", () => {
+      // Alexandria Downtown (Mahatet El Raml): 31.2001, 29.9187
+      expect(isWithinServiceBounds(31.2001, 29.9187)).toBe(true);
+      // Montaza / Abu Qir: 31.2885, 30.0152
+      expect(isWithinServiceBounds(31.2885, 30.0152)).toBe(true);
     });
 
     it("rejects coordinates outside the municipal service bounds", () => {
+      // Cairo Downtown (outside Alexandria bounds)
+      expect(isWithinServiceBounds(30.0444, 31.2357)).toBe(false);
       // Paris, France
       expect(isWithinServiceBounds(48.8566, 2.3522)).toBe(false);
       // Tokyo, Japan
@@ -34,9 +36,9 @@ describe("Report Service & Domain Logic Unit Tests", () => {
         title: "حفرة عميقة في تقاطع الشارع الرئيسي",
         description: "يوجد هبوط أرضي وحفرة عميقة تهدد سلامة المركبات والمشاة.",
         categoryId: "cat_roads_01",
-        latitude: 30.0444,
-        longitude: 31.2357,
-        addressText: "شارع التحرير، وسط البلد",
+        latitude: 31.2001,
+        longitude: 29.9187,
+        addressText: "طريق الجيش، كورنيش الإسكندرية",
         mediaIds: ["m1", "m2"],
       };
 
@@ -52,6 +54,7 @@ describe("Report Service & Domain Logic Unit Tests", () => {
         categoryId: "cat_roads_01",
         latitude: 30.0444,
         longitude: 31.2357,
+        mediaIds: ["m1"],
       };
 
       expect(() => createReportSchema.parse(invalid)).toThrow(
@@ -59,17 +62,18 @@ describe("Report Service & Domain Logic Unit Tests", () => {
       );
     });
 
-    it("rejects descriptions shorter than 10 characters", () => {
+    it("rejects descriptions shorter than 5 characters", () => {
       const invalid = {
         title: "هبوط أرضي في الشارع",
-        description: "قصير",
+        description: "قصر",
         categoryId: "cat_roads_01",
         latitude: 30.0444,
         longitude: 31.2357,
+        mediaIds: ["m1"],
       };
 
       expect(() => createReportSchema.parse(invalid)).toThrow(
-        "يرجى كتابة وصف تفصيلي للمشكلة"
+        "يرجى كتابة وصف مختصر للمشكلة"
       );
     });
 
@@ -80,9 +84,25 @@ describe("Report Service & Domain Logic Unit Tests", () => {
         categoryId: "cat_roads_01",
         latitude: 95.0, // Invalid latitude > 90
         longitude: 31.2357,
+        mediaIds: ["m1"],
       };
 
       expect(() => createReportSchema.parse(invalidLat)).toThrow("إحداثيات العرض غير صحيحة");
+    });
+
+    it("rejects submission with no photos attached", () => {
+      const noMedia = {
+        title: "هبوط أرضي في الشارع العام",
+        description: "تفاصيل كافية حول البلاغ المقدم من المواطن",
+        categoryId: "cat_roads_01",
+        latitude: 31.2001,
+        longitude: 29.9187,
+        mediaIds: [],
+      };
+
+      expect(() => createReportSchema.parse(noMedia)).toThrow(
+        "يرجى إرفاق صورة واحدة على الأقل"
+      );
     });
 
     it("enforces maximum 5 media attachments per report", () => {

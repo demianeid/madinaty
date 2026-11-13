@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth/guards";
-import { readStoredMedia } from "@/lib/media/storage";
+import { readStoredMedia, verifySignedMediaToken } from "@/lib/media/storage";
 import { prisma } from "@/lib/db/prisma";
 import { UserRole, ReportVisibility } from "@prisma/client";
 
@@ -28,11 +28,24 @@ export async function GET(
       return NextResponse.json({ error: "الصورة غير موجودة." }, { status: 404 });
     }
 
-    // Access authorization check
-    // If report is explicitly approved as PUBLIC, public access is allowed
+    // Access authorization check:
+    // 1. Check if temporary signed URL token is present and valid (Task 3.1.4)
+    const token = req.nextUrl.searchParams.get("token");
+    const expiresStr = req.nextUrl.searchParams.get("expires");
+    let hasValidSignedToken = false;
+
+    if (token && expiresStr) {
+      const expires = Number(expiresStr);
+      hasValidSignedToken = verifySignedMediaToken(id, token, expires);
+      if (!hasValidSignedToken) {
+        return NextResponse.json({ error: "رابط الصورة منتهي الصلاحية أو غير صالح." }, { status: 403 });
+      }
+    }
+
+    // 2. If no valid signed token and report is not public, enforce session authorization
     const isPublicReport = media.report?.visibility === ReportVisibility.PUBLIC;
 
-    if (!isPublicReport) {
+    if (!hasValidSignedToken && !isPublicReport) {
       // Must be authenticated
       const user = await requireUser();
 

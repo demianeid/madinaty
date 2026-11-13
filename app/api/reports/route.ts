@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth/guards";
 import { createReport } from "@/lib/reports/service";
 import { prisma } from "@/lib/db/prisma";
 import { UserRole } from "@prisma/client";
+import { ZodError } from "zod";
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,6 +13,12 @@ export async function POST(req: NextRequest) {
     const report = await createReport(body, user);
     return NextResponse.json({ success: true, report }, { status: 201 });
   } catch (error: unknown) {
+    // Zod validation errors → extract the first Arabic message cleanly
+    if (error instanceof ZodError) {
+      const firstIssue = error.issues[0];
+      const message = firstIssue?.message || "البيانات المدخلة غير صحيحة، يرجى التحقق من جميع الحقول.";
+      return NextResponse.json({ success: false, error: message }, { status: 400 });
+    }
     const message = error instanceof Error ? error.message : "حدث خطأ أثناء إنشاء البلاغ.";
     const status = (error as { status?: number }).status || 400;
     return NextResponse.json({ success: false, error: message }, { status });

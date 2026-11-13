@@ -3,11 +3,24 @@
 import { useEffect, useState, use, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useSession } from "@/lib/auth/auth-client";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { REPORT_STATUS_METADATA, ALLOWED_TRANSITIONS } from "@/lib/reports/lifecycle";
 import { ReportStatus, UserRole } from "@prisma/client";
+
+const LeafletMap = dynamic(
+  () => import("@/components/maps/leaflet-map").then((mod) => mod.LeafletMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[220px] w-full rounded-xl bg-slate-100 flex items-center justify-center text-xs text-slate-400 animate-pulse border border-slate-200">
+        جاري تحميل خريطة الموقع...
+      </div>
+    ),
+  }
+);
 
 interface ReportMediaItem {
   id: string;
@@ -99,6 +112,9 @@ interface ReportDetail {
   internalNotes?: InternalNoteItem[];
   appeals: AppealItem[];
   ratings: RatingItem[];
+  aiValidationResult?: string | null;
+  aiConfidence?: number | null;
+  aiReviewState?: string | null;
 }
 
 export default function ReportDetailPage({
@@ -533,6 +549,17 @@ function ReportDetailContent({
                     {report.authority.nameAr}
                   </span>
                 )}
+                {report.aiValidationResult && (
+                  <span
+                    className={`rounded-lg px-2.5 py-1 text-xs font-semibold border ${
+                      report.aiValidationResult === "VALID"
+                        ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                        : "bg-purple-50 text-purple-800 border-purple-200"
+                    }`}
+                  >
+                    🤖 {report.aiValidationResult === "VALID" ? "فحص ذكي: مطابق للبلاغات البلدية" : "فحص ذكي: قيد المراجعة البشرية"}
+                  </span>
+                )}
               </div>
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                 {report.title}
@@ -589,10 +616,21 @@ function ReportDetailContent({
               )}
             </div>
 
-            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-              <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 space-y-3">
+              <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 الموقع الجغرافي
               </h2>
+
+              <div className="overflow-hidden rounded-xl">
+                <LeafletMap
+                  latitude={report.latitude}
+                  longitude={report.longitude}
+                  readOnly
+                  height="180px"
+                  showBoundaryNotice={false}
+                />
+              </div>
+
               <div className="space-y-2 text-xs">
                 <div>
                   <span className="text-slate-500">العنوان التقريبي:</span>
@@ -606,7 +644,7 @@ function ReportDetailContent({
                     {report.latitude.toFixed(6)}, {report.longitude.toFixed(6)}
                   </p>
                 </div>
-                <div className="pt-2">
+                <div className="pt-1">
                   <a
                     href={`https://maps.google.com/?q=${report.latitude},${report.longitude}`}
                     target="_blank"
