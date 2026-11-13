@@ -172,40 +172,36 @@ flowchart TD
 
 ---
 
-## 5. Phase 4 — Notifications, Background Jobs & Outbox
+## 5. Phase 4 — In-App Notifications & Scheduled Background Jobs
 
-**Goal:** Build transactional outbox, Resend email notifications in Arabic, in-app notification center, and cron jobs.
+**Goal:** Build a robust in-app notification center eliminating external email dependencies, real-time unread badge, and automated cron jobs.
 
-### Epic 5.1: Transactional Outbox Pattern
-- **Task 5.1.1:** Implement `OutboxEvent` table and writer inside domain service transactions.
-- **Task 5.1.2:** Build background processor to poll and process pending outbox events with exponential backoff.
-- **Task 5.1.3:** Implement event deduplication using idempotency keys.
+### Epic 5.1: In-App Notification Service & Lifecycle Hooks
+- [x] **Task 5.1.1:** Implement `Notification` domain service (`lib/notifications/service.ts`) with immediate transactional persistence.
+- [x] **Task 5.1.2:** Integrate notification triggers into report lifecycle events (`lib/reports/service.ts`):
+  - Report created confirmation with reference badge
+  - Status transitions (`ASSIGNED`, `IN_PROGRESS`, `WAITING_FOR_RESIDENT`, `RESOLVED`, `REJECTED`, `CLOSED`, `REOPENED`)
+  - Appeal registration confirmation
+  - 7-day auto-closure notice
+- [x] **Task 5.1.3:** Implement secure notification APIs (`GET /api/notifications`, `PATCH /api/notifications`, `POST /api/notifications/mark-all-read`).
 - **Acceptance Criteria:**
-  - Email failures do not roll back report creation or status changes.
-  - Events are processed with at-least-once delivery semantics; duplicate deliveries are suppressed.
+  - [x] Notifications are created atomically inside database transactions.
+  - [x] Zero external email deliverability/spam failures; updates are instantly visible to citizens.
 
-### Epic 5.2: Resend Email & In-App Notification Center
-- **Task 5.2.1:** Design responsive Arabic RTL email templates:
-  - Report created confirmation
-  - Status change update (Assigned, In Progress)
-  - Information requested (`WAITING_FOR_RESIDENT`)
-  - Resolution notice with 7-day appeal instructions
-  - Rejection notice with reason and review request link
-- **Task 5.2.2:** Build in-app notification center:
-  - Database-backed notifications with `readAt` state.
-  - Unread badge counter in header.
-  - Deep links to specific report pages.
+### Epic 5.2: Notification Bell & Dedicated Notification Center
+- [x] **Task 5.2.1:** Header Notification Bell (`components/notifications/notification-bell.tsx`) with animated badge and background polling.
+- [x] **Task 5.2.2:** Dropdown notification panel with relative Arabic timestamps, status badges, and one-click report deep links.
+- [x] **Task 5.2.3:** Full Notifications Page (`app/notifications/page.tsx`) with read/unread filter tabs and "Mark all as read" capability.
 - **Acceptance Criteria:**
-  - Emails display properly in RTL with valid sender domain and clear headers.
-  - Marking a notification as read updates unread counter without full page reload.
+  - [x] Unread badge counter updates dynamically without requiring full page reload.
+  - [x] Clicking a notification marks it as read and navigates directly to the relevant report.
 
 ### Epic 5.3: Cron & Scheduled Background Jobs
-- **Task 5.3.1:** Implement secure API route `/api/cron/process-appeals` protected by bearer token / CRON secret.
-- **Task 5.3.2:** Cron scans for resolved reports past 7 days with no appeals, moving them to `CLOSED_NO_RESPONSE`.
-- **Task 5.3.3:** Cron scans for SLA breach warnings and alerts authority queues.
+- [x] **Task 5.3.1:** Implement secure API route `/api/cron/process-appeals` protected by bearer token / CRON secret.
+- [x] **Task 5.3.2:** Cron scans for resolved reports past 7 days with no appeals, moving them to `CLOSED_NO_RESPONSE` and creating an in-app citizen notification.
 - **Acceptance Criteria:**
-  - Cron route returns 401 when accessed without authorization token.
-  - Expired reports transition cleanly to `CLOSED_NO_RESPONSE` with audit entries.
+  - [x] Cron route returns 401 when accessed without authorization token.
+  - [x] Expired reports transition cleanly to `CLOSED_NO_RESPONSE` with audit entries and in-app citizen alerts.
 
 ---
 

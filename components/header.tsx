@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useSession, signOut } from "@/lib/auth/auth-client";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 export function Header() {
   const { data: session, isPending } = useSession();
@@ -57,6 +58,9 @@ export function Header() {
             <div className="h-9 w-24 rounded-lg bg-slate-100 animate-pulse" />
           ) : session?.user ? (
             <div className="flex items-center gap-3">
+              {/* Notification Bell */}
+              <NotificationBell />
+
               <Link
                 href="/dashboard"
                 className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-200 transition-colors"

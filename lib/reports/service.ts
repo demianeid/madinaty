@@ -145,10 +145,29 @@ export async function createReport(
       },
     });
 
+    // 5. In-App Notification: Notify citizen that their report was successfully created
+    await tx.notification.create({
+      data: {
+        userId: actor.id,
+        reportId: report.id,
+        type: "REPORT_CREATED",
+        title: `تم استلام بلاغك بنجاح #${report.publicReference}`,
+        body: `تم تسجيل بلاغك "${report.title}" وسيتم فحصه وتوجيهه للجهة البلدية المختصة لمباشرة المعالجة الميدانية.`,
+        deliveries: {
+          create: {
+            channel: "IN_APP",
+            status: "SENT",
+            sentAt: new Date(),
+            attemptCount: 1,
+          },
+        },
+      },
+    });
+
     return report;
   });
 
-  // 5. Post-creation Gemini validation (Blueprint §8, Backlog Task 3.3.2 & 3.3.3)
+  // 6. Post-creation Gemini validation (Blueprint §8, Backlog Task 3.3.2 & 3.3.3)
   try {
     const activeCategories = await prisma.category.findMany({
       where: { isActive: true },
@@ -376,6 +395,72 @@ export async function transitionReportStatus(params: TransitionReportParams) {
       },
     });
 
+    // 10. In-App Notification: Notify citizen about status transition
+    const statusNotifications: Partial<Record<ReportStatus, { title: string; body: string }>> = {
+      [ReportStatus.ASSIGNED]: {
+        title: `تم إسناد بلاغك #${report.publicReference}`,
+        body: `تم إسناد البلاغ إلى ${report.authority?.nameAr || "الجهة البلدية المختصة"} لبدء إجراءات الفحص الميداني.`,
+      },
+      [ReportStatus.IN_PROGRESS]: {
+        title: `جاري العمل على معالجة بلاغك #${report.publicReference}`,
+        body: `بدأت الفرق الميدانية التابعة للبلدية في تنفيذ أعمال الإصلاح والمعالجة.`,
+      },
+      [ReportStatus.WAITING_FOR_RESIDENT]: {
+        title: `استفسار مطلوب بخصوص بلاغك #${report.publicReference}`,
+        body: reason || "يرجى مراجعة تفاصيل البلاغ وتقديم المعلومات أو الإيضاحات المطلوبة لتسريع الحل.",
+      },
+      [ReportStatus.RESOLVED]: {
+        title: `تم حل البلاغ وإصلاح العطل #${report.publicReference}`,
+        body: repairDescription
+          ? `تم إنجاز المعالجة بنجاح: ${repairDescription} (يمكنك الاعتراض خلال 7 أيام إذا لم تكن المعالجة مكتملة).`
+          : "أفادت البلدية باكتمال معالجة المشكلة. يمكنك الاطلاع على صور ومحضر الإصلاح وتقييم الخدمة.",
+      },
+      [ReportStatus.REJECTED]: {
+        title: `تعذر قبول البلاغ #${report.publicReference}`,
+        body: reason || "تم فحص البلاغ ومراجعة المعايير البلدية وتقرر عدم قبوله. يمكنك تقديم اعتراض خلال 7 أيام.",
+      },
+      [ReportStatus.CLOSED]: {
+        title: `إغلاق ملف البلاغ #${report.publicReference}`,
+        body: `تم إغلاق البلاغ نهائياً بعد استيفاء كافة المراحل والإجراءات الميدانية.`,
+      },
+      [ReportStatus.CLOSED_NO_RESPONSE]: {
+        title: `إغلاق البلاغ تلقائياً #${report.publicReference}`,
+        body: `تم إغلاق البلاغ بعد انقضاء مهلة الـ 7 أيام دون تسجيل أي اعتراض. نشكركم على تعاونكم.`,
+      },
+      [ReportStatus.REOPENED]: {
+        title: `إعادة فتح بلاغك #${report.publicReference}`,
+        body: `بناءً على طلب المراجعة، تمت إعادة فتح البلاغ لمزيد من التدقيق والعمل الميداني.`,
+      },
+    };
+
+    const notifInfo = statusNotifications[toStatus];
+    if (notifInfo && report.createdById) {
+      await tx.notification.create({
+        data: {
+          userId: report.createdById,
+          reportId: report.id,
+          type:
+            toStatus === ReportStatus.RESOLVED
+              ? "REPORT_RESOLVED"
+              : toStatus === ReportStatus.REJECTED
+              ? "REPORT_REJECTED"
+              : toStatus === ReportStatus.WAITING_FOR_RESIDENT
+              ? "INFO_REQUESTED"
+              : "STATUS_CHANGED",
+          title: notifInfo.title,
+          body: notifInfo.body,
+          deliveries: {
+            create: {
+              channel: "IN_APP",
+              status: "SENT",
+              sentAt: new Date(),
+              attemptCount: 1,
+            },
+          },
+        },
+      });
+    }
+
     return updatedReport;
   });
 }
@@ -456,6 +541,25 @@ export async function submitAppeal(params: {
         changedById: actor.id,
         actorType: "USER",
         metadata: { appealId: appeal.id },
+      },
+    });
+
+    // In-App Notification: Confirm appeal received to citizen
+    await tx.notification.create({
+      data: {
+        userId: actor.id,
+        reportId: report.id,
+        type: "APPEAL_SUBMITTED",
+        title: `تم استلام اعتراضك على البلاغ #${report.publicReference}`,
+        body: `تم تسجيل طلب الاعتراض وإعادة فتح البلاغ لمراجعة أسباب الاعتراض بواسطة الإدارة الإشرافية.`,
+        deliveries: {
+          create: {
+            channel: "IN_APP",
+            status: "SENT",
+            sentAt: new Date(),
+            attemptCount: 1,
+          },
+        },
       },
     });
 
@@ -644,7 +748,7 @@ export async function processExpiredAppealsCron() {
         none: { status: AppealStatus.PENDING },
       },
     },
-    select: { id: true, version: true },
+    select: { id: true, version: true, createdById: true, publicReference: true },
   });
 
   const closedReportIds: string[] = [];
@@ -679,6 +783,27 @@ export async function processExpiredAppealsCron() {
             entityId: report.id,
           },
         });
+
+        // In-App Notification: Notify citizen of auto-close
+        if (report.createdById) {
+          await tx.notification.create({
+            data: {
+              userId: report.createdById,
+              reportId: report.id,
+              type: "AUTO_CLOSED",
+              title: `إغلاق البلاغ نهائياً #${report.publicReference}`,
+              body: `تم إغلاق البلاغ رسمياً بعد انقضاء مهلة الـ 7 أيام دون تسجيل أي اعتراض. نشكركم على مساهمتكم في تحسين المدينة.`,
+              deliveries: {
+                create: {
+                  channel: "IN_APP",
+                  status: "SENT",
+                  sentAt: new Date(),
+                  attemptCount: 1,
+                },
+              },
+            },
+          });
+        }
       });
       closedReportIds.push(report.id);
     } catch (err) {
