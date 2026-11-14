@@ -52,7 +52,7 @@ export function LeafletMap({
         className: "custom-leaflet-marker",
         html: `
           <div style="transform: translate(-50%, -100%); cursor: pointer; display: flex; flex-direction: column; align-items: center;">
-            <div style="background-color: #059669; color: white; width: 34px; height: 34px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(5, 150, 105, 0.4); border: 2px solid white;">
+            <div style="background-color: #007766; color: white; width: 34px; height: 34px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 119, 102, 0.4); border: 2px solid white;">
               <span style="transform: rotate(45deg); font-size: 14px; font-weight: bold;">📍</span>
             </div>
             <div style="width: 10px; height: 4px; background: rgba(0,0,0,0.25); border-radius: 50%; margin-top: 2px;"></div>

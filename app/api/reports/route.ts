@@ -75,6 +75,9 @@ export async function GET(req: NextRequest) {
         authority: {
           select: { slug: true, nameAr: true },
         },
+        createdBy: {
+          select: { name: true, email: true, phoneNumber: true },
+        },
         media: {
           select: { id: true, storageKey: true, mimeType: true, isResolutionPhoto: true },
         },

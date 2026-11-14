@@ -1,33 +1,223 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: var(--font-ibm-plex-arabic), "IBM Plex Sans Arabic", "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+
+  /* Civic Horizon Theme Colors (DESIGN.md) */
+  --color-civic-emerald: #007766;
+  --color-civic-emerald-hover: #005f52;
+  --color-civic-emerald-container: #007766;
+  --color-civic-emerald-subtle: #ecfdf5;
+  --color-civic-emerald-subtle-alt: #e2f8ef;
+
+  --color-slate-navy: #0f172a;
+  --color-slate-navy-hover: #1e293b;
+  --color-slate-navy-subtle: #f1f5f9;
+
+  --color-canvas-bg: #f8fafc;
+  --color-canvas-surface: #f5faf8;
+  --color-surface-card: #ffffff;
+
+  --color-border-default: #e2e8f0;
+  --color-border-muted: #dce8e4;
+
+  --color-status-danger: #dc2626;
+  --color-status-danger-bg: #fef2f2;
+  --color-status-warning: #d97706;
+  --color-status-warning-bg: #fffbeb;
+  --color-status-info: #0284c7;
+  --color-status-info-bg: #f0f9ff;
+  --color-status-success: #16a34a;
+  --color-status-success-bg: #f0fdf4;
+
+  /* Civic Horizon Elevation Shadows */
+  --shadow-civic-1: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+  --shadow-civic-2: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
+  --shadow-civic-3: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+}
+
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
   --card: #ffffff;
   --card-foreground: #0f172a;
-  --primary: #059669;
+  --primary: #007766;
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #1e293b;
+  --primary-hover: #005f52;
+  --primary-subtle: #ecfdf5;
+  --secondary: #0f172a;
+  --secondary-foreground: #ffffff;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
-  --accent: #e0f2fe;
-  --accent-foreground: #0369a1;
-  --destructive: #ef4444;
+  --accent: #ecfdf5;
+  --accent-foreground: #007766;
+  --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: #e2e8f0;
-  --ring: #059669;
+  --border-muted: #dce8e4;
+  --ring: #007766;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
+  font-family: var(--font-ibm-plex-arabic), "IBM Plex Sans Arabic", "IBM Plex Sans", system-ui, sans-serif;
   font-feature-settings: "rlig" 1, "calt" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* RTL Helpers */
 [dir="rtl"] {
   text-align: right;
+}
+
+/* Tabular figures for numerals */
+.tabular-nums, font-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Civic Design System Component Classes */
+.btn-civic-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #007766;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  height: 2.625rem; /* 42px */
+  padding: 0 1.25rem;
+  border-radius: 0.5rem; /* 8px */
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.btn-civic-primary:hover {
+  background-color: #005f52;
+}
+.btn-civic-primary:focus-visible {
+  outline: 2px solid #007766;
+  outline-offset: 2px;
+}
+
+.btn-civic-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #0f172a;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  height: 2.625rem;
+  padding: 0 1.25rem;
+  border-radius: 0.5rem;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-civic-secondary:hover {
+  background-color: #1e293b;
+}
+
+.btn-civic-subtle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #ecfdf5;
+  color: #007766;
+  font-weight: 600;
+  font-size: 0.875rem;
+  height: 2.625rem;
+  padding: 0 1.25rem;
+  border: 1px solid #dce8e4;
+  border-radius: 0.5rem;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-civic-subtle:hover {
+  background-color: #e2f8ef;
+}
+
+.input-civic {
+  height: 2.75rem; /* 44px */
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 0 0.875rem;
+  font-size: 0.875rem;
+  color: #0f172a;
+  transition: all 150ms ease;
+}
+.input-civic:focus {
+  outline: none;
+  border-color: #007766;
+  box-shadow: 0 0 0 3px rgba(0, 119, 102, 0.15);
+}
+.input-civic::placeholder {
+  color: #64748b;
+}
+
+.card-civic {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.875rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+}
+
+/* Civic Status Badges with Leading Indicator Dot */
+.badge-civic-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 600;
+  line-height: 1rem;
+}
+.badge-civic-pill::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+.badge-civic-danger {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+.badge-civic-danger::before {
+  background-color: #dc2626;
+}
+
+.badge-civic-warning {
+  background-color: #fffbeb;
+  color: #d97706;
+  border: 1px solid rgba(217, 119, 6, 0.2);
+}
+.badge-civic-warning::before {
+  background-color: #d97706;
+}
+
+.badge-civic-info {
+  background-color: #f0f9ff;
+  color: #0284c7;
+  border: 1px solid rgba(2, 132, 199, 0.2);
+}
+.badge-civic-info::before {
+  background-color: #0284c7;
+}
+
+.badge-civic-success {
+  background-color: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid rgba(22, 163, 74, 0.2);
+}
+.badge-civic-success::before {
+  background-color: #16a34a;
 }
 
 /* AI Scan loader animations */

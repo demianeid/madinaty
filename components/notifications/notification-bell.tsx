@@ -169,13 +169,17 @@ export function NotificationBell() {
 
       {/* Notifications Dropdown Panel */}
       {isOpen && (
-        <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-80 sm:w-96 rounded-2xl border border-slate-200 bg-white shadow-xl z-50 overflow-hidden animate-in fade-in duration-150">
+        <div
+          className="absolute left-0 mt-2 rounded-2xl border border-slate-200 bg-white shadow-xl z-50 overflow-hidden animate-in fade-in duration-150"
+          style={{ width: "min(24rem, calc(100vw - 1rem))" }}
+          dir="rtl"
+        >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 bg-slate-50/60">
             <div className="flex items-center gap-2">
               <span className="font-bold text-sm text-slate-900">مركز الإشعارات</span>
               {unreadCount > 0 && (
-                <span className="rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5">
+                <span className="rounded-full bg-[#ecfdf5] border border-[#dce8e4] text-[#007766] text-[10px] font-bold px-2 py-0.5">
                   {unreadCount} جديد
                 </span>
               )}
@@ -185,7 +189,7 @@ export function NotificationBell() {
                 type="button"
                 onClick={handleMarkAllAsRead}
                 disabled={isLoading}
-                className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer disabled:opacity-50"
+                className="text-xs font-semibold text-[#007766] hover:text-[#005f52] hover:underline cursor-pointer disabled:opacity-50"
               >
                 تحديد الكل كمقروء
               </button>
@@ -210,7 +214,7 @@ export function NotificationBell() {
                     key={n.id}
                     onClick={() => handleMarkAsRead(n.id, n.reportId)}
                     className={`p-3.5 flex items-start gap-3 transition-colors cursor-pointer hover:bg-slate-50 ${
-                      isUnread ? "bg-emerald-50/40" : "bg-white"
+                      isUnread ? "bg-[#f5faf8]" : "bg-white"
                     }`}
                   >
                     <div className="flex-1 min-w-0">
@@ -234,7 +238,7 @@ export function NotificationBell() {
                       )}
                     </div>
                     {isUnread && (
-                      <span className="h-2 w-2 rounded-full bg-emerald-600 shrink-0 mt-1.5" />
+                      <span className="h-2 w-2 rounded-full bg-[#007766] shrink-0 mt-1.5" />
                     )}
                   </div>
                 );
@@ -247,7 +251,7 @@ export function NotificationBell() {
             <Link
               href="/notifications"
               onClick={() => setIsOpen(false)}
-              className="text-xs font-bold text-emerald-700 hover:text-emerald-800 transition-colors"
+              className="text-xs font-bold text-[#007766] hover:text-[#005f52] transition-colors"
             >
               عرض جميع الإشعارات والسجل الكامل ←
             </Link>

@@ -519,41 +519,39 @@ function ReportDetailContent({
         )}
 
         {/* Top Header Card */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs mb-8">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-civic-1 mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-2">
-                <span className="font-mono text-sm font-extrabold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200">
+                <span className="font-mono text-sm font-bold text-[#007766] bg-[#ecfdf5] px-3 py-1 rounded-md border border-[#dce8e4]">
                   {report.publicReference}
                 </span>
                 <span
-                  className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-bold ${
+                  className={`badge-civic-pill ${
                     report.status === ReportStatus.RESOLVED
-                      ? "bg-emerald-100 text-emerald-800"
+                      ? "badge-civic-success"
                       : report.status === ReportStatus.REJECTED
-                      ? "bg-red-100 text-red-800"
-                      : report.status === ReportStatus.IN_PROGRESS
-                      ? "bg-amber-100 text-amber-800"
-                      : report.status === ReportStatus.WAITING_FOR_RESIDENT
-                      ? "bg-orange-100 text-orange-800"
-                      : "bg-slate-100 text-slate-800"
+                      ? "badge-civic-danger"
+                      : report.status === ReportStatus.IN_PROGRESS || report.status === ReportStatus.WAITING_FOR_RESIDENT
+                      ? "badge-civic-warning"
+                      : "badge-civic-info"
                   }`}
                 >
                   {statusMeta.labelAr}
                 </span>
-                <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                <span className="rounded-md bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
                   {report.category.labelAr}
                 </span>
                 {report.authority && (
-                  <span className="rounded-lg bg-teal-50 text-teal-800 border border-teal-200 px-2.5 py-1 text-xs font-semibold">
+                  <span className="rounded-md bg-[#eff4ff] text-[#005683] border border-[#d3e4fe] px-2.5 py-0.5 text-xs font-medium">
                     {report.authority.nameAr}
                   </span>
                 )}
                 {report.aiValidationResult && (
                   <span
-                    className={`rounded-lg px-2.5 py-1 text-xs font-semibold border ${
+                    className={`rounded-md px-2.5 py-0.5 text-xs font-medium border ${
                       report.aiValidationResult === "VALID"
-                        ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                        ? "bg-[#ecfdf5] text-[#007766] border-[#dce8e4]"
                         : "bg-purple-50 text-purple-800 border-purple-200"
                     }`}
                   >
@@ -561,7 +559,7 @@ function ReportDetailContent({
                   </span>
                 )}
               </div>
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
                 {report.title}
               </h1>
             </div>
@@ -588,7 +586,7 @@ function ReportDetailContent({
               {isReporter && report.status === ReportStatus.RESOLVED && report.ratings.length === 0 && (
                 <button
                   onClick={() => setShowRatingModal(true)}
-                  className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition-colors shadow-xs"
+                  className="rounded-lg bg-[#007766] hover:bg-[#005f52] px-4 py-2 text-xs font-semibold text-white transition-colors shadow-xs cursor-pointer"
                 >
                   تقييم الخدمة وإغلاق البلاغ
                 </button>
@@ -807,7 +805,7 @@ function ReportDetailContent({
         {/* Timeline & Discussion Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Status History Timeline */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-civic-1">
             <h2 className="text-sm font-bold text-slate-900 mb-6 pb-2 border-b border-slate-100">
               سجل المراحل والتدقيق الميداني (Timeline)
             </h2>
@@ -816,7 +814,7 @@ function ReportDetailContent({
               {report.statusHistory.map((item) => (
                 <div key={item.id} className="relative group">
                   {/* Timeline bullet dot */}
-                  <div className="absolute -right-[31px] top-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-600 ring-2 ring-emerald-200" />
+                  <div className="absolute -right-[31px] top-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-[#007766] ring-2 ring-[#007766]/20" />
 
                   <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
                     <span className="font-semibold text-slate-700">
@@ -831,7 +829,7 @@ function ReportDetailContent({
                   </div>
 
                   {item.reason && (
-                    <p className="text-xs text-slate-600 bg-slate-50 rounded-lg p-2.5 mt-1 border border-slate-100">
+                    <p className="text-xs text-slate-600 bg-[#f8fafc] rounded-lg p-2.5 mt-1 border border-slate-100">
                       {item.reason}
                     </p>
                   )}
@@ -841,7 +839,7 @@ function ReportDetailContent({
           </div>
 
           {/* Public Updates & Clarifications Thread */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs flex flex-col justify-between">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-civic-1 flex flex-col justify-between">
             <div>
               <h2 className="text-sm font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100">
                 التحديثات والتوضيحات العامة
@@ -856,7 +854,7 @@ function ReportDetailContent({
                   {report.updates.map((update) => (
                     <div
                       key={update.id}
-                      className="rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-xs"
+                      className="rounded-lg border border-slate-100 bg-[#f8fafc] p-3 text-xs"
                     >
                       <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1.5 font-medium">
                         <span className="font-bold text-slate-800">
@@ -885,13 +883,13 @@ function ReportDetailContent({
                 value={clarificationBody}
                 onChange={(e) => setClarificationBody(e.target.value)}
                 placeholder="أضف تعقيباً أو تفصيلاً جديداً..."
-                className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-800 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
+                className="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-xs text-slate-800 focus:border-[#007766] focus:outline-none focus:ring-1 focus:ring-[#007766]"
               />
               <div className="flex justify-end">
                 <button
                   type="submit"
                   disabled={submittingClarification || !clarificationBody.trim()}
-                  className="rounded-xl bg-emerald-700 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-800 disabled:opacity-50 transition-colors"
+                  className="rounded-lg bg-[#007766] hover:bg-[#005f52] px-4 py-2 text-xs font-semibold text-white disabled:opacity-50 transition-colors cursor-pointer"
                 >
                   إرسال تعقيب
                 </button>

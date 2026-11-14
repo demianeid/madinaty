@@ -11,20 +11,20 @@ import { NotificationItem } from "@/components/notifications/notification-bell";
 function getTypeBadge(type: string): { label: string; color: string } {
   switch (type) {
     case "REPORT_RESOLVED":
-      return { label: "تم الحل", color: "bg-emerald-100 text-emerald-800 border-emerald-200" };
+      return { label: "تم الحل", color: "badge-civic-pill badge-civic-success" };
     case "REPORT_REJECTED":
-      return { label: "مرفوض", color: "bg-rose-100 text-rose-800 border-rose-200" };
+      return { label: "مرفوض", color: "badge-civic-pill badge-civic-danger" };
     case "INFO_REQUESTED":
-      return { label: "استفسار مطلوب", color: "bg-amber-100 text-amber-800 border-amber-200" };
+      return { label: "استفسار مطلوب", color: "badge-civic-pill badge-civic-warning" };
     case "STATUS_CHANGED":
-      return { label: "تحديث مرحلة", color: "bg-blue-100 text-blue-800 border-blue-200" };
+      return { label: "تحديث مرحلة", color: "badge-civic-pill badge-civic-info" };
     case "APPEAL_SUBMITTED":
-      return { label: "اعتراض مسجل", color: "bg-purple-100 text-purple-800 border-purple-200" };
+      return { label: "اعتراض مسجل", color: "badge-civic-pill bg-[#eff4ff] text-[#005683] border border-[#d3e4fe]" };
     case "AUTO_CLOSED":
-      return { label: "إغلاق نهائي", color: "bg-slate-100 text-slate-800 border-slate-200" };
+      return { label: "إغلاق نهائي", color: "badge-civic-pill bg-slate-100 text-slate-700 border border-slate-200" };
     case "REPORT_CREATED":
     default:
-      return { label: "بلاغ جديد", color: "bg-teal-100 text-teal-800 border-teal-200" };
+      return { label: "بلاغ جديد", color: "badge-civic-pill bg-[#ecfdf5] text-[#007766] border border-[#dce8e4]" };
   }
 }
 
@@ -158,9 +158,9 @@ export default function NotificationsPage() {
           <button
             type="button"
             onClick={() => setFilter("all")}
-            className={`rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
+            className={`rounded-lg px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
               filter === "all"
-                ? "bg-emerald-600 text-white shadow-xs"
+                ? "bg-[#007766] text-white shadow-xs"
                 : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
             }`}
           >
@@ -169,16 +169,16 @@ export default function NotificationsPage() {
           <button
             type="button"
             onClick={() => setFilter("unread")}
-            className={`rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`rounded-lg px-4 py-2 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
               filter === "unread"
-                ? "bg-emerald-600 text-white shadow-xs"
+                ? "bg-[#007766] text-white shadow-xs"
                 : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
             }`}
           >
             <span>غير المقروءة فقط</span>
             {unreadCount > 0 && (
               <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono font-bold ${
-                filter === "unread" ? "bg-white text-emerald-800" : "bg-rose-100 text-rose-700"
+                filter === "unread" ? "bg-white text-[#007766]" : "bg-[#fef2f2] text-[#dc2626] border border-[#fecaca]"
               }`}>
                 {unreadCount}
               </span>
@@ -190,11 +190,11 @@ export default function NotificationsPage() {
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 rounded-2xl bg-white border border-slate-200 p-4 animate-pulse" />
+              <div key={i} className="h-24 rounded-xl bg-white border border-slate-200 p-4 animate-pulse" />
             ))}
           </div>
         ) : notifications.length === 0 ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-xs">
+          <div className="rounded-xl border border-slate-200 bg-white p-12 text-center shadow-civic-1">
             <div className="text-5xl mb-3">📭</div>
             <h3 className="text-base font-bold text-slate-800">
               {filter === "unread" ? "لا توجد إشعارات غير مقروءة" : "لا توجد أي إشعارات مسجلة"}
@@ -208,7 +208,7 @@ export default function NotificationsPage() {
               <button
                 type="button"
                 onClick={() => setFilter("all")}
-                className="mt-4 rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
+                className="mt-4 rounded-lg bg-slate-100 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
               >
                 عرض الإشعارات المقروءة السابقة
               </button>
@@ -223,16 +223,16 @@ export default function NotificationsPage() {
               return (
                 <div
                   key={n.id}
-                  className={`rounded-2xl border p-5 transition-all shadow-xs ${
+                  className={`rounded-xl border p-5 transition-all shadow-civic-1 ${
                     isUnread
-                      ? "bg-white border-emerald-300 ring-2 ring-emerald-500/10"
+                      ? "bg-white border-[#007766]/50 ring-2 ring-[#007766]/10"
                       : "bg-white border-slate-200 hover:border-slate-300"
                   }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-1">
-                          <span className={`rounded-md border px-2 py-0.5 text-[10px] font-bold ${badge.color}`}>
+                          <span className={badge.color}>
                             {badge.label}
                           </span>
                           {n.report && (
@@ -241,13 +241,13 @@ export default function NotificationsPage() {
                             </span>
                           )}
                           {isUnread && (
-                            <span className="rounded-full bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.2">
+                            <span className="rounded-full bg-[#007766] text-white text-[9px] font-bold px-2 py-0.5">
                               جديد
                             </span>
                           )}
                         </div>
 
-                        <h3 className={`text-sm ${isUnread ? "font-black text-slate-900" : "font-bold text-slate-800"}`}>
+                        <h3 className={`text-sm ${isUnread ? "font-bold text-slate-900" : "font-medium text-slate-800"}`}>
                           {n.title}
                         </h3>
 
@@ -255,7 +255,7 @@ export default function NotificationsPage() {
                           {n.body}
                         </p>
 
-                        <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-slate-400 font-medium">
+                        <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-slate-400 font-medium font-mono">
                           <span>
                             {new Date(n.createdAt).toLocaleDateString("ar-EG", {
                               weekday: "long",
@@ -275,7 +275,7 @@ export default function NotificationsPage() {
                         <button
                           type="button"
                           onClick={() => handleMarkAsRead(n.id)}
-                          className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                          className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
                         >
                           تحديد كمقروء
                         </button>
@@ -284,7 +284,7 @@ export default function NotificationsPage() {
                       {n.reportId && (
                         <Link
                           href={`/reports/${n.reportId}`}
-                          className="rounded-xl bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 shadow-xs transition-colors"
+                          className="rounded-lg bg-[#007766] hover:bg-[#005f52] px-4 py-1.5 text-xs font-bold text-white shadow-xs transition-colors"
                         >
                           عرض البلاغ ←
                         </Link>

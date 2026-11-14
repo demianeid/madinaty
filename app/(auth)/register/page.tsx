@@ -53,13 +53,13 @@ export default function RegisterPage() {
 
       if (res.error) {
         setErrorMessage(res.error.message || "فشل إنشاء الحساب. قد يكون البريد الإلكتروني مسجلاً مسبقاً.");
+        setIsLoading(false);
       } else {
-        router.push("/dashboard");
+        router.replace("/dashboard");
         router.refresh();
       }
     } catch {
       setErrorMessage("حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة لاحقاً.");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -69,7 +69,7 @@ export default function RegisterPage() {
       <Header />
 
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+        <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 sm:p-8 shadow-civic-1">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               إنشاء حساب مواطن جديد
@@ -80,7 +80,7 @@ export default function RegisterPage() {
           </div>
 
           {errorMessage && (
-            <div className="mb-4 rounded-xl bg-red-50 border border-red-200 p-3 text-xs sm:text-sm text-red-700">
+            <div className="mb-4 rounded-lg bg-[#fef2f2] border border-[#fecaca] p-3 text-xs sm:text-sm text-[#dc2626]">
               {errorMessage}
             </div>
           )}
@@ -96,7 +96,7 @@ export default function RegisterPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="أحمد محمد"
-                className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
               />
             </div>
 
@@ -111,7 +111,7 @@ export default function RegisterPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
                 dir="ltr"
-                className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
               />
             </div>
 
@@ -125,7 +125,7 @@ export default function RegisterPage() {
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="05XXXXXXXX"
                 dir="ltr"
-                className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
               />
             </div>
 
@@ -140,7 +140,7 @@ export default function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="8 أحرف على الأقل"
                 dir="ltr"
-                className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
               />
             </div>
 
@@ -155,7 +155,7 @@ export default function RegisterPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
                 dir="ltr"
-                className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
               />
             </div>
 
@@ -165,15 +165,15 @@ export default function RegisterPage() {
                 id="terms"
                 checked={termsAccepted}
                 onChange={(e) => setTermsAccepted(e.target.checked)}
-                className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                className="mt-1 h-4 w-4 rounded border-slate-300 text-[#007766] focus:ring-[#007766]"
               />
               <label htmlFor="terms" className="text-xs text-slate-600 leading-normal">
                 أوافق على{" "}
-                <Link href="/terms" className="text-emerald-600 underline">
+                <Link href="/terms" className="text-[#007766] underline">
                   شروط الاستخدام
                 </Link>{" "}
                 و{" "}
-                <Link href="/privacy" className="text-emerald-600 underline">
+                <Link href="/privacy" className="text-[#007766] underline">
                   سياسة الخصوصية
                 </Link>{" "}
                 الخاصة بمنصة مدينتي.
@@ -183,7 +183,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white shadow-xs hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+              className="w-full rounded-lg bg-[#007766] py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-[#005f52] disabled:opacity-50 transition-colors cursor-pointer"
             >
               {isLoading ? "جاري إنشاء الحساب..." : "إنشاء الحساب الآن"}
             </button>
@@ -191,7 +191,7 @@ export default function RegisterPage() {
 
           <div className="mt-6 text-center text-xs text-slate-600">
             لديك حساب بالفعل؟{" "}
-            <Link href="/login" className="font-bold text-emerald-600 hover:text-emerald-700">
+            <Link href="/login" className="font-bold text-[#007766] hover:text-[#005f52]">
               تسجيل الدخول
             </Link>
           </div>

@@ -338,22 +338,22 @@ export default function NewReportPage() {
       <main className="flex-1 container mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         {createdReference ? (
           /* Success Screen */
-          <div className="rounded-3xl border border-emerald-200 bg-white p-8 text-center shadow-lg">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-3xl font-bold mb-4">
+          <div className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-civic-2">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#ecfdf5] text-[#007766] text-3xl font-bold mb-4">
               ✓
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
               تم استلام بلاغك بنجاح!
             </h1>
             <p className="text-sm text-slate-600 max-w-md mx-auto mb-6">
               تم توجيه البلاغ للجهة المختصة وفحصه بالذكاء الاصطناعي وبدء إجراءات التدقيق والمتابعة الميدانية.
             </p>
 
-            <div className="mx-auto max-w-xs rounded-2xl bg-slate-50 border border-slate-200 p-4 mb-6">
+            <div className="mx-auto max-w-xs rounded-lg bg-[#f8fafc] border border-slate-200 p-4 mb-6">
               <span className="block text-xs font-semibold text-slate-500 mb-1">
                 الرمز المرجعي العام للبلاغ
               </span>
-              <span className="font-mono text-xl font-extrabold text-emerald-800 tracking-wider">
+              <span className="font-mono text-xl font-bold text-[#007766] tracking-wider">
                 {createdReference}
               </span>
             </div>
@@ -361,13 +361,13 @@ export default function NewReportPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 href={`/reports/${createdReference}`}
-                className="w-full sm:w-auto rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white hover:bg-emerald-700 transition-colors"
+                className="w-full sm:w-auto rounded-lg bg-[#007766] hover:bg-[#005f52] px-6 py-2.5 text-sm font-semibold text-white transition-colors"
               >
                 متابعة تفاصيل البلاغ
               </Link>
               <Link
                 href="/dashboard"
-                className="w-full sm:w-auto rounded-xl border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                className="w-full sm:w-auto rounded-lg border border-slate-300 px-6 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
               >
                 العودة للوحة التحكم
               </Link>
@@ -375,12 +375,12 @@ export default function NewReportPage() {
           </div>
         ) : (
           /* Report Creation Form */
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 sm:p-10 shadow-civic-1">
             <div className="mb-8 border-b border-slate-100 pb-4">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 mb-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-[#ecfdf5] border border-[#dce8e4] px-3 py-1 text-xs font-semibold text-[#007766] mb-2">
                 بلاغ جديد
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
                 تسجيل بلاغ بلدي أو بيئي
               </h1>
               <p className="mt-1 text-xs sm:text-sm text-slate-600">
@@ -389,7 +389,7 @@ export default function NewReportPage() {
             </div>
 
             {errorMessage && (
-              <div className="mb-6 rounded-2xl bg-red-50 border border-red-200 p-4 text-xs sm:text-sm text-red-700">
+              <div className="mb-6 rounded-lg bg-[#fef2f2] border border-[#fecaca] p-4 text-xs sm:text-sm text-[#dc2626]">
                 {errorMessage}
               </div>
             )}
@@ -402,7 +402,7 @@ export default function NewReportPage() {
                 </label>
 
                 {categoriesLoading ? (
-                  <div className="h-10 w-full rounded-xl bg-slate-100 animate-pulse" />
+                  <div className="h-10 w-full rounded-lg bg-slate-100 animate-pulse" />
                 ) : (
                   <>
                     <select
@@ -416,7 +416,7 @@ export default function NewReportPage() {
                           runMediaPreCheck(uploadedMedia, newCatId);
                         }
                       }}
-                      className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                      className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
                     >
                       {categories.map((cat) => (
                         <option key={cat.id} value={cat.id}>
@@ -460,7 +460,7 @@ export default function NewReportPage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="مثال: هبوط أسفلتي وتجمع مياه أمام مدرسة الحي"
-                  className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
                 />
               </div>
 
@@ -476,7 +476,7 @@ export default function NewReportPage() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="صف المشكلة باختصار... (مثال: كابل كهرباء مكشوف، حفرة عميقة، بالوعة مكسورة)"
-                  className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
                 />
               </div>
 
@@ -778,12 +778,12 @@ export default function NewReportPage() {
                     mediaValidationState.isChecking ||
                     mediaValidationState.isInvalid
                   }
-                  className={`rounded-xl px-8 py-3 text-sm font-bold text-white shadow-md transition-colors ${
+                  className={`rounded-lg px-8 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors cursor-pointer ${
                     mediaValidationState.isInvalid
-                      ? "bg-rose-600 hover:bg-rose-700 disabled:opacity-60 cursor-not-allowed"
+                      ? "bg-[#dc2626] hover:bg-[#b91c1c] disabled:opacity-60 cursor-not-allowed"
                       : uploadedMedia.length === 0
                       ? "bg-slate-400 cursor-not-allowed disabled:opacity-70"
-                      : "bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50"
+                      : "bg-[#007766] hover:bg-[#005f52] disabled:opacity-50"
                   }`}
                 >
                   {isSubmitting

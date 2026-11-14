@@ -57,7 +57,7 @@ export default function ResetPasswordPage() {
       <Header />
 
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+        <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 sm:p-8 shadow-civic-1">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               تعيين كلمة مرور جديدة
@@ -68,21 +68,21 @@ export default function ResetPasswordPage() {
           </div>
 
           {errorMessage && (
-            <div className="mb-4 rounded-xl bg-red-50 border border-red-200 p-3 text-xs sm:text-sm text-red-700">
+            <div className="mb-4 rounded-lg bg-[#fef2f2] border border-[#fecaca] p-3 text-xs sm:text-sm text-[#dc2626]">
               {errorMessage}
             </div>
           )}
 
           {success ? (
-            <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-center">
-              <h3 className="text-sm font-bold text-emerald-900 mb-1">
+            <div className="rounded-lg bg-[#f0fdf4] border border-[#bbf7d0] p-4 text-center">
+              <h3 className="text-sm font-bold text-[#166534] mb-1">
                 تم تغيير كلمة المرور بنجاح!
               </h3>
-              <p className="text-xs text-emerald-700">
+              <p className="text-xs text-[#14532d]">
                 سيتم توجيهك إلى صفحة تسجيل الدخول خلال لحظات...
               </p>
               <div className="mt-4">
-                <Link href="/login" className="text-xs font-bold text-emerald-700 underline">
+                <Link href="/login" className="text-xs font-semibold text-[#007766] underline">
                   الانتقال لتسجيل الدخول مباشرة
                 </Link>
               </div>
@@ -100,7 +100,7 @@ export default function ResetPasswordPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="8 أحرف على الأقل"
                   dir="ltr"
-                  className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
                 />
               </div>
 
@@ -115,14 +115,14 @@ export default function ResetPasswordPage() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
                   dir="ltr"
-                  className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white shadow-xs hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+                className="w-full rounded-lg bg-[#007766] py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-[#005f52] disabled:opacity-50 transition-colors cursor-pointer"
               >
                 {isLoading ? "جاري الحفظ..." : "حفظ كلمة المرور الجديدة"}
               </button>

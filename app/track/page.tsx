@@ -101,13 +101,13 @@ function TrackContent() {
         </div>
 
         {/* Search Header Card */}
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs mb-8">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 sm:p-8 shadow-civic-1 mb-8">
           <div className="text-center max-w-xl mx-auto mb-6">
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100/70 px-3 py-1 text-xs font-bold text-emerald-800 mb-3">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#ecfdf5] border border-[#dce8e4] px-3.5 py-1 text-xs font-semibold text-[#007766] mb-3">
               <span>🔎</span>
               <span>بوابة الاستعلام والشفافية العامة</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
               تتبع حالة بلاغك البلدي
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1.5 leading-relaxed">
@@ -123,24 +123,24 @@ function TrackContent() {
                 value={referenceInput}
                 onChange={(e) => setReferenceInput(e.target.value)}
                 placeholder="MD-XXXX-XXXX"
-                className="w-full uppercase font-mono tracking-wider rounded-xl border border-slate-300 px-4 py-3 text-sm text-center font-bold focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full uppercase font-mono tracking-wider rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-center font-bold focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
                 required
               />
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full sm:w-auto whitespace-nowrap rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white hover:bg-emerald-700 shadow-sm transition-colors disabled:opacity-50 cursor-pointer"
+                className="w-full sm:w-auto whitespace-nowrap rounded-lg bg-[#007766] hover:bg-[#005f52] px-6 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {isLoading ? "جاري البحث..." : "استعلام"}
               </button>
             </div>
-            <p className="mt-2 text-[11px] text-slate-400 text-center">
+            <p className="mt-2 text-[11px] text-slate-400 text-center font-mono">
               مثال: MD-7K2X-9P4W (يتم إرساله في إشعار تأكيد البلاغ)
             </p>
           </form>
 
           {errorMessage && (
-            <div className="mt-6 rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs sm:text-sm text-rose-800 text-center font-medium">
+            <div className="mt-6 rounded-lg bg-[#fef2f2] border border-[#fecaca] p-4 text-xs sm:text-sm text-[#dc2626] text-center font-medium">
               {errorMessage}
             </div>
           )}
@@ -148,9 +148,9 @@ function TrackContent() {
 
         {/* Loading Spinner */}
         {isLoading && (
-          <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-xs">
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent mx-auto mb-3" />
-            <p className="text-xs font-bold text-slate-700">جاري استرجاع تفاصيل البلاغ من السجل البلدي...</p>
+          <div className="rounded-xl border border-slate-200 bg-white p-12 text-center shadow-civic-1">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#007766] border-t-transparent mx-auto mb-3" />
+            <p className="text-xs font-semibold text-slate-700">جاري استرجاع تفاصيل البلاغ من السجل البلدي...</p>
           </div>
         )}
 
@@ -158,45 +158,43 @@ function TrackContent() {
         {!isLoading && report && statusMeta && (
           <div className="space-y-6 animate-in fade-in duration-200">
             {/* Status Header Card */}
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs">
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-civic-1">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
                 <div>
                   <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <span className="font-mono text-xs sm:text-sm font-extrabold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200">
+                    <span className="font-mono text-xs sm:text-sm font-bold text-[#007766] bg-[#ecfdf5] px-3 py-1 rounded-md border border-[#dce8e4]">
                       #{report.publicReference}
                     </span>
                     <span
-                      className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-bold ${
+                      className={`badge-civic-pill ${
                         report.status === ReportStatus.RESOLVED
-                          ? "bg-emerald-100 text-emerald-800"
+                          ? "badge-civic-success"
                           : report.status === ReportStatus.REJECTED
-                          ? "bg-rose-100 text-rose-800"
-                          : report.status === ReportStatus.IN_PROGRESS
-                          ? "bg-amber-100 text-amber-800"
-                          : report.status === ReportStatus.WAITING_FOR_RESIDENT
-                          ? "bg-orange-100 text-orange-800"
-                          : "bg-slate-100 text-slate-800"
+                          ? "badge-civic-danger"
+                          : report.status === ReportStatus.IN_PROGRESS || report.status === ReportStatus.WAITING_FOR_RESIDENT
+                          ? "badge-civic-warning"
+                          : "badge-civic-info"
                       }`}
                     >
                       {statusMeta.labelAr}
                     </span>
-                    <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                    <span className="rounded-md bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
                       {report.category.labelAr}
                     </span>
                     {report.authority && (
-                      <span className="rounded-lg bg-teal-50 text-teal-800 border border-teal-200 px-2.5 py-1 text-xs font-semibold">
+                      <span className="rounded-md bg-[#eff4ff] text-[#005683] border border-[#d3e4fe] px-2.5 py-0.5 text-xs font-medium">
                         {report.authority.nameAr}
                       </span>
                     )}
                   </div>
-                  <h2 className="text-xl font-black text-slate-900 tracking-tight">
+                  <h2 className="text-xl font-bold text-slate-900 tracking-tight">
                     {report.title}
                   </h2>
                 </div>
 
                 <div className="text-left text-xs text-slate-400 font-medium">
                   <span>تاريخ التسجيل:</span>
-                  <p className="font-bold text-slate-600 mt-0.5">
+                  <p className="font-bold text-slate-600 mt-0.5 font-mono">
                     {new Date(report.createdAt).toLocaleDateString("ar-EG", {
                       year: "numeric",
                       month: "long",
@@ -209,19 +207,19 @@ function TrackContent() {
               {/* Description */}
               <div className="pt-6">
                 <h3 className="text-xs font-bold text-slate-400 mb-1">وصف البلاغ المقدم:</h3>
-                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed bg-[#f8fafc] rounded-lg p-4 border border-slate-100">
                   {report.description}
                 </p>
               </div>
 
               {/* Resolution Summary (If resolved) */}
               {report.resolutionSummary && (
-                <div className="mt-4 rounded-2xl bg-emerald-50 border border-emerald-200 p-4">
-                  <h3 className="text-xs font-bold text-emerald-900 mb-1 flex items-center gap-1.5">
+                <div className="mt-4 rounded-lg bg-[#f0fdf4] border border-[#bbf7d0] p-4">
+                  <h3 className="text-xs font-bold text-[#166534] mb-1 flex items-center gap-1.5">
                     <span>✅</span>
                     <span>تقرير المعالجة والإصلاح الميداني:</span>
                   </h3>
-                  <p className="text-xs sm:text-sm text-emerald-800 leading-relaxed font-medium">
+                  <p className="text-xs sm:text-sm text-[#14532d] leading-relaxed font-medium">
                     {report.resolutionSummary}
                   </p>
                 </div>
@@ -229,7 +227,7 @@ function TrackContent() {
             </div>
 
             {/* Approximate Geographic Location & Privacy Protection */}
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs">
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-civic-1">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                   <span>📍</span>
@@ -246,7 +244,7 @@ function TrackContent() {
                 </p>
               )}
 
-              <div className="rounded-2xl overflow-hidden border border-slate-200">
+              <div className="rounded-lg overflow-hidden border border-slate-200">
                 <LeafletMap
                   latitude={report.approximateLocation.latitude}
                   longitude={report.approximateLocation.longitude}
@@ -257,7 +255,7 @@ function TrackContent() {
             </div>
 
             {/* Timeline History */}
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs">
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-civic-1">
               <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
                 <span>⏱️</span>
                 <span>سجل المراحل والإجراءات الميدانية</span>
@@ -268,10 +266,10 @@ function TrackContent() {
                   const stepMeta = REPORT_STATUS_METADATA[step.toStatus];
                   return (
                     <div key={idx} className="flex items-start gap-3">
-                      <div className="h-6 w-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                      <div className="h-6 w-6 rounded-full bg-[#ecfdf5] text-[#007766] border border-[#dce8e4] flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 font-mono">
                         {idx + 1}
                       </div>
-                      <div className="flex-1 bg-slate-50 rounded-xl p-3 border border-slate-100">
+                      <div className="flex-1 bg-[#f8fafc] rounded-lg p-3 border border-slate-100">
                         <div className="flex items-center justify-between gap-2">
                           <p className="text-xs font-bold text-slate-800">
                             {stepMeta?.labelAr || step.toStatus}
@@ -299,14 +297,14 @@ function TrackContent() {
 
             {/* Resolution Photos (If any) */}
             {report.resolutionPhotos && report.resolutionPhotos.length > 0 && (
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs">
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-civic-1">
                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
                   <span>📸</span>
                   <span>صور توثيق الإصلاح والمعالجة</span>
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {report.resolutionPhotos.map((photo) => (
-                    <div key={photo.id} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200">
+                    <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden border border-slate-200">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={photo.url} alt="توثيق الإصلاح" className="w-full h-full object-cover" />
                     </div>
@@ -319,7 +317,7 @@ function TrackContent() {
 
         {/* Initial Empty State */}
         {!isLoading && !report && !hasSearched && (
-          <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-xs">
+          <div className="rounded-xl border border-slate-200 bg-white p-12 text-center shadow-civic-1">
             <div className="text-4xl mb-3">🏛️</div>
             <h3 className="text-base font-bold text-slate-800">الاستعلام المباشر عبر البوابة البلدية</h3>
             <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">

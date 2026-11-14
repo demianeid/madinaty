@@ -45,37 +45,37 @@ function VerifyEmailContent() {
   }, [token]);
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 text-center shadow-sm">
+    <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 sm:p-8 text-center shadow-civic-1">
       <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-4">
         تأكيد البريد الإلكتروني
       </h1>
 
       {isLoading ? (
         <div className="py-8">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-[#007766] border-t-transparent" />
           <p className="mt-4 text-sm text-slate-600">جاري التحقق من صحة الرابط...</p>
         </div>
       ) : isSuccess ? (
-        <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4">
-          <p className="text-sm font-bold text-emerald-900">
+        <div className="rounded-lg bg-[#f0fdf4] border border-[#bbf7d0] p-4">
+          <p className="text-sm font-bold text-[#166534]">
             تم تأكيد بريدك الإلكتروني بنجاح!
           </p>
           <div className="mt-4">
             <Link
               href="/dashboard"
-              className="inline-block rounded-xl bg-emerald-600 px-6 py-2.5 text-xs font-bold text-white hover:bg-emerald-700"
+              className="inline-block rounded-lg bg-[#007766] px-6 py-2 text-xs font-semibold text-white hover:bg-[#005f52] transition-colors"
             >
               الانتقال إلى لوحة التحكم
             </Link>
           </div>
         </div>
       ) : errorMessage ? (
-        <div className="rounded-xl bg-red-50 border border-red-200 p-4">
-          <p className="text-sm font-medium text-red-700">{errorMessage}</p>
+        <div className="rounded-lg bg-[#fef2f2] border border-[#fecaca] p-4">
+          <p className="text-sm font-medium text-[#dc2626]">{errorMessage}</p>
           <div className="mt-4">
             <Link
               href="/login"
-              className="inline-block text-xs font-bold text-emerald-700 underline"
+              className="inline-block text-xs font-semibold text-[#007766] underline"
             >
               العودة لتسجيل الدخول
             </Link>
@@ -89,7 +89,7 @@ function VerifyEmailContent() {
           <div className="mt-6">
             <Link
               href="/dashboard"
-              className="text-xs font-bold text-emerald-600 hover:text-emerald-700"
+              className="text-xs font-semibold text-[#007766] hover:text-[#005f52]"
             >
               الانتقال للوحة التحكم
             </Link>

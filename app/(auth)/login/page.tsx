@@ -1,18 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "@/lib/auth/auth-client";
+import { signIn, useSession } from "@/lib/auth/auth-client";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { data: session, isPending } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  // If already logged in, redirect directly to dashboard
+  useEffect(() => {
+    if (!isPending && session?.user) {
+      router.replace("/dashboard");
+    }
+  }, [session, isPending, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,13 +35,13 @@ export default function LoginPage() {
 
       if (res.error) {
         setErrorMessage(res.error.message || "فشل تسجيل الدخول. يرجى التحقق من البريد وكلمة المرور.");
+        setIsLoading(false);
       } else {
-        router.push("/dashboard");
+        router.replace("/dashboard");
         router.refresh();
       }
     } catch {
       setErrorMessage("حدث خطأ غير متوقع أثناء الاتصال بالخادم. يرجى المحاولة لاحقاً.");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -43,7 +51,7 @@ export default function LoginPage() {
       <Header />
 
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+        <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 sm:p-8 shadow-civic-1">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               تسجيل الدخول إلى مدينتي
@@ -54,7 +62,7 @@ export default function LoginPage() {
           </div>
 
           {errorMessage && (
-            <div className="mb-4 rounded-xl bg-red-50 border border-red-200 p-3 text-xs sm:text-sm text-red-700">
+            <div className="mb-4 rounded-lg bg-[#fef2f2] border border-[#fecaca] p-3 text-xs sm:text-sm text-[#dc2626]">
               {errorMessage}
             </div>
           )}
@@ -71,7 +79,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
                 dir="ltr"
-                className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
               />
             </div>
 
@@ -82,7 +90,7 @@ export default function LoginPage() {
                 </label>
                 <Link
                   href="/forgot-password"
-                  className="text-xs text-emerald-600 hover:text-emerald-700"
+                  className="text-xs font-semibold text-[#007766] hover:text-[#005f52]"
                 >
                   نسيت كلمة المرور؟
                 </Link>
@@ -94,14 +102,14 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 dir="ltr"
-                className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
               />
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white shadow-xs hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+              className="w-full rounded-lg bg-[#007766] py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-[#005f52] disabled:opacity-50 transition-colors cursor-pointer"
             >
               {isLoading ? "جاري التحقق..." : "تسجيل الدخول"}
             </button>
@@ -109,7 +117,7 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center text-xs text-slate-600">
             ليس لديك حساب بعد؟{" "}
-            <Link href="/register" className="font-bold text-emerald-600 hover:text-emerald-700">
+            <Link href="/register" className="font-bold text-[#007766] hover:text-[#005f52]">
               إنشاء حساب مواطن جديد
             </Link>
           </div>
