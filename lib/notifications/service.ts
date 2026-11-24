@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, UserRole } from "@prisma/client";
 
 export type NotificationType =
   | "REPORT_CREATED"
@@ -9,7 +9,8 @@ export type NotificationType =
   | "REPORT_RESOLVED"
   | "REPORT_REJECTED"
   | "APPEAL_SUBMITTED"
-  | "AUTO_CLOSED";
+  | "AUTO_CLOSED"
+  | "LOW_RATING_ALERT";
 
 export interface CreateNotificationInput {
   userId: string;
@@ -140,5 +141,49 @@ export async function markAllNotificationsAsRead(userId: string) {
       readAt: new Date(),
     },
   });
+}
+
+export interface NotifyStaffAndAdminsInput {
+  reportId?: string | null;
+  type: NotificationType;
+  title: string;
+  body: string;
+  authorityId?: string | null;
+  excludeUserId?: string | null;
+}
+
+/**
+ * Broadcasts an in-app notification to all active operations staff and administrators.
+ */
+export async function notifyStaffAndAdmins(
+  input: NotifyStaffAndAdminsInput,
+  client: Prisma.TransactionClient | typeof prisma = prisma
+) {
+  const opsUsers = await client.user.findMany({
+    where: {
+      role: { in: [UserRole.ADMIN, UserRole.STAFF] },
+      status: "ACTIVE",
+      deletedAt: null,
+      ...(input.excludeUserId ? { id: { not: input.excludeUserId } } : {}),
+    },
+    select: { id: true },
+  });
+
+  if (opsUsers.length === 0) return [];
+
+  return Promise.all(
+    opsUsers.map((u) =>
+      createNotification(
+        {
+          userId: u.id,
+          reportId: input.reportId,
+          type: input.type,
+          title: input.title,
+          body: input.body,
+        },
+        client
+      )
+    )
+  );
 }
 

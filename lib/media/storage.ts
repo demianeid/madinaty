@@ -20,18 +20,26 @@ const STORAGE_DIR = path.resolve(process.cwd(), "storage/media");
  * Configure Cloudinary if credentials are provided in environment
  */
 const isCloudinaryConfigured = Boolean(
-  serverEnv.CLOUDINARY_CLOUD_NAME &&
-  serverEnv.CLOUDINARY_API_KEY &&
-  serverEnv.CLOUDINARY_API_SECRET
+  serverEnv.CLOUDINARY_URL ||
+  (serverEnv.CLOUDINARY_CLOUD_NAME &&
+   serverEnv.CLOUDINARY_API_KEY &&
+   serverEnv.CLOUDINARY_API_SECRET)
 );
 
 if (isCloudinaryConfigured) {
-  cloudinary.config({
-    cloud_name: serverEnv.CLOUDINARY_CLOUD_NAME,
-    api_key: serverEnv.CLOUDINARY_API_KEY,
-    api_secret: serverEnv.CLOUDINARY_API_SECRET,
-    secure: true,
-  });
+  if (serverEnv.CLOUDINARY_URL) {
+    cloudinary.config({
+      cloudinary_url: serverEnv.CLOUDINARY_URL,
+      secure: true,
+    });
+  } else {
+    cloudinary.config({
+      cloud_name: serverEnv.CLOUDINARY_CLOUD_NAME,
+      api_key: serverEnv.CLOUDINARY_API_KEY,
+      api_secret: serverEnv.CLOUDINARY_API_SECRET,
+      secure: true,
+    });
+  }
 }
 
 /**
@@ -188,7 +196,15 @@ export async function readStoredMedia(storageKey: string): Promise<{ buffer: Buf
           type: "authenticated",
           expires_at: Math.floor(Date.now() / 1000) + 300,
         });
-        const res = await fetch(downloadUrl);
+        let res = await fetch(downloadUrl);
+        if (!res.ok) {
+          const rawUrl = cloudinary.utils.private_download_url(storageKey, "", {
+            resource_type: "image",
+            type: "authenticated",
+            expires_at: Math.floor(Date.now() / 1000) + 300,
+          });
+          res = await fetch(rawUrl);
+        }
         if (res.ok) {
           const arrayBuffer = await res.arrayBuffer();
           return { buffer: Buffer.from(arrayBuffer) };

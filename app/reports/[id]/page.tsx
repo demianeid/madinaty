@@ -749,28 +749,27 @@ function ReportDetailContent({
                 </div>
               </div>
 
-              {/* Special requirement when transitioning to RESOLVED */}
+              {/* Optional documentation when transitioning to RESOLVED */}
               {selectedNextStatus === ReportStatus.RESOLVED && (
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 space-y-3">
                   <h3 className="text-xs font-bold text-emerald-900">
-                    متطلبات إثبات المعالجة والإصلاح (إلزامية للمرحلة المكتملة)
+                    توثيق المعالجة والإصلاح (اختياري)
                   </h3>
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      وصف الأعمال المنفذة والإصلاح *
+                      وصف الأعمال المنفذة والإصلاح (اختياري)
                     </label>
                     <textarea
                       rows={2}
                       value={repairDescription}
                       onChange={(e) => setRepairDescription(e.target.value)}
-                      placeholder="صف بالتفصيل ما تم إنجازه (مثال: تم ردم الحفرة وإعادة السفلتة)..."
+                      placeholder="صف ما تم إنجازه (اختياري)..."
                       className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-800"
-                      required
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      رفع صور الإثبات الميداني بعد الإصلاح
+                      رفع صور الإثبات الميداني بعد الإصلاح (اختياري)
                     </label>
                     <input
                       type="file"

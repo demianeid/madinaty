@@ -29,6 +29,10 @@ interface OpsReportsTableProps {
   reports: OpsReport[];
   role: UserRole;
   onReportUpdated: (reportId: string, newStatus: ReportStatus) => void;
+  previewReport?: OpsReport | null;
+  onSelectPreviewReport?: (report: OpsReport | null) => void;
+  hoveredReportId?: string | null;
+  onHoverReport?: (id: string | null) => void;
 }
 
 // ─────────────────────────────────────────────
@@ -321,9 +325,26 @@ function NotesPanel({ reportId }: { reportId: string }) {
 // ─────────────────────────────────────────────
 // Main Table Component
 // ─────────────────────────────────────────────
-export function OpsReportsTable({ reports, role, onReportUpdated }: OpsReportsTableProps) {
+export function OpsReportsTable({
+  reports,
+  role,
+  onReportUpdated,
+  previewReport: controlledPreviewReport,
+  onSelectPreviewReport,
+  hoveredReportId,
+  onHoverReport,
+}: OpsReportsTableProps) {
   const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set());
-  const [previewReport, setPreviewReport] = useState<OpsReport | null>(null);
+  const [internalPreviewReport, setInternalPreviewReport] = useState<OpsReport | null>(null);
+
+  const previewReport = controlledPreviewReport !== undefined ? controlledPreviewReport : internalPreviewReport;
+  const setPreview = (rep: OpsReport | null) => {
+    if (onSelectPreviewReport) {
+      onSelectPreviewReport(rep);
+    } else {
+      setInternalPreviewReport(rep);
+    }
+  };
 
   function toggleNotes(id: string) {
     setExpandedNotes((prev) => {
@@ -356,17 +377,26 @@ export function OpsReportsTable({ reports, role, onReportUpdated }: OpsReportsTa
             {reports.map((report) => {
               const sla = getSlaInfo(report.createdAt, report.status);
               const notesOpen = expandedNotes.has(report.id);
+              const isHovered = hoveredReportId === report.id;
 
               return (
                 <Fragment key={report.id}>
                   <tr
-                    className={`border-b border-slate-100 transition-colors ${notesOpen ? "bg-[#f5faf8]" : "hover:bg-[#f5faf8]"}`}
+                    onMouseEnter={() => onHoverReport?.(report.id)}
+                    onMouseLeave={() => onHoverReport?.(null)}
+                    className={`border-b border-slate-100 transition-colors ${
+                      isHovered
+                        ? "bg-[#ecfdf5] ring-1 ring-[#007766]/30"
+                        : notesOpen
+                        ? "bg-[#f5faf8]"
+                        : "hover:bg-[#f5faf8]"
+                    }`}
                   >
                     {/* Reference */}
                     <td className="py-3 px-4 font-mono font-bold">
                       <button
                         type="button"
-                        onClick={() => setPreviewReport(report)}
+                        onClick={() => setPreview(report)}
                         className="text-[#007766] hover:underline cursor-pointer font-bold tracking-tight"
                         title="معاينة تفاصيل البلاغ"
                       >
@@ -378,7 +408,7 @@ export function OpsReportsTable({ reports, role, onReportUpdated }: OpsReportsTa
                     <td className="py-3 px-4 max-w-[220px]">
                       <button
                         type="button"
-                        onClick={() => setPreviewReport(report)}
+                        onClick={() => setPreview(report)}
                         className="font-semibold text-slate-900 hover:text-[#007766] text-right truncate block w-full cursor-pointer transition-colors"
                         title="انقر للمعاينة السريعة"
                       >
@@ -444,7 +474,7 @@ export function OpsReportsTable({ reports, role, onReportUpdated }: OpsReportsTa
                       <div className="flex items-center justify-center gap-1.5">
                         <button
                           type="button"
-                          onClick={() => setPreviewReport(report)}
+                          onClick={() => setPreview(report)}
                           className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 font-semibold text-slate-700 hover:border-[#007766]/40 hover:bg-[#ecfdf5] hover:text-[#007766] transition-colors text-[11px] cursor-pointer"
                           title="معاينة الصور والوصف الميداني"
                         >
@@ -483,7 +513,7 @@ export function OpsReportsTable({ reports, role, onReportUpdated }: OpsReportsTa
       <ReportPreviewDrawer
         report={previewReport}
         isOpen={Boolean(previewReport)}
-        onClose={() => setPreviewReport(null)}
+        onClose={() => setPreview(null)}
         role={role}
       />
     </>

@@ -40,6 +40,13 @@ export function LeafletMap({
     async function initMap() {
       if (!mapContainerRef.current || mapInstanceRef.current) return;
 
+      // Clear any stale _leaflet_id left by StrictMode/HMR
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((mapContainerRef.current as any)._leaflet_id) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        delete (mapContainerRef.current as any)._leaflet_id;
+      }
+
       // Import Leaflet dynamically to avoid SSR window errors
       const L = (await import("leaflet")).default;
       // Import Leaflet CSS
@@ -47,19 +54,24 @@ export function LeafletMap({
 
       if (!isMounted || !mapContainerRef.current) return;
 
-      // Custom SVG Marker Icon to avoid broken image paths in Turbopack
+      // Custom SVG Marker Icon pointing straight down
       const customPinIcon = L.divIcon({
         className: "custom-leaflet-marker",
         html: `
-          <div style="transform: translate(-50%, -100%); cursor: pointer; display: flex; flex-direction: column; align-items: center;">
-            <div style="background-color: #007766; color: white; width: 34px; height: 34px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 119, 102, 0.4); border: 2px solid white;">
-              <span style="transform: rotate(45deg); font-size: 14px; font-weight: bold;">📍</span>
-            </div>
-            <div style="width: 10px; height: 4px; background: rgba(0,0,0,0.25); border-radius: 50%; margin-top: 2px;"></div>
+          <div style="width: 34px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <svg width="34" height="44" viewBox="0 0 34 44" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 7px rgba(0,0,0,0.35));">
+              <!-- Teardrop pin pointing straight down to (17, 42) -->
+              <path d="M17 1C8.716 1 2 7.716 2 16C2 26.5 17 42 17 42C17 42 32 26.5 32 16C32 7.716 25.284 1 17 1Z" fill="#007766" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="round"/>
+              <!-- Inner white circular disc -->
+              <circle cx="17" cy="16" r="6" fill="#FFFFFF"/>
+              <!-- Inner emerald dot -->
+              <circle cx="17" cy="16" r="3" fill="#007766"/>
+            </svg>
           </div>
         `,
-        iconSize: [34, 40],
-        iconAnchor: [17, 40],
+        iconSize: [34, 44],
+        iconAnchor: [17, 42],
+        popupAnchor: [0, -42],
       });
 
       // Create map instance
@@ -70,6 +82,9 @@ export function LeafletMap({
         center: [latitude, longitude],
         zoom,
         zoomControl: false, // We will add zoom control in top-left or top-right
+        fadeAnimation: false,
+        zoomAnimation: false,
+        markerZoomAnimation: false,
       });
 
       // Add Arabic zoom control
@@ -137,7 +152,13 @@ export function LeafletMap({
     return () => {
       isMounted = false;
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
+        try {
+          mapInstanceRef.current.stop();
+          mapInstanceRef.current.off();
+          mapInstanceRef.current.remove();
+        } catch {
+          // Ignore Leaflet unmount animation errors
+        }
         mapInstanceRef.current = null;
         markerRef.current = null;
       }
@@ -149,10 +170,14 @@ export function LeafletMap({
   useEffect(() => {
     if (!mapReady || !markerRef.current || !mapInstanceRef.current) return;
 
-    const currentPos = markerRef.current.getLatLng();
-    if (Math.abs(currentPos.lat - latitude) > 0.0001 || Math.abs(currentPos.lng - longitude) > 0.0001) {
-      markerRef.current.setLatLng([latitude, longitude]);
-      mapInstanceRef.current.panTo([latitude, longitude], { animate: true });
+    try {
+      const currentPos = markerRef.current.getLatLng();
+      if (Math.abs(currentPos.lat - latitude) > 0.0001 || Math.abs(currentPos.lng - longitude) > 0.0001) {
+        markerRef.current.setLatLng([latitude, longitude]);
+        mapInstanceRef.current.panTo([latitude, longitude], { animate: false });
+      }
+    } catch {
+      // Guard against concurrent position update during teardown
     }
   }, [latitude, longitude, mapReady]);
 

@@ -5,6 +5,7 @@ import {
   getUnreadNotificationCount,
   markNotificationAsRead,
   markAllNotificationsAsRead,
+  notifyStaffAndAdmins,
   type NotificationType,
 } from "@/lib/notifications/service";
 import { prisma } from "@/lib/db/prisma";
@@ -168,6 +169,44 @@ describe("In-App Notification Center Service Tests (Phase 4)", () => {
     } finally {
       prisma.notification.updateMany = originalUpdateMany;
     }
+  });
+
+  it("broadcasts notifications to active staff and admins", async () => {
+    const mockTx = {
+      user: {
+        findMany: vi.fn().mockResolvedValue([
+          { id: "staff_1" },
+          { id: "admin_1" },
+        ]),
+      },
+      notification: {
+        create: vi.fn().mockResolvedValue({ id: "notif_ops" }),
+      },
+    };
+
+    const result = await notifyStaffAndAdmins(
+      {
+        reportId: "rep_999",
+        type: "REPORT_CREATED",
+        title: "بلاغ وارد جديد #MDN-1001",
+        body: "ورد بلاغ جديد في قطاع الإنارة",
+        excludeUserId: "citizen_1",
+      },
+      mockTx as unknown as typeof prisma
+    );
+
+    expect(mockTx.user.findMany).toHaveBeenCalledWith({
+      where: {
+        role: { in: ["ADMIN", "STAFF"] },
+        status: "ACTIVE",
+        deletedAt: null,
+        id: { not: "citizen_1" },
+      },
+      select: { id: true },
+    });
+
+    expect(mockTx.notification.create).toHaveBeenCalledTimes(2);
+    expect(result).toHaveLength(2);
   });
 });
 

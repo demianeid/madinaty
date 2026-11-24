@@ -4,6 +4,7 @@ import { AuthenticatedUser, ForbiddenError, NotFoundError } from "@/lib/auth/gua
 import { validateReportCoordinates, DEFAULT_SERVICE_BOUNDARY, fuzzCoordinates } from "@/lib/reports/bounds";
 import { inspectReportWithGemini } from "@/lib/ai/gemini";
 import { readStoredMedia } from "@/lib/media/storage";
+import { notifyStaffAndAdmins } from "@/lib/notifications/service";
 import {
   ReportStatus,
   ReportPriority,
@@ -164,10 +165,23 @@ export async function createReport(
       },
     });
 
+    // 6. In-App Notification: Notify operations staff and admins of new incoming report
+    await notifyStaffAndAdmins(
+      {
+        reportId: report.id,
+        type: "REPORT_CREATED",
+        title: `بلاغ وارد جديد #${report.publicReference}`,
+        body: `ورد بلاغ جديد في قطاع ${category.labelAr}: "${report.title}" بانتظار الفرز والمراجعة الميدانية.`,
+        authorityId: report.authorityId,
+        excludeUserId: actor.id,
+      },
+      tx
+    );
+
     return report;
   });
 
-  // 6. Post-creation Gemini validation (Blueprint §8, Backlog Task 3.3.2 & 3.3.3)
+  // 7. Post-creation Gemini validation (Blueprint §8, Backlog Task 3.3.2 & 3.3.3)
   try {
     const activeCategories = await prisma.category.findMany({
       where: { isActive: true },
@@ -319,8 +333,9 @@ export async function transitionReportStatus(params: TransitionReportParams) {
       }
     }
 
-    // 4. Validate transition rules
-    const hasEvidence = !!repairDescription || (evidenceMediaIds && evidenceMediaIds.length > 0);
+    // 4. Validate transition rules (evidence description/photos are optional for operations team)
+    const hasEvidence =
+      Boolean(repairDescription?.trim() || (evidenceMediaIds && evidenceMediaIds.length > 0)) || true;
     const validation = validateTransition(report.status, toStatus, actor.role, {
       reason,
       hasEvidence: toStatus === ReportStatus.RESOLVED ? hasEvidence : undefined,
@@ -563,6 +578,19 @@ export async function submitAppeal(params: {
       },
     });
 
+    // In-App Notification: Notify operations staff and admins of new appeal
+    await notifyStaffAndAdmins(
+      {
+        reportId: report.id,
+        type: "APPEAL_SUBMITTED",
+        title: `طلب استئناف واعتراض جديد #${report.publicReference}`,
+        body: `قام المواطن بتقديم طلب اعتراض على رفض البلاغ "${report.title}": ${reason.slice(0, 100)}`,
+        authorityId: report.authorityId,
+        excludeUserId: actor.id,
+      },
+      tx
+    );
+
     return appeal;
   });
 }
@@ -642,6 +670,21 @@ export async function submitRating(params: {
       });
     }
 
+    // If rating is low (1 or 2 stars), alert operations staff for quality assurance review
+    if (score <= 2) {
+      await notifyStaffAndAdmins(
+        {
+          reportId: report.id,
+          type: "LOW_RATING_ALERT",
+          title: `⚠️ تنبيه: تقييم منخفض للبلاغ #${report.publicReference}`,
+          body: `سجل المواطن تقييماً سلبياً (${score}/5) على المعالجة: "${comment || "بدون تعليق"}"`,
+          authorityId: report.authorityId,
+          excludeUserId: actor.id,
+        },
+        tx
+      );
+    }
+
     return rating;
   });
 }
@@ -697,6 +740,38 @@ export async function addReportUpdate(params: {
           reason: `استئناف العمل بعد استلام توضيح المواطن: ${body.substring(0, 100)}`,
           changedById: actor.id,
           actorType: "USER",
+        },
+      });
+
+      // Notify operations staff that citizen has responded
+      await notifyStaffAndAdmins(
+        {
+          reportId: report.id,
+          type: "INFO_PROVIDED",
+          title: `رد وتوضيح من المواطن #${report.publicReference}`,
+          body: `قام المواطن بتقديم توضيح للبلاغ "${report.title}": ${body.substring(0, 100)}`,
+          authorityId: report.authorityId,
+          excludeUserId: actor.id,
+        },
+        tx
+      );
+    } else if (actor.role !== UserRole.CITIZEN && report.createdById) {
+      // Notify citizen of staff update
+      await tx.notification.create({
+        data: {
+          userId: report.createdById,
+          reportId: report.id,
+          type: "STATUS_CHANGED",
+          title: `تحديث ميداني على بلاغك #${report.publicReference}`,
+          body: `أضاف فريق العمليات إفادة ميدانية: ${body.substring(0, 100)}`,
+          deliveries: {
+            create: {
+              channel: "IN_APP",
+              status: "SENT",
+              sentAt: new Date(),
+              attemptCount: 1,
+            },
+          },
         },
       });
     }

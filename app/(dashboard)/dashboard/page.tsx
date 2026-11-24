@@ -51,8 +51,10 @@ export default function DashboardPage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  // Field Map visibility toggle
+  // Field Map visibility toggle & Interactive Two-Way Sync
   const [mapVisible, setMapVisible] = useState(true);
+  const [previewReport, setPreviewReport] = useState<OpsReport | null>(null);
+  const [hoveredReportId, setHoveredReportId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isPending && !session?.user) {
@@ -266,6 +268,10 @@ export default function DashboardPage() {
         <OpsReportsTable
           reports={reports}
           role={role}
+          previewReport={previewReport}
+          onSelectPreviewReport={setPreviewReport}
+          hoveredReportId={hoveredReportId}
+          onHoverReport={setHoveredReportId}
           onReportUpdated={(id, newStatus) => {
             setReports((prev) =>
               prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r))
@@ -491,12 +497,14 @@ export default function DashboardPage() {
 
               {mapVisible && (
                 <FieldMap
-                  key={reports.length}
                   reports={reports.filter(
                     (r): r is FieldMapReport & typeof r =>
                       typeof r.latitude === "number" && typeof r.longitude === "number"
                   ) as FieldMapReport[]}
                   height="400px"
+                  onSelectReport={(rep) => setPreviewReport(rep as unknown as OpsReport)}
+                  hoveredReportId={hoveredReportId}
+                  selectedReportId={previewReport?.id}
                 />
               )}
             </section>

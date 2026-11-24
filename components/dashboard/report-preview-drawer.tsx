@@ -216,18 +216,31 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
                   <span className="font-semibold text-slate-800">{report.addressText || "الموقع محدد على الخريطة"}</span>
                 </div>
                 {report.latitude && report.longitude && (
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="font-mono text-[11px] text-slate-500 dir-ltr">
-                      {report.latitude.toFixed(5)}, {report.longitude.toFixed(5)}
-                    </span>
-                    <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${report.latitude},${report.longitude}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[11px] font-bold text-[#007766] hover:underline"
-                    >
-                      فتح في خرائط Google ↗
-                    </a>
+                  <div className="pt-2 space-y-2">
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono dir-ltr">
+                      <span>{report.latitude.toFixed(5)}, {report.longitude.toFixed(5)}</span>
+                    </div>
+                    {/* Navigation Buttons */}
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${report.latitude},${report.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white hover:bg-emerald-50 hover:text-[#007766] hover:border-[#007766]/30 py-2 px-3 text-[11px] font-bold text-slate-700 transition-colors shadow-xs"
+                      >
+                        <span>🚗</span>
+                        <span>ملاحة Google Maps</span>
+                      </a>
+                      <a
+                        href={`https://waze.com/ul?ll=${report.latitude},${report.longitude}&navigate=yes`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white hover:bg-sky-50 hover:text-sky-700 hover:border-sky-300 py-2 px-3 text-[11px] font-bold text-slate-700 transition-colors shadow-xs"
+                      >
+                        <span>🚙</span>
+                        <span>ملاحة Waze</span>
+                      </a>
+                    </div>
                   </div>
                 )}
               </div>
