@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Map as LeafletMapType } from "leaflet";
 import { ReportStatus } from "@prisma/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface FieldMapReport {
   id: string;
@@ -25,21 +26,25 @@ interface FieldMapProps {
 function statusColor(status: ReportStatus): string {
   switch (status) {
     case ReportStatus.NEW:
-      return "#0284c7"; // Sky blue
+      return "#1D4ED8"; // Primary Blue
+    case ReportStatus.UNDER_REVIEW:
+      return "#B45309"; // Amber
     case ReportStatus.ASSIGNED:
-      return "#7c3aed"; // Violet
+      return "#0369A1"; // Blue/Sky
     case ReportStatus.IN_PROGRESS:
-      return "#d97706"; // Amber
+      return "#3730A3"; // Indigo
     case ReportStatus.WAITING_FOR_RESIDENT:
-      return "#f59e0b"; // Orange
+      return "#92400E"; // Condition Pill Text Amber
     case ReportStatus.RESOLVED:
+      return "#047857"; // Emerald/Green
     case ReportStatus.CLOSED:
-      return "#16a34a"; // Emerald green
-    case ReportStatus.REJECTED:
+      return "#334155"; // Slate Dark
     case ReportStatus.CLOSED_NO_RESPONSE:
-      return "#dc2626"; // Red
+      return "#475569"; // Slate Muted
+    case ReportStatus.REJECTED:
+      return "#B91C1C"; // Red
     default:
-      return "#64748b"; // Slate
+      return "#64748B"; // Neutral Gray
   }
 }
 
@@ -162,7 +167,7 @@ export function FieldMap({ reports, className = "", height = "400px" }: FieldMap
             ${report.category?.labelAr ? `<p style="font-size: 10px; color: #64748b; margin: 0 0 8px 0;">🏷 ${report.category.labelAr}</p>` : ""}
             <a href="/reports/${report.id}" style="
               display: inline-block;
-              background: #007766;
+              background: #2563EB;
               color: white;
               text-decoration: none;
               padding: 4px 12px;
@@ -216,26 +221,30 @@ export function FieldMap({ reports, className = "", height = "400px" }: FieldMap
   }, [reports, mapReady]);
 
   const legendItems = [
-    { color: "#0284c7", label: "جديد" },
-    { color: "#7c3aed", label: "مُسند" },
-    { color: "#d97706", label: "قيد العمل" },
-    { color: "#f59e0b", label: "بانتظار مواطن" },
-    { color: "#16a34a", label: "مُعالج / مغلق" },
-    { color: "#dc2626", label: "مرفوض" },
+    { color: "#1D4ED8", label: "جديد" },
+    { color: "#0369A1", label: "مُسند" },
+    { color: "#3730A3", label: "قيد العمل" },
+    { color: "#92400E", label: "بانتظار مواطن" },
+    { color: "#047857", label: "مُعالج" },
+    { color: "#334155", label: "مغلق" },
+    { color: "#B91C1C", label: "مرفوض" },
   ];
 
   return (
-    <div className={`relative w-full overflow-hidden rounded-xl border border-slate-200 bg-white ${className}`}>
+    <div className={`relative w-full overflow-hidden rounded-xl border border-[#CBD5E1] bg-white ${className}`}>
+      {!mapReady && (
+        <Skeleton className="absolute inset-0 z-20 w-full h-full rounded-xl pointer-events-none transition-opacity duration-300" />
+      )}
       {/* Map Canvas */}
       <div ref={mapContainerRef} style={{ height }} className="w-full z-0" dir="ltr" />
 
       {/* Top-right control strip */}
       <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
         {/* Pin count badge */}
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur-sm border border-slate-200 shadow-sm px-3 py-1.5 text-[11px] font-bold text-slate-700">
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur-sm border border-[#CBD5E1] shadow-sm px-3 py-1.5 text-[11px] font-bold text-[#142D4E]">
           <span
             className="h-2 w-2 rounded-full"
-            style={{ backgroundColor: "#007766" }}
+            style={{ backgroundColor: "#2563EB" }}
           />
           {reportsWithCoords.length} بلاغ على الخريطة
         </div>
@@ -244,7 +253,7 @@ export function FieldMap({ reports, className = "", height = "400px" }: FieldMap
         <button
           type="button"
           onClick={() => setShowLegend((v) => !v)}
-          className="inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur-sm border border-slate-200 shadow-sm px-3 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-[#ecfdf5] hover:text-[#007766] hover:border-[#007766]/30 transition-all cursor-pointer"
+          className="inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur-sm border border-[#CBD5E1] shadow-sm px-3 py-1.5 text-[11px] font-bold text-[#142D4E] hover:bg-[#EFF6FF] hover:text-[#2563EB] hover:border-[#2563EB]/30 transition-all cursor-pointer"
         >
           <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
             <rect x="0" y="0" width="4" height="4" rx="1" />

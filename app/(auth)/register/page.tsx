@@ -69,9 +69,9 @@ export default function RegisterPage() {
       <Header />
 
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 sm:p-8 shadow-civic-1">
+        <div className="w-full max-w-md rounded-xl border border-[#CBD5E1] bg-white p-6 sm:p-8 shadow-civic-1">
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-2xl font-bold tracking-tight text-[#142D4E]">
               إنشاء حساب مواطن جديد
             </h1>
             <p className="mt-2 text-xs sm:text-sm text-slate-600">
@@ -80,7 +80,7 @@ export default function RegisterPage() {
           </div>
 
           {errorMessage && (
-            <div className="mb-4 rounded-lg bg-[#fef2f2] border border-[#fecaca] p-3 text-xs sm:text-sm text-[#dc2626]">
+            <div className="mb-4 rounded-lg bg-[#FEF2F2] border border-[#FECACA] p-3 text-xs sm:text-sm text-[#B91C1C]">
               {errorMessage}
             </div>
           )}
@@ -96,7 +96,7 @@ export default function RegisterPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="أحمد محمد"
-                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
+                className="w-full rounded-lg border border-[#CBD5E1] px-3.5 py-2.5 text-sm focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
               />
             </div>
 
@@ -111,7 +111,7 @@ export default function RegisterPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
                 dir="ltr"
-                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
+                className="w-full rounded-lg border border-[#CBD5E1] px-3.5 py-2.5 text-sm focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
               />
             </div>
 
@@ -125,7 +125,7 @@ export default function RegisterPage() {
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="05XXXXXXXX"
                 dir="ltr"
-                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
+                className="w-full rounded-lg border border-[#CBD5E1] px-3.5 py-2.5 text-sm focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
               />
             </div>
 
@@ -140,7 +140,7 @@ export default function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="8 أحرف على الأقل"
                 dir="ltr"
-                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
+                className="w-full rounded-lg border border-[#CBD5E1] px-3.5 py-2.5 text-sm focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
               />
             </div>
 
@@ -155,7 +155,7 @@ export default function RegisterPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
                 dir="ltr"
-                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
+                className="w-full rounded-lg border border-[#CBD5E1] px-3.5 py-2.5 text-sm focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
               />
             </div>
 
@@ -165,15 +165,15 @@ export default function RegisterPage() {
                 id="terms"
                 checked={termsAccepted}
                 onChange={(e) => setTermsAccepted(e.target.checked)}
-                className="mt-1 h-4 w-4 rounded border-slate-300 text-[#007766] focus:ring-[#007766]"
+                className="mt-1 h-4 w-4 rounded border-[#CBD5E1] text-[#2563EB] focus:ring-[#2563EB]"
               />
               <label htmlFor="terms" className="text-xs text-slate-600 leading-normal">
                 أوافق على{" "}
-                <Link href="/terms" className="text-[#007766] underline">
+                <Link href="/terms" className="text-[#2563EB] underline">
                   شروط الاستخدام
                 </Link>{" "}
                 و{" "}
-                <Link href="/privacy" className="text-[#007766] underline">
+                <Link href="/privacy" className="text-[#2563EB] underline">
                   سياسة الخصوصية
                 </Link>{" "}
                 الخاصة بمنصة مدينتي.
@@ -183,7 +183,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-lg bg-[#007766] py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-[#005f52] disabled:opacity-50 transition-colors cursor-pointer"
+              className="w-full rounded-lg bg-[#2563EB] py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-[#1D4ED8] active:bg-[#1E40AF] disabled:opacity-50 transition-colors cursor-pointer"
             >
               {isLoading ? "جاري إنشاء الحساب..." : "إنشاء الحساب الآن"}
             </button>
@@ -191,7 +191,7 @@ export default function RegisterPage() {
 
           <div className="mt-6 text-center text-xs text-slate-600">
             لديك حساب بالفعل؟{" "}
-            <Link href="/login" className="font-bold text-[#007766] hover:text-[#005f52]">
+            <Link href="/login" className="font-bold text-[#2563EB] hover:text-[#1D4ED8]">
               تسجيل الدخول
             </Link>
           </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ReportStatus, UserRole } from "@prisma/client";
 import { REPORT_STATUS_METADATA, ALLOWED_TRANSITIONS } from "@/lib/reports/lifecycle";
 import { ReportPreviewDrawer } from "./report-preview-drawer";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // ─────────────────────────────────────────────
 // Types
@@ -55,11 +56,29 @@ function getSlaInfo(createdAt: string, status: ReportStatus) {
 // ─────────────────────────────────────────────
 // Status badge color helper
 // ─────────────────────────────────────────────
-function statusBadgeClass(status: ReportStatus) {
-  if (status === ReportStatus.RESOLVED || status === ReportStatus.CLOSED) return "badge-civic-success";
-  if (status === ReportStatus.REJECTED || status === ReportStatus.CLOSED_NO_RESPONSE) return "badge-civic-danger";
-  if (status === ReportStatus.IN_PROGRESS || status === ReportStatus.WAITING_FOR_RESIDENT) return "badge-civic-warning";
-  return "badge-civic-info";
+function statusBadgeClass(status: ReportStatus): string {
+  switch (status) {
+    case ReportStatus.NEW:
+      return "badge-status-new";
+    case ReportStatus.UNDER_REVIEW:
+      return "badge-status-under-review";
+    case ReportStatus.ASSIGNED:
+      return "badge-status-assigned";
+    case ReportStatus.IN_PROGRESS:
+      return "badge-status-in-progress";
+    case ReportStatus.WAITING_FOR_RESIDENT:
+      return "badge-workflow-condition";
+    case ReportStatus.RESOLVED:
+      return "badge-status-resolved";
+    case ReportStatus.CLOSED:
+      return "badge-status-closed";
+    case ReportStatus.CLOSED_NO_RESPONSE:
+      return "badge-status-closed-no-response";
+    case ReportStatus.REJECTED:
+      return "badge-status-rejected";
+    default:
+      return "badge-status-new";
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -179,7 +198,7 @@ function StatusPopover({
                         doTransition(t.to, false);
                       }
                     }}
-                    className="w-full text-right px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-[#ecfdf5] hover:text-[#007766] flex items-center gap-2 transition-colors cursor-pointer"
+                    className="w-full text-right px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-[#EFF6FF] hover:text-[#2563EB] flex items-center gap-2 transition-colors cursor-pointer"
                   >
                     <span className={`h-2 w-2 rounded-full shrink-0 ${statusBadgeClass(t.to).includes("success") ? "bg-emerald-500" : statusBadgeClass(t.to).includes("danger") ? "bg-rose-500" : statusBadgeClass(t.to).includes("warning") ? "bg-amber-500" : "bg-sky-500"}`} />
                     {toMeta?.labelAr || t.to}
@@ -198,7 +217,7 @@ function StatusPopover({
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="سبب التحويل (إلزامي)..."
                 rows={2}
-                className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:border-[#007766] focus:outline-none focus:ring-1 focus:ring-[#007766] resize-none"
+                className="w-full rounded-lg border border-[#CBD5E1] px-2 py-1.5 text-xs text-[#142D4E] placeholder-slate-400 focus:border-[#2563EB] focus:outline-none focus:ring-1 focus:ring-[#2563EB] resize-none"
               />
               {error && <p className="text-[10px] text-rose-600 font-semibold">{error}</p>}
               <div className="flex gap-2">
@@ -206,14 +225,14 @@ function StatusPopover({
                   type="button"
                   onClick={() => doTransition(pendingTo, true)}
                   disabled={loading}
-                  className="flex-1 rounded-lg bg-[#007766] hover:bg-[#005f52] text-white text-[11px] font-bold py-1.5 disabled:opacity-50 cursor-pointer transition-colors"
+                  className="flex-1 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] active:bg-[#1E40AF] text-white text-[11px] font-bold py-1.5 disabled:opacity-50 cursor-pointer transition-colors"
                 >
                   {loading ? "جاري..." : "تأكيد"}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setPendingTo(null); setReason(""); setError(""); }}
-                  className="rounded-lg border border-slate-200 text-slate-600 text-[11px] font-bold py-1.5 px-2 cursor-pointer hover:bg-slate-50 transition-colors"
+                  className="rounded-lg border border-[#CBD5E1] text-slate-600 text-[11px] font-bold py-1.5 px-2 cursor-pointer hover:bg-slate-50 transition-colors"
                 >
                   إلغاء
                 </button>
@@ -275,7 +294,7 @@ function NotesPanel({ reportId }: { reportId: string }) {
   }
 
   return (
-    <div dir="rtl" className="bg-slate-50/80 border-t border-slate-100 px-4 py-3 space-y-3">
+    <div dir="rtl" className="bg-[#F1F5F9]/80 border-t border-[#CBD5E1] px-4 py-3 space-y-3">
       {/* Input */}
       <div className="flex gap-2">
         <textarea
@@ -283,13 +302,13 @@ function NotesPanel({ reportId }: { reportId: string }) {
           onChange={(e) => setBody(e.target.value)}
           placeholder="أضف ملاحظة داخلية للفريق..."
           rows={2}
-          className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:border-[#007766] focus:outline-none focus:ring-1 focus:ring-[#007766] resize-none shadow-xs"
+          className="flex-1 rounded-xl border border-[#CBD5E1] bg-white px-3 py-2 text-xs text-[#142D4E] placeholder-slate-400 focus:border-[#2563EB] focus:outline-none focus:ring-1 focus:ring-[#2563EB] resize-none shadow-xs"
         />
         <button
           type="button"
           onClick={addNote}
           disabled={submitting || !body.trim()}
-          className="self-end rounded-xl bg-[#007766] hover:bg-[#005f52] disabled:opacity-40 text-white text-xs font-bold px-3 py-2 cursor-pointer transition-colors shadow-xs"
+          className="self-end rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] active:bg-[#1E40AF] disabled:opacity-40 text-white text-xs font-bold px-3 py-2 cursor-pointer transition-colors shadow-xs"
         >
           {submitting ? "..." : "إضافة"}
         </button>
@@ -298,7 +317,10 @@ function NotesPanel({ reportId }: { reportId: string }) {
 
       {/* Notes List */}
       {loading ? (
-        <p className="text-[11px] text-slate-400 font-medium">جاري التحميل...</p>
+        <div className="space-y-2 py-1" aria-busy="true">
+          <Skeleton className="h-3.5 w-1/3 rounded-sm" />
+          <Skeleton className="h-3 w-1/2 rounded-sm" />
+        </div>
       ) : notes.length === 0 ? (
         <p className="text-[11px] text-slate-400 font-medium">لا توجد ملاحظات داخلية بعد.</p>
       ) : (
@@ -360,14 +382,14 @@ export function OpsReportsTable({ reports, role, onReportUpdated }: OpsReportsTa
               return (
                 <Fragment key={report.id}>
                   <tr
-                    className={`border-b border-slate-100 transition-colors ${notesOpen ? "bg-[#f5faf8]" : "hover:bg-[#f5faf8]"}`}
+                    className={`border-b border-slate-100 transition-colors ${notesOpen ? "bg-[#F1F5F9]/70" : "hover:bg-[#F1F5F9]/50"}`}
                   >
                     {/* Reference */}
                     <td className="py-3 px-4 font-mono font-bold">
                       <button
                         type="button"
                         onClick={() => setPreviewReport(report)}
-                        className="text-[#007766] hover:underline cursor-pointer font-bold tracking-tight"
+                        className="text-[#2563EB] hover:underline cursor-pointer font-bold tracking-tight"
                         title="معاينة تفاصيل البلاغ"
                       >
                         {report.publicReference}
@@ -379,7 +401,7 @@ export function OpsReportsTable({ reports, role, onReportUpdated }: OpsReportsTa
                       <button
                         type="button"
                         onClick={() => setPreviewReport(report)}
-                        className="font-semibold text-slate-900 hover:text-[#007766] text-right truncate block w-full cursor-pointer transition-colors"
+                        className="font-semibold text-[#142D4E] hover:text-[#2563EB] text-right truncate block w-full cursor-pointer transition-colors"
                         title="انقر للمعاينة السريعة"
                       >
                         {report.title}
@@ -427,8 +449,8 @@ export function OpsReportsTable({ reports, role, onReportUpdated }: OpsReportsTa
                         onClick={() => toggleNotes(report.id)}
                         className={`inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[10px] font-bold transition-all cursor-pointer ${
                           notesOpen
-                            ? "border-[#007766]/30 bg-[#ecfdf5] text-[#007766]"
-                            : "border-slate-200 bg-white text-slate-500 hover:border-[#007766]/30 hover:text-[#007766] hover:bg-[#ecfdf5]"
+                            ? "border-[#2563EB]/40 bg-[#EFF6FF] text-[#2563EB]"
+                            : "border-[#CBD5E1] bg-white text-slate-500 hover:border-[#2563EB]/40 hover:text-[#2563EB] hover:bg-[#EFF6FF]"
                         }`}
                         title="الملاحظات الداخلية"
                       >
@@ -445,7 +467,7 @@ export function OpsReportsTable({ reports, role, onReportUpdated }: OpsReportsTa
                         <button
                           type="button"
                           onClick={() => setPreviewReport(report)}
-                          className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 font-semibold text-slate-700 hover:border-[#007766]/40 hover:bg-[#ecfdf5] hover:text-[#007766] transition-colors text-[11px] cursor-pointer"
+                          className="inline-flex items-center gap-1 rounded-md border border-[#CBD5E1] bg-white px-2 py-1 font-semibold text-slate-700 hover:border-[#2563EB]/40 hover:bg-[#EFF6FF] hover:text-[#2563EB] transition-colors text-[11px] cursor-pointer"
                           title="معاينة الصور والوصف الميداني"
                         >
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -456,7 +478,7 @@ export function OpsReportsTable({ reports, role, onReportUpdated }: OpsReportsTa
                         </button>
                         <Link
                           href={`/reports/${report.id}`}
-                          className="inline-flex rounded-md border border-slate-200 bg-white px-2.5 py-1 font-semibold text-slate-700 hover:bg-[#ecfdf5] hover:text-[#007766] transition-colors text-[11px]"
+                          className="inline-flex rounded-md border border-[#CBD5E1] bg-white px-2.5 py-1 font-semibold text-slate-700 hover:bg-[#EFF6FF] hover:text-[#2563EB] transition-colors text-[11px]"
                         >
                           {role === UserRole.STAFF ? "معالجة" : "تفاصيل"}
                         </Link>

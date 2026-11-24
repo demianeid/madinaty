@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
+import { WebsiteBackground } from "@/components/ui/website-background";
 
 const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic"],
@@ -26,7 +27,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl" className={`${ibmPlexSansArabic.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans bg-canvas-bg text-slate-900 selection:bg-civic-emerald selection:text-white">
+      <body className="min-h-full flex flex-col font-sans bg-[#0B1E38] text-slate-100 selection:bg-[#2563EB] selection:text-white relative">
+        <WebsiteBackground />
         {children}
       </body>
     </html>

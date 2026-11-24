@@ -7,6 +7,7 @@ import { useSession } from "@/lib/auth/auth-client";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { NotificationItem } from "@/components/notifications/notification-bell";
+import { NotificationItemSkeleton, Skeleton, SkeletonButton } from "@/components/ui/skeleton";
 
 function getTypeBadge(type: string): { label: string; color: string } {
   switch (type) {
@@ -19,12 +20,12 @@ function getTypeBadge(type: string): { label: string; color: string } {
     case "STATUS_CHANGED":
       return { label: "تحديث مرحلة", color: "badge-civic-pill badge-civic-info" };
     case "APPEAL_SUBMITTED":
-      return { label: "اعتراض مسجل", color: "badge-civic-pill bg-[#eff4ff] text-[#005683] border border-[#d3e4fe]" };
+      return { label: "اعتراض مسجل", color: "badge-civic-pill bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE]" };
     case "AUTO_CLOSED":
       return { label: "إغلاق نهائي", color: "badge-civic-pill bg-slate-100 text-slate-700 border border-slate-200" };
     case "REPORT_CREATED":
     default:
-      return { label: "بلاغ جديد", color: "badge-civic-pill bg-[#ecfdf5] text-[#007766] border border-[#dce8e4]" };
+      return { label: "بلاغ جديد", color: "badge-civic-pill badge-status-new" };
   }
 }
 
@@ -106,38 +107,65 @@ export default function NotificationsPage() {
 
   if (sessionLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
+      <div className="min-h-screen bg-transparent flex flex-col justify-between" dir="rtl">
         <Header />
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
-        </div>
+        <main className="flex-1 container mx-auto max-w-4xl px-4 py-8 space-y-6" aria-busy="true">
+          {/* Breadcrumb Skeleton */}
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-3 w-16 rounded-sm" />
+            <span className="text-slate-400">/</span>
+            <Skeleton className="h-3 w-32 rounded-sm" />
+          </div>
+
+          {/* Header Title Skeleton */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-2">
+              <Skeleton className="h-7 w-56 rounded-lg" />
+              <Skeleton className="h-4 w-80 sm:w-96 rounded-sm" />
+            </div>
+            <SkeletonButton size="sm" className="w-36" />
+          </div>
+
+          {/* Tabs Skeleton */}
+          <div className="flex gap-2 border-b border-[#CBD5E1] pb-3">
+            <Skeleton className="h-8 w-32 rounded-lg" />
+            <Skeleton className="h-8 w-28 rounded-lg" />
+          </div>
+
+          {/* Items Skeletons */}
+          <div className="space-y-3">
+            {[1, 2, 3, 4].map((i) => (
+              <NotificationItemSkeleton key={i} />
+            ))}
+          </div>
+        </main>
         <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-between" dir="rtl">
+    <div className="min-h-screen bg-transparent flex flex-col justify-between" dir="rtl">
       <Header />
 
       <main className="flex-1 container mx-auto max-w-4xl px-4 py-8">
         {/* Breadcrumb */}
-        <div className="mb-6 flex items-center gap-2 text-xs font-semibold text-slate-500">
-          <Link href="/dashboard" className="hover:text-emerald-700 transition-colors">
+        <div className="mb-6 flex items-center gap-2 text-xs font-semibold text-slate-300">
+          <Link href="/dashboard" className="hover:text-blue-400 transition-colors">
             لوحة التحكم
           </Link>
           <span>/</span>
-          <span className="text-slate-800">مركز الإشعارات والتنبيهات</span>
+          <span className="text-white">مركز الإشعارات والتنبيهات</span>
         </div>
 
         {/* Header Title & Actions */}
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black text-slate-900 flex items-center gap-2.5">
+            <h1 className="text-2xl font-black text-[#142D4E] flex items-center gap-2.5">
               <span>🔔</span>
               <span>مركز الإشعارات والتنبيهات</span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-[#64748B] mt-1">
               متابعة حية ومفصلة لكافة التحديثات الميدانية وقرارات الجهات البلدية على بلاغاتك
             </p>
           </div>
@@ -146,7 +174,7 @@ export default function NotificationsPage() {
             <button
               type="button"
               onClick={handleMarkAllAsRead}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-emerald-700 shadow-xs transition-colors self-start sm:self-auto cursor-pointer"
+              className="rounded-xl border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-[#EFF6FF] hover:text-[#2563EB] shadow-xs transition-colors self-start sm:self-auto cursor-pointer"
             >
               ✓ تحديد جميع التنبيهات كمقروءة
             </button>
@@ -154,14 +182,14 @@ export default function NotificationsPage() {
         </div>
 
         {/* Filter Tabs */}
-        <div className="mb-6 flex items-center gap-2 border-b border-slate-200 pb-3">
+        <div className="mb-6 flex items-center gap-2 border-b border-[#CBD5E1] pb-3">
           <button
             type="button"
             onClick={() => setFilter("all")}
             className={`rounded-lg px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
               filter === "all"
-                ? "bg-[#007766] text-white shadow-xs"
-                : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                ? "bg-[#2563EB] text-white shadow-xs"
+                : "bg-white text-slate-600 border border-[#CBD5E1] hover:bg-slate-50"
             }`}
           >
             جميع الإشعارات ({totalCount})
@@ -171,14 +199,14 @@ export default function NotificationsPage() {
             onClick={() => setFilter("unread")}
             className={`rounded-lg px-4 py-2 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
               filter === "unread"
-                ? "bg-[#007766] text-white shadow-xs"
-                : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                ? "bg-[#2563EB] text-white shadow-xs"
+                : "bg-white text-slate-600 border border-[#CBD5E1] hover:bg-slate-50"
             }`}
           >
             <span>غير المقروءة فقط</span>
             {unreadCount > 0 && (
               <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono font-bold ${
-                filter === "unread" ? "bg-white text-[#007766]" : "bg-[#fef2f2] text-[#dc2626] border border-[#fecaca]"
+                filter === "unread" ? "bg-white text-[#2563EB]" : "bg-[#FEF2F2] text-[#B91C1C] border border-[#FECACA]"
               }`}>
                 {unreadCount}
               </span>
@@ -188,18 +216,18 @@ export default function NotificationsPage() {
 
         {/* Notifications List */}
         {isLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 rounded-xl bg-white border border-slate-200 p-4 animate-pulse" />
+          <div className="space-y-3" aria-busy="true" aria-label="جاري تحميل الإشعارات">
+            {[1, 2, 3, 4].map((i) => (
+              <NotificationItemSkeleton key={i} />
             ))}
           </div>
         ) : notifications.length === 0 ? (
-          <div className="rounded-xl border border-slate-200 bg-white p-12 text-center shadow-civic-1">
+          <div className="rounded-xl border border-[#CBD5E1] bg-white p-12 text-center shadow-civic-1">
             <div className="text-5xl mb-3">📭</div>
-            <h3 className="text-base font-bold text-slate-800">
+            <h3 className="text-base font-bold text-[#142D4E]">
               {filter === "unread" ? "لا توجد إشعارات غير مقروءة" : "لا توجد أي إشعارات مسجلة"}
             </h3>
-            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+            <p className="text-xs text-[#64748B] mt-1 max-w-sm mx-auto">
               {filter === "unread"
                 ? "لقد قمت بقراءة جميع الإشعارات والتحديثات الخاصة ببلاغاتك."
                 : "ستصلك هنا إشعارات فورية عن أي إجراء يتخذه فريق البلدية بشأن بلاغاتك."}
@@ -225,8 +253,8 @@ export default function NotificationsPage() {
                   key={n.id}
                   className={`rounded-xl border p-5 transition-all shadow-civic-1 ${
                     isUnread
-                      ? "bg-white border-[#007766]/50 ring-2 ring-[#007766]/10"
-                      : "bg-white border-slate-200 hover:border-slate-300"
+                      ? "bg-white border-[#BFDBFE] ring-2 ring-[#2563EB]/10"
+                      : "bg-white border-[#CBD5E1] hover:border-slate-300"
                   }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
@@ -241,13 +269,13 @@ export default function NotificationsPage() {
                             </span>
                           )}
                           {isUnread && (
-                            <span className="rounded-full bg-[#007766] text-white text-[9px] font-bold px-2 py-0.5">
+                            <span className="rounded-full bg-[#2563EB] text-white text-[9px] font-bold px-2 py-0.5">
                               جديد
                             </span>
                           )}
                         </div>
 
-                        <h3 className={`text-sm ${isUnread ? "font-bold text-slate-900" : "font-medium text-slate-800"}`}>
+                        <h3 className={`text-sm ${isUnread ? "font-bold text-[#142D4E]" : "font-medium text-slate-800"}`}>
                           {n.title}
                         </h3>
 
@@ -255,7 +283,7 @@ export default function NotificationsPage() {
                           {n.body}
                         </p>
 
-                        <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-slate-400 font-medium font-mono">
+                        <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-[#64748B] font-medium font-mono">
                           <span>
                             {new Date(n.createdAt).toLocaleDateString("ar-EG", {
                               weekday: "long",
@@ -275,7 +303,7 @@ export default function NotificationsPage() {
                         <button
                           type="button"
                           onClick={() => handleMarkAsRead(n.id)}
-                          className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                          className="rounded-lg border border-[#CBD5E1] bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
                         >
                           تحديد كمقروء
                         </button>
@@ -284,7 +312,7 @@ export default function NotificationsPage() {
                       {n.reportId && (
                         <Link
                           href={`/reports/${n.reportId}`}
-                          className="rounded-lg bg-[#007766] hover:bg-[#005f52] px-4 py-1.5 text-xs font-bold text-white shadow-xs transition-colors"
+                          className="rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] px-4 py-1.5 text-xs font-bold text-white shadow-xs transition-colors"
                         >
                           عرض البلاغ ←
                         </Link>

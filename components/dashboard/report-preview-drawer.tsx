@@ -14,11 +14,29 @@ interface ReportPreviewDrawerProps {
   role: UserRole;
 }
 
-function statusBadgeClass(status: ReportStatus) {
-  if (status === ReportStatus.RESOLVED || status === ReportStatus.CLOSED) return "badge-civic-success";
-  if (status === ReportStatus.REJECTED || status === ReportStatus.CLOSED_NO_RESPONSE) return "badge-civic-danger";
-  if (status === ReportStatus.IN_PROGRESS || status === ReportStatus.WAITING_FOR_RESIDENT) return "badge-civic-warning";
-  return "badge-civic-info";
+function statusBadgeClass(status: ReportStatus): string {
+  switch (status) {
+    case ReportStatus.NEW:
+      return "badge-status-new";
+    case ReportStatus.UNDER_REVIEW:
+      return "badge-status-under-review";
+    case ReportStatus.ASSIGNED:
+      return "badge-status-assigned";
+    case ReportStatus.IN_PROGRESS:
+      return "badge-status-in-progress";
+    case ReportStatus.WAITING_FOR_RESIDENT:
+      return "badge-workflow-condition";
+    case ReportStatus.RESOLVED:
+      return "badge-status-resolved";
+    case ReportStatus.CLOSED:
+      return "badge-status-closed";
+    case ReportStatus.CLOSED_NO_RESPONSE:
+      return "badge-status-closed-no-response";
+    case ReportStatus.REJECTED:
+      return "badge-status-rejected";
+    default:
+      return "badge-status-new";
+  }
 }
 
 export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPreviewDrawerProps) {
@@ -78,15 +96,15 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
           className="w-screen max-w-xl bg-white shadow-2xl flex flex-col z-10 animate-in slide-in-from-left duration-300"
         >
           {/* Header */}
-          <div className="p-4 sm:p-5 border-b border-slate-100 bg-[#f8fafc] flex items-center justify-between gap-3">
+          <div className="p-4 sm:p-5 border-b border-[#CBD5E1] bg-[#F1F5F9] flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="font-mono text-xs font-black text-[#007766] bg-[#ecfdf5] border border-[#dce8e4] px-2.5 py-1 rounded-lg">
+              <span className="font-mono text-xs font-black text-[#1D4ED8] bg-[#EFF6FF] border border-[#BFDBFE] px-2.5 py-1 rounded-lg">
                 {report.publicReference}
               </span>
               <button
                 type="button"
                 onClick={handleCopyRef}
-                className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 bg-white border border-slate-200 px-2 py-1 rounded-md transition-colors cursor-pointer"
+                className="text-[11px] font-semibold text-slate-500 hover:text-[#142D4E] bg-white border border-[#CBD5E1] px-2 py-1 rounded-md transition-colors cursor-pointer"
                 title="نسخ رقم البلاغ"
               >
                 {copied ? "تم النسخ ✓" : "نسخ"}
@@ -110,7 +128,7 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
           <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
             {/* Title & Description */}
             <div>
-              <h2 className="text-base sm:text-lg font-black text-slate-900 leading-snug">
+              <h2 className="text-base sm:text-lg font-black text-[#142D4E] leading-snug">
                 {report.title}
               </h2>
               <div className="mt-3 rounded-xl bg-slate-50 border border-slate-100 p-4">
@@ -126,8 +144,8 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
             {/* Media / Photos Section */}
             <div>
               <div className="flex items-center justify-between mb-2.5">
-                <h3 className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <svg className="w-4 h-4 text-[#007766]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <h3 className="text-xs font-bold text-[#142D4E] flex items-center gap-1.5">
+                  <svg className="w-4 h-4 text-[#2563EB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   التوثيق المصور المرفق ({report.media?.length || 0})
@@ -136,7 +154,7 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
               </div>
 
               {(!report.media || report.media.length === 0) ? (
-                <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center bg-slate-50/50">
+                <div className="rounded-xl border border-dashed border-[#CBD5E1] p-6 text-center bg-slate-50/50">
                   <p className="text-xs font-semibold text-slate-500">لم يرفق المواطن صوراً مع هذا البلاغ</p>
                 </div>
               ) : (
@@ -150,7 +168,7 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
                           <div
                             key={m.id}
                             onClick={() => setSelectedPhoto(`/api/media/${m.id}`)}
-                            className="group relative aspect-4/3 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 cursor-pointer shadow-xs hover:border-[#007766] transition-all"
+                            className="group relative aspect-4/3 rounded-xl overflow-hidden border border-[#CBD5E1] bg-slate-100 cursor-pointer shadow-xs hover:border-[#2563EB] transition-all"
                           >
                             <Image
                               src={`/api/media/${m.id}`}
@@ -173,13 +191,13 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
                   {/* Resolution photos */}
                   {resolutionPhotos.length > 0 && (
                     <div>
-                      <span className="text-[11px] font-bold text-emerald-700 block mb-2">توثيق الإصلاح (بعد المعالجة):</span>
+                      <span className="text-[11px] font-bold text-[#047857] block mb-2">توثيق الإصلاح (بعد المعالجة):</span>
                       <div className="grid grid-cols-2 gap-2.5">
                         {resolutionPhotos.map((m) => (
                           <div
                             key={m.id}
                             onClick={() => setSelectedPhoto(`/api/media/${m.id}`)}
-                            className="group relative aspect-4/3 rounded-xl overflow-hidden border-2 border-emerald-400 bg-emerald-50 cursor-pointer shadow-xs hover:border-emerald-600 transition-all"
+                            className="group relative aspect-4/3 rounded-xl overflow-hidden border-2 border-[#A7F3D0] bg-[#ECFDF5] cursor-pointer shadow-xs hover:border-[#047857] transition-all"
                           >
                             <Image
                               src={`/api/media/${m.id}`}
@@ -188,7 +206,7 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
                               unoptimized
                               className="object-cover group-hover:scale-105 transition-transform duration-200"
                             />
-                            <div className="absolute top-2 right-2 bg-emerald-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-xs">
+                            <div className="absolute top-2 right-2 bg-[#047857] text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-xs">
                               تم الإصلاح ✓
                             </div>
                           </div>
@@ -201,9 +219,9 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
             </div>
 
             {/* Location & GIS Details */}
-            <div className="rounded-xl border border-slate-200 p-4 space-y-3 bg-white shadow-xs">
-              <h3 className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                <svg className="w-4 h-4 text-[#007766]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="rounded-xl border border-[#CBD5E1] p-4 space-y-3 bg-white shadow-xs">
+              <h3 className="text-xs font-bold text-[#142D4E] flex items-center gap-1.5">
+                <svg className="w-4 h-4 text-[#2563EB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
@@ -213,7 +231,7 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
               <div className="text-xs space-y-1.5">
                 <div className="flex items-start gap-2">
                   <span className="text-slate-400 shrink-0">العنوان:</span>
-                  <span className="font-semibold text-slate-800">{report.addressText || "الموقع محدد على الخريطة"}</span>
+                  <span className="font-semibold text-[#142D4E]">{report.addressText || "الموقع محدد على الخريطة"}</span>
                 </div>
                 {report.latitude && report.longitude && (
                   <div className="flex items-center justify-between pt-1">
@@ -224,7 +242,7 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
                       href={`https://www.google.com/maps/search/?api=1&query=${report.latitude},${report.longitude}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[11px] font-bold text-[#007766] hover:underline"
+                      className="inline-flex items-center gap-1 text-[11px] font-bold text-[#2563EB] hover:underline"
                     >
                       فتح في خرائط Google ↗
                     </a>
@@ -235,25 +253,25 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
 
             {/* Metadata Grid */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+              <div className="rounded-xl border border-[#CBD5E1] bg-slate-50/70 p-3">
                 <span className="text-[10px] font-bold text-slate-400 block mb-1">التصنيف البلدي</span>
-                <span className="text-xs font-bold text-slate-800 block truncate">
+                <span className="text-xs font-bold text-[#142D4E] block truncate">
                   {report.category?.labelAr || "—"}
                 </span>
               </div>
-              <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+              <div className="rounded-xl border border-[#CBD5E1] bg-slate-50/70 p-3">
                 <span className="text-[10px] font-bold text-slate-400 block mb-1">الجهة المسند إليها</span>
-                <span className="text-xs font-bold text-slate-800 block truncate">
+                <span className="text-xs font-bold text-[#142D4E] block truncate">
                   {report.authority?.nameAr || "قيد التعيين"}
                 </span>
               </div>
-              <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+              <div className="rounded-xl border border-[#CBD5E1] bg-slate-50/70 p-3">
                 <span className="text-[10px] font-bold text-slate-400 block mb-1">تاريخ ووقت التقديم</span>
                 <span className="text-xs font-semibold text-slate-700 block">
                   {new Date(report.createdAt).toLocaleString("ar-EG", { dateStyle: "medium", timeStyle: "short" })}
                 </span>
               </div>
-              <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+              <div className="rounded-xl border border-[#CBD5E1] bg-slate-50/70 p-3">
                 <span className="text-[10px] font-bold text-slate-400 block mb-1">المواطن المبلغ</span>
                 <span className="text-xs font-semibold text-slate-700 block truncate">
                   {report.createdBy?.name || report.createdBy?.email || "مواطن مسجل"}
@@ -263,18 +281,18 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
           </div>
 
           {/* Footer Actions */}
-          <div className="p-4 border-t border-slate-100 bg-slate-50/60 flex items-center justify-between gap-3">
+          <div className="p-4 border-t border-[#CBD5E1] bg-slate-50/60 flex items-center justify-between gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-slate-200 bg-white hover:bg-slate-100 px-4 py-2.5 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
+              className="rounded-xl border border-[#CBD5E1] bg-white hover:bg-slate-100 px-4 py-2.5 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
             >
               إغلاق
             </button>
 
             <Link
               href={`/reports/${report.id}`}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-[#007766] hover:bg-[#005f52] text-white px-5 py-2.5 text-xs font-bold transition-all shadow-xs"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] active:bg-[#1E40AF] text-white px-5 py-2.5 text-xs font-bold transition-all shadow-xs"
             >
               <span>{role === UserRole.STAFF ? "الانتقال لصفحة المعالجة الكاملة" : "صفحة البلاغ التفصيلية"}</span>
               <span className="text-sm font-mono leading-none">←</span>
