@@ -9,15 +9,14 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { REPORT_STATUS_METADATA, ALLOWED_TRANSITIONS } from "@/lib/reports/lifecycle";
 import { ReportStatus, UserRole } from "@prisma/client";
+import { Skeleton, ReportDetailSkeleton } from "@/components/ui/skeleton";
 
 const LeafletMap = dynamic(
   () => import("@/components/maps/leaflet-map").then((mod) => mod.LeafletMap),
   {
     ssr: false,
     loading: () => (
-      <div className="h-[220px] w-full rounded-xl bg-slate-100 flex items-center justify-center text-xs text-slate-400 animate-pulse border border-slate-200">
-        جاري تحميل خريطة الموقع...
-      </div>
+      <Skeleton className="h-[220px] w-full rounded-xl" />
     ),
   }
 );
@@ -125,9 +124,12 @@ export default function ReportDetailPage({
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
-          <p className="mt-4 text-sm text-slate-600 font-medium">جاري التحميل...</p>
+        <div className="min-h-screen flex flex-col bg-[#F1F5F9]" dir="rtl">
+          <Header />
+          <main className="flex-1 container mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+            <ReportDetailSkeleton />
+          </main>
+          <Footer />
         </div>
       }
     >
@@ -415,16 +417,19 @@ function ReportDetailContent({
 
   if (loading || sessionLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
-        <p className="mt-4 text-sm text-slate-600 font-medium">جاري تحميل تفاصيل البلاغ...</p>
+      <div className="min-h-screen flex flex-col bg-[#F1F5F9]" dir="rtl">
+        <Header />
+        <main className="flex-1 container mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+          <ReportDetailSkeleton />
+        </main>
+        <Footer />
       </div>
     );
   }
 
   if (errorMessage && !report) {
     return (
-      <div className="min-h-screen flex flex-col bg-slate-50">
+      <div className="min-h-screen flex flex-col bg-[#F1F5F9]">
         <Header />
         <main className="flex-1 container mx-auto max-w-4xl px-4 py-12 text-center">
           <div className="rounded-2xl border border-red-200 bg-red-50 p-8 shadow-xs">
@@ -452,29 +457,29 @@ function ReportDetailContent({
   const { isAppealWindowActive, daysRemaining } = appealState;
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
+    <div className="min-h-screen flex flex-col bg-[#F1F5F9]">
       <Header />
 
       <main className="flex-1 container mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Navigation Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-slate-500 mb-6 font-medium">
-          <Link href="/dashboard" className="hover:text-emerald-700">
+        <div className="flex items-center gap-2 text-xs text-[#64748B] mb-6 font-medium">
+          <Link href="/dashboard" className="hover:text-[#2563EB]">
             لوحة التحكم
           </Link>
           <span>/</span>
           <span>البلاغات</span>
           <span>/</span>
-          <span className="font-mono text-slate-700 font-bold">{report.publicReference}</span>
+          <span className="font-mono text-[#142D4E] font-bold">{report.publicReference}</span>
         </div>
 
         {/* Global Feedback Banners */}
         {errorMessage && (
-          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-800">
+          <div className="mb-6 rounded-xl border border-[#FECACA] bg-[#FEF2F2] p-4 text-xs font-semibold text-[#B91C1C]">
             {errorMessage}
           </div>
         )}
         {successMessage && (
-          <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-semibold text-emerald-800">
+          <div className="mb-6 rounded-xl border border-[#A7F3D0] bg-[#ECFDF5] p-4 text-xs font-semibold text-[#047857]">
             {successMessage}
           </div>
         )}
@@ -519,22 +524,32 @@ function ReportDetailContent({
         )}
 
         {/* Top Header Card */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-civic-1 mb-8">
+        <div className="rounded-xl border border-[#CBD5E1] bg-white p-6 shadow-civic-1 mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-2">
-                <span className="font-mono text-sm font-bold text-[#007766] bg-[#ecfdf5] px-3 py-1 rounded-md border border-[#dce8e4]">
+                <span className="font-mono text-sm font-bold text-[#2563EB] bg-[#EFF6FF] px-3 py-1 rounded-md border border-[#BFDBFE]">
                   {report.publicReference}
                 </span>
                 <span
                   className={`badge-civic-pill ${
                     report.status === ReportStatus.RESOLVED
-                      ? "badge-civic-success"
+                      ? "badge-status-resolved"
                       : report.status === ReportStatus.REJECTED
-                      ? "badge-civic-danger"
-                      : report.status === ReportStatus.IN_PROGRESS || report.status === ReportStatus.WAITING_FOR_RESIDENT
-                      ? "badge-civic-warning"
-                      : "badge-civic-info"
+                      ? "badge-status-rejected"
+                      : report.status === ReportStatus.IN_PROGRESS
+                      ? "badge-status-in-progress"
+                      : report.status === ReportStatus.WAITING_FOR_RESIDENT
+                      ? "badge-workflow-condition"
+                      : report.status === ReportStatus.ASSIGNED
+                      ? "badge-status-assigned"
+                      : report.status === ReportStatus.UNDER_REVIEW
+                      ? "badge-status-under-review"
+                      : report.status === ReportStatus.CLOSED
+                      ? "badge-status-closed"
+                      : report.status === ReportStatus.CLOSED_NO_RESPONSE
+                      ? "badge-status-closed-no-response"
+                      : "badge-status-new"
                   }`}
                 >
                   {statusMeta.labelAr}
@@ -543,7 +558,7 @@ function ReportDetailContent({
                   {report.category.labelAr}
                 </span>
                 {report.authority && (
-                  <span className="rounded-md bg-[#eff4ff] text-[#005683] border border-[#d3e4fe] px-2.5 py-0.5 text-xs font-medium">
+                  <span className="rounded-md bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE] px-2.5 py-0.5 text-xs font-medium">
                     {report.authority.nameAr}
                   </span>
                 )}
@@ -551,7 +566,7 @@ function ReportDetailContent({
                   <span
                     className={`rounded-md px-2.5 py-0.5 text-xs font-medium border ${
                       report.aiValidationResult === "VALID"
-                        ? "bg-[#ecfdf5] text-[#007766] border-[#dce8e4]"
+                        ? "bg-[#ECFDF5] text-[#047857] border-[#A7F3D0]"
                         : "bg-purple-50 text-purple-800 border-purple-200"
                     }`}
                   >
@@ -559,7 +574,7 @@ function ReportDetailContent({
                   </span>
                 )}
               </div>
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              <h1 className="text-xl sm:text-2xl font-bold text-[#142D4E] tracking-tight">
                 {report.title}
               </h1>
             </div>
@@ -571,12 +586,12 @@ function ReportDetailContent({
                   {isAppealWindowActive ? (
                     <button
                       onClick={() => setShowAppealModal(true)}
-                      className="rounded-xl border border-rose-300 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 transition-colors"
+                      className="rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-2 text-xs font-bold text-[#B91C1C] hover:bg-red-100 transition-colors"
                     >
                       تقديم اعتراض ({daysRemaining} أيام متبقية)
                     </button>
                   ) : (
-                    <span className="text-xs text-slate-400 font-medium">
+                    <span className="text-xs text-[#64748B] font-medium">
                       انتهت مهلة الاعتراض (7 أيام)
                     </span>
                   )}
@@ -586,7 +601,7 @@ function ReportDetailContent({
               {isReporter && report.status === ReportStatus.RESOLVED && report.ratings.length === 0 && (
                 <button
                   onClick={() => setShowRatingModal(true)}
-                  className="rounded-lg bg-[#007766] hover:bg-[#005f52] px-4 py-2 text-xs font-semibold text-white transition-colors shadow-xs cursor-pointer"
+                  className="rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white transition-colors shadow-xs cursor-pointer"
                 >
                   تقييم الخدمة وإغلاق البلاغ
                 </button>
@@ -605,9 +620,9 @@ function ReportDetailContent({
               </p>
 
               {report.resolutionSummary && (
-                <div className="mt-6 rounded-xl bg-emerald-50 border border-emerald-200 p-4">
-                  <h3 className="text-xs font-bold text-emerald-900 mb-1">تقرير المعالجة الميدانية:</h3>
-                  <p className="text-xs text-emerald-800 leading-relaxed">
+                <div className="mt-6 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] p-4">
+                  <h3 className="text-xs font-bold text-[#047857] mb-1">تقرير المعالجة الميدانية:</h3>
+                  <p className="text-xs text-[#047857] leading-relaxed">
                     {report.resolutionSummary}
                   </p>
                 </div>
@@ -647,7 +662,7 @@ function ReportDetailContent({
                     href={`https://maps.google.com/?q=${report.latitude},${report.longitude}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-emerald-700 font-bold hover:underline"
+                    className="inline-flex items-center gap-1 text-[#2563EB] font-bold hover:underline"
                   >
                     عرض على خرائط Google ↗
                   </a>
@@ -677,7 +692,7 @@ function ReportDetailContent({
                       loading="lazy"
                     />
                     {img.isResolutionPhoto && (
-                      <span className="absolute bottom-1 right-1 rounded-md bg-emerald-600/90 text-white text-[10px] px-1.5 py-0.5 font-bold">
+                      <span className="absolute bottom-1 right-1 rounded-md bg-[#047857]/90 text-white text-[10px] px-1.5 py-0.5 font-bold">
                         صورة الإصلاح
                       </span>
                     )}
@@ -719,7 +734,7 @@ function ReportDetailContent({
                       <select
                         value={selectedNextStatus}
                         onChange={(e) => setSelectedNextStatus(e.target.value as ReportStatus)}
-                        className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-800 font-semibold focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
+                        className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-800 font-semibold focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
                         required
                       >
                         <option value="">-- اختر الحالة الجديدة المتاحة --</option>
@@ -744,15 +759,15 @@ function ReportDetailContent({
                     value={transitionReason}
                     onChange={(e) => setTransitionReason(e.target.value)}
                     placeholder="مثال: وصول فرقة الصيانة إلى الموقع..."
-                    className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-800 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
+                    className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-800 focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
                   />
                 </div>
               </div>
 
               {/* Optional documentation when transitioning to RESOLVED */}
               {selectedNextStatus === ReportStatus.RESOLVED && (
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 space-y-3">
-                  <h3 className="text-xs font-bold text-emerald-900">
+                <div className="rounded-xl border border-[#A7F3D0] bg-[#ECFDF5]/50 p-4 space-y-3">
+                  <h3 className="text-xs font-bold text-[#047857]">
                     توثيق المعالجة والإصلاح (اختياري)
                   </h3>
                   <div>
@@ -777,10 +792,10 @@ function ReportDetailContent({
                       multiple
                       onChange={handleEvidenceUpload}
                       disabled={isUploadingEvidence}
-                      className="block w-full text-xs text-slate-500 file:mr-0 file:ml-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 cursor-pointer"
+                      className="block w-full text-xs text-slate-500 file:mr-0 file:ml-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#2563EB] file:text-white hover:file:bg-[#1D4ED8] cursor-pointer"
                     />
                     {evidenceMediaIds.length > 0 && (
-                      <p className="mt-1 text-[11px] font-bold text-emerald-700">
+                      <p className="mt-1 text-[11px] font-bold text-[#047857]">
                         تم تجهيز {evidenceMediaIds.length} صورة إثبات معتمدة.
                       </p>
                     )}
@@ -813,7 +828,7 @@ function ReportDetailContent({
               {report.statusHistory.map((item) => (
                 <div key={item.id} className="relative group">
                   {/* Timeline bullet dot */}
-                  <div className="absolute -right-[31px] top-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-[#007766] ring-2 ring-[#007766]/20" />
+                  <div className="absolute -right-[31px] top-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-[#2563EB] ring-2 ring-[#2563EB]/20" />
 
                   <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
                     <span className="font-semibold text-slate-700">
@@ -882,13 +897,13 @@ function ReportDetailContent({
                 value={clarificationBody}
                 onChange={(e) => setClarificationBody(e.target.value)}
                 placeholder="أضف تعقيباً أو تفصيلاً جديداً..."
-                className="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-xs text-slate-800 focus:border-[#007766] focus:outline-none focus:ring-1 focus:ring-[#007766]"
+                className="w-full rounded-lg border border-[#CBD5E1] bg-white p-2.5 text-xs text-slate-800 focus:border-[#2563EB] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
               />
               <div className="flex justify-end">
                 <button
                   type="submit"
                   disabled={submittingClarification || !clarificationBody.trim()}
-                  className="rounded-lg bg-[#007766] hover:bg-[#005f52] px-4 py-2 text-xs font-semibold text-white disabled:opacity-50 transition-colors cursor-pointer"
+                  className="rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white disabled:opacity-50 transition-colors cursor-pointer"
                 >
                   إرسال تعقيب
                 </button>
@@ -947,8 +962,8 @@ function ReportDetailContent({
 
         {/* Citizen Rating Information Display */}
         {report.ratings.length > 0 && (
-          <div className="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-6 shadow-xs">
-            <h2 className="text-sm font-bold text-emerald-900 mb-2">
+          <div className="mt-8 rounded-2xl border border-[#A7F3D0] bg-[#ECFDF5]/60 p-6 shadow-xs">
+            <h2 className="text-sm font-bold text-[#047857] mb-2">
               تقييم المواطن لخدمة الإصلاح
             </h2>
             <div className="flex items-center gap-2 mb-2">
@@ -956,12 +971,12 @@ function ReportDetailContent({
                 {"★".repeat(report.ratings[0].score)}
                 {"☆".repeat(5 - report.ratings[0].score)}
               </div>
-              <span className="text-xs font-bold text-emerald-800 font-mono">
+              <span className="text-xs font-bold text-[#047857] font-mono">
                 ({report.ratings[0].score} من 5)
               </span>
             </div>
             {report.ratings[0].comment && (
-              <p className="text-xs text-emerald-800 italic">
+              <p className="text-xs text-[#047857] italic">
                 &ldquo;{report.ratings[0].comment}&rdquo;
               </p>
             )}
@@ -1074,7 +1089,7 @@ function ReportDetailContent({
                 <button
                   type="submit"
                   disabled={submittingRating}
-                  className="rounded-xl bg-emerald-600 px-5 py-2 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
+                  className="rounded-xl bg-[#2563EB] px-5 py-2 text-xs font-bold text-white hover:bg-[#1D4ED8] disabled:opacity-50"
                 >
                   {submittingRating ? "جاري الإرسال..." : "إرسال التقييم وإغلاق البلاغ"}
                 </button>

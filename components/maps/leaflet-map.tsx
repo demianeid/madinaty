@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Map as LeafletMapType, Marker as LeafletMarkerType } from "leaflet";
 import { isCoordinatesInBounds, DEFAULT_SERVICE_BOUNDARY } from "@/lib/reports/bounds";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface LeafletMapProps {
   latitude: number;
@@ -61,11 +62,11 @@ export function LeafletMap({
           <div style="width: 34px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
             <svg width="34" height="44" viewBox="0 0 34 44" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 7px rgba(0,0,0,0.35));">
               <!-- Teardrop pin pointing straight down to (17, 42) -->
-              <path d="M17 1C8.716 1 2 7.716 2 16C2 26.5 17 42 17 42C17 42 32 26.5 32 16C32 7.716 25.284 1 17 1Z" fill="#007766" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M17 1C8.716 1 2 7.716 2 16C2 26.5 17 42 17 42C17 42 32 26.5 32 16C32 7.716 25.284 1 17 1Z" fill="#2563EB" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="round"/>
               <!-- Inner white circular disc -->
               <circle cx="17" cy="16" r="6" fill="#FFFFFF"/>
-              <!-- Inner emerald dot -->
-              <circle cx="17" cy="16" r="3" fill="#007766"/>
+              <!-- Inner blue dot -->
+              <circle cx="17" cy="16" r="3" fill="#2563EB"/>
             </svg>
           </div>
         `,
@@ -220,6 +221,9 @@ export function LeafletMap({
 
   return (
     <div className="relative w-full rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 shadow-xs">
+      {!mapReady && (
+        <Skeleton className="absolute inset-0 z-20 w-full h-full rounded-2xl pointer-events-none transition-opacity duration-300" />
+      )}
       {/* Map canvas container */}
       <div ref={mapContainerRef} style={{ height }} className="w-full z-0" />
 

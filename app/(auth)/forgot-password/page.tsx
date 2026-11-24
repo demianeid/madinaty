@@ -33,9 +33,9 @@ export default function ForgotPasswordPage() {
       <Header />
 
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 sm:p-8 shadow-civic-1">
+        <div className="w-full max-w-md rounded-xl border border-[#CBD5E1] bg-white p-6 sm:p-8 shadow-civic-1">
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-2xl font-bold tracking-tight text-[#142D4E]">
               استعادة كلمة المرور
             </h1>
             <p className="mt-2 text-xs sm:text-sm text-slate-600">
@@ -44,20 +44,20 @@ export default function ForgotPasswordPage() {
           </div>
 
           {isSubmitted ? (
-            <div className="rounded-lg bg-[#f0fdf4] border border-[#bbf7d0] p-4 text-center">
-              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#ecfdf5] text-[#007766] mb-3 font-bold">
+            <div className="rounded-lg bg-[#ECFDF5] border border-[#A7F3D0] p-4 text-center">
+              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#ECFDF5] text-[#047857] mb-3 font-bold border border-[#A7F3D0]">
                 ✓
               </div>
-              <h3 className="text-sm font-bold text-[#166534] mb-1">
+              <h3 className="text-sm font-bold text-[#047857] mb-1">
                 تم استلام طلبك
               </h3>
-              <p className="text-xs text-[#14532d] leading-relaxed">
+              <p className="text-xs text-[#047857] leading-relaxed">
                 إذا كان هذا البريد مسجلاً لدينا، فستصلك رسالة تحتوي على رابط مؤقت لتعيين كلمة المرور. يرجى التحقق من صندوق الوارد ومجلد الرسائل غير المرغوب فيها.
               </p>
               <div className="mt-4">
                 <Link
                   href="/login"
-                  className="inline-block text-xs font-semibold text-[#007766] hover:underline"
+                  className="inline-block text-xs font-semibold text-[#2563EB] hover:underline"
                 >
                   العودة لتسجيل الدخول
                 </Link>
@@ -76,14 +76,14 @@ export default function ForgotPasswordPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
                   dir="ltr"
-                  className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
+                  className="w-full rounded-lg border border-[#CBD5E1] px-3.5 py-2.5 text-sm focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full rounded-lg bg-[#007766] py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-[#005f52] disabled:opacity-50 transition-colors cursor-pointer"
+                className="w-full rounded-lg bg-[#2563EB] py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-[#1D4ED8] active:bg-[#1E40AF] disabled:opacity-50 transition-colors cursor-pointer"
               >
                 {isLoading ? "جاري الإرسال..." : "إرسال رابط استعادة كلمة المرور"}
               </button>
@@ -92,7 +92,7 @@ export default function ForgotPasswordPage() {
 
           <div className="mt-6 text-center text-xs text-slate-600">
             تذكرت كلمة المرور؟{" "}
-            <Link href="/login" className="font-bold text-[#007766] hover:text-[#005f52]">
+            <Link href="/login" className="font-bold text-[#2563EB] hover:text-[#1D4ED8]">
               تسجيل الدخول
             </Link>
           </div>

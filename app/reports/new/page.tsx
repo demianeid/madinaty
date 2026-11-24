@@ -7,15 +7,14 @@ import dynamic from "next/dynamic";
 import { useSession } from "@/lib/auth/auth-client";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { Skeleton, NewReportFormSkeleton } from "@/components/ui/skeleton";
 
 const LeafletMap = dynamic(
   () => import("@/components/maps/leaflet-map").then((mod) => mod.LeafletMap),
   {
     ssr: false,
     loading: () => (
-      <div className="h-[340px] w-full rounded-2xl bg-slate-100 flex items-center justify-center text-xs text-slate-400 animate-pulse border border-slate-200">
-        جاري تحميل خريطة البلاغات التفاعلية...
-      </div>
+      <Skeleton className="h-[340px] w-full rounded-2xl" />
     ),
   }
 );
@@ -325,35 +324,39 @@ export default function NewReportPage() {
 
   if (sessionLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
+      <div className="min-h-screen flex flex-col bg-[#F1F5F9]" dir="rtl">
+        <Header />
+        <main className="flex-1 container mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+          <NewReportFormSkeleton />
+        </main>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
+    <div className="min-h-screen flex flex-col bg-[#F1F5F9]">
       <Header />
 
       <main className="flex-1 container mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         {createdReference ? (
           /* Success Screen */
-          <div className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-civic-2">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#ecfdf5] text-[#007766] text-3xl font-bold mb-4">
+          <div className="rounded-xl border border-[#CBD5E1] bg-white p-8 text-center shadow-civic-2">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#ECFDF5] text-[#047857] text-3xl font-bold mb-4">
               ✓
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#142D4E] mb-2">
               تم استلام بلاغك بنجاح!
             </h1>
-            <p className="text-sm text-slate-600 max-w-md mx-auto mb-6">
+            <p className="text-sm text-[#64748B] max-w-md mx-auto mb-6">
               تم توجيه البلاغ للجهة المختصة وفحصه بالذكاء الاصطناعي وبدء إجراءات التدقيق والمتابعة الميدانية.
             </p>
 
-            <div className="mx-auto max-w-xs rounded-lg bg-[#f8fafc] border border-slate-200 p-4 mb-6">
-              <span className="block text-xs font-semibold text-slate-500 mb-1">
+            <div className="mx-auto max-w-xs rounded-lg bg-[#F8FAFC] border border-[#CBD5E1] p-4 mb-6">
+              <span className="block text-xs font-semibold text-[#64748B] mb-1">
                 الرمز المرجعي العام للبلاغ
               </span>
-              <span className="font-mono text-xl font-bold text-[#007766] tracking-wider">
+              <span className="font-mono text-xl font-bold text-[#2563EB] tracking-wider">
                 {createdReference}
               </span>
             </div>
@@ -361,13 +364,13 @@ export default function NewReportPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 href={`/reports/${createdReference}`}
-                className="w-full sm:w-auto rounded-lg bg-[#007766] hover:bg-[#005f52] px-6 py-2.5 text-sm font-semibold text-white transition-colors"
+                className="w-full sm:w-auto rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] px-6 py-2.5 text-sm font-semibold text-white transition-colors"
               >
                 متابعة تفاصيل البلاغ
               </Link>
               <Link
                 href="/dashboard"
-                className="w-full sm:w-auto rounded-lg border border-slate-300 px-6 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                className="w-full sm:w-auto rounded-lg border border-[#CBD5E1] px-6 py-2.5 text-sm font-semibold text-[#142D4E] hover:bg-white transition-colors"
               >
                 العودة للوحة التحكم
               </Link>
@@ -375,21 +378,21 @@ export default function NewReportPage() {
           </div>
         ) : (
           /* Report Creation Form */
-          <div className="rounded-xl border border-slate-200 bg-white p-6 sm:p-10 shadow-civic-1">
+          <div className="rounded-xl border border-[#CBD5E1] bg-white p-6 sm:p-10 shadow-civic-1">
             <div className="mb-8 border-b border-slate-100 pb-4">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-[#ecfdf5] border border-[#dce8e4] px-3 py-1 text-xs font-semibold text-[#007766] mb-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-[#EFF6FF] border border-[#BFDBFE] px-3 py-1 text-xs font-semibold text-[#1D4ED8] mb-2">
                 بلاغ جديد
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#142D4E]">
                 تسجيل بلاغ بلدي أو بيئي
               </h1>
-              <p className="mt-1 text-xs sm:text-sm text-slate-600">
+              <p className="mt-1 text-xs sm:text-sm text-[#64748B]">
                 أدخل تفاصيل المشكلة بدقة وحدد موقعها على الخريطة التفاعلية لتسريع إجراءات المعالجة الميدانية
               </p>
             </div>
 
             {errorMessage && (
-              <div className="mb-6 rounded-lg bg-[#fef2f2] border border-[#fecaca] p-4 text-xs sm:text-sm text-[#dc2626]">
+              <div className="mb-6 rounded-lg bg-[#FEF2F2] border border-[#FECACA] p-4 text-xs sm:text-sm text-[#B91C1C]">
                 {errorMessage}
               </div>
             )}
@@ -397,12 +400,12 @@ export default function NewReportPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Category */}
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                <label className="block text-xs font-bold text-[#142D4E] mb-1.5">
                   تصنيف المشكلة <span className="text-red-500">*</span>
                 </label>
 
                 {categoriesLoading ? (
-                  <div className="h-10 w-full rounded-lg bg-slate-100 animate-pulse" />
+                  <Skeleton className="h-10 w-full rounded-lg" />
                 ) : (
                   <>
                     <select
@@ -416,7 +419,7 @@ export default function NewReportPage() {
                           runMediaPreCheck(uploadedMedia, newCatId);
                         }
                       }}
-                      className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
+                      className="w-full rounded-lg border border-[#CBD5E1] px-3.5 py-2.5 text-sm text-[#142D4E] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
                     >
                       {categories.map((cat) => (
                         <option key={cat.id} value={cat.id}>
@@ -427,11 +430,11 @@ export default function NewReportPage() {
 
                     {/* Auto-Switch Undo Chip */}
                     {categoryAutoSwitch && (
-                      <div className="mt-1.5 flex items-center gap-2 text-[11px] text-slate-500">
-                        <span className="text-sky-600">✦</span>
+                      <div className="mt-1.5 flex items-center gap-2 text-[11px] text-[#64748B]">
+                        <span className="text-[#2563EB]">✦</span>
                         <span>
                           عدّل الذكاء الاصطناعي التصنيف إلى{" "}
-                          <strong className="text-slate-700">«{categoryAutoSwitch.newLabel}»</strong>
+                          <strong className="text-[#142D4E]">«{categoryAutoSwitch.newLabel}»</strong>
                         </span>
                         <button
                           type="button"
@@ -439,7 +442,7 @@ export default function NewReportPage() {
                             setCategoryId(categoryAutoSwitch.prevId);
                             setCategoryAutoSwitch(null);
                           }}
-                          className="text-slate-400 hover:text-rose-500 underline underline-offset-2 transition-colors cursor-pointer"
+                          className="text-[#64748B] hover:text-[#B91C1C] underline underline-offset-2 transition-colors cursor-pointer"
                         >
                           تراجع
                         </button>
@@ -451,7 +454,7 @@ export default function NewReportPage() {
 
               {/* Title */}
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                <label className="block text-xs font-bold text-[#142D4E] mb-1.5">
                   عنوان البلاغ <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -460,15 +463,15 @@ export default function NewReportPage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="مثال: هبوط أسفلتي وتجمع مياه أمام مدرسة الحي"
-                  className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
+                  className="w-full rounded-lg border border-[#CBD5E1] px-3.5 py-2.5 text-sm text-[#142D4E] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                <label className="block text-xs font-bold text-[#142D4E] mb-1.5">
                   الوصف <span className="text-red-500">*</span>{" "}
-                  <span className="font-normal text-slate-400">(5 أحرف على الأقل)</span>
+                  <span className="font-normal text-[#64748B]">(5 أحرف على الأقل)</span>
                 </label>
                 <textarea
                   required
@@ -476,7 +479,7 @@ export default function NewReportPage() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="صف المشكلة باختصار... (مثال: كابل كهرباء مكشوف، حفرة عميقة، بالوعة مكسورة)"
-                  className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#007766] focus:outline-none focus:ring-2 focus:ring-[#007766]/15"
+                  className="w-full rounded-lg border border-[#CBD5E1] px-3.5 py-2.5 text-sm text-[#142D4E] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
                 />
               </div>
 
@@ -510,7 +513,7 @@ export default function NewReportPage() {
                     <button
                       type="button"
                       onClick={() => setShowManualCoords(!showManualCoords)}
-                      className="text-[11px] font-semibold text-slate-500 hover:text-emerald-700 underline cursor-pointer"
+                      className="text-[11px] font-semibold text-[#64748B] hover:text-[#2563EB] underline cursor-pointer"
                     >
                       {showManualCoords ? "إخفاء تفاصيل الإحداثيات اليدوية" : "تعديل الإحداثيات يدوياً"}
                     </button>
@@ -521,7 +524,7 @@ export default function NewReportPage() {
                     value={addressText}
                     onChange={(e) => setAddressText(e.target.value)}
                     placeholder="اسم الشارع، رقم المبنى، أو أقرب معلم مشهور"
-                    className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+                    className="mt-1.5 w-full rounded-xl border border-[#CBD5E1] bg-white px-3.5 py-2 text-sm text-[#142D4E] focus:border-[#2563EB] focus:outline-none"
                   />
 
                   {showManualCoords && (
@@ -730,7 +733,7 @@ export default function NewReportPage() {
                     className={`relative rounded-2xl border-2 border-dashed p-6 text-center transition-colors bg-slate-50/50 ${
                       uploadedMedia.length === 0
                         ? "border-amber-300 hover:border-amber-400"
-                        : "border-slate-300 hover:border-emerald-500"
+                        : "border-[#CBD5E1] hover:border-[#2563EB]"
                     }`}
                   >
                     <input
@@ -780,10 +783,10 @@ export default function NewReportPage() {
                   }
                   className={`rounded-lg px-8 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors cursor-pointer ${
                     mediaValidationState.isInvalid
-                      ? "bg-[#dc2626] hover:bg-[#b91c1c] disabled:opacity-60 cursor-not-allowed"
+                      ? "bg-[#B91C1C] hover:bg-[#991B1B] disabled:opacity-60 cursor-not-allowed"
                       : uploadedMedia.length === 0
                       ? "bg-slate-400 cursor-not-allowed disabled:opacity-70"
-                      : "bg-[#007766] hover:bg-[#005f52] disabled:opacity-50"
+                      : "bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-50"
                   }`}
                 >
                   {isSubmitting

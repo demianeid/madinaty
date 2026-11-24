@@ -7,6 +7,7 @@ import type {
   TileLayer as LeafletTileLayerType,
 } from "leaflet";
 import { ReportStatus } from "@prisma/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface FieldMapReport {
   id: string;
@@ -37,21 +38,25 @@ interface FieldMapProps {
 function statusColor(status: ReportStatus): string {
   switch (status) {
     case ReportStatus.NEW:
-      return "#0284c7"; // Sky blue
+      return "#1D4ED8"; // Primary Blue
+    case ReportStatus.UNDER_REVIEW:
+      return "#B45309"; // Amber
     case ReportStatus.ASSIGNED:
-      return "#7c3aed"; // Violet
+      return "#0369A1"; // Blue/Sky
     case ReportStatus.IN_PROGRESS:
-      return "#d97706"; // Amber
+      return "#3730A3"; // Indigo
     case ReportStatus.WAITING_FOR_RESIDENT:
-      return "#f59e0b"; // Orange
+      return "#92400E"; // Condition Pill Text Amber
     case ReportStatus.RESOLVED:
+      return "#047857"; // Emerald/Green
     case ReportStatus.CLOSED:
-      return "#16a34a"; // Emerald green
-    case ReportStatus.REJECTED:
+      return "#334155"; // Slate Dark
     case ReportStatus.CLOSED_NO_RESPONSE:
-      return "#dc2626"; // Red
+      return "#475569"; // Slate Muted
+    case ReportStatus.REJECTED:
+      return "#B91C1C"; // Red
     default:
-      return "#64748b"; // Slate
+      return "#64748B"; // Neutral Gray
   }
 }
 
@@ -655,13 +660,17 @@ export function FieldMap({
         dir="ltr"
       />
 
+      {!mapReady && (
+        <Skeleton className="absolute inset-0 z-20 w-full h-full rounded-2xl pointer-events-none transition-opacity duration-300" />
+      )}
+
       {/* ── 1. Unified Floating Navigation FAB (Top Left) ── */}
       <div className="absolute top-3.5 left-3.5 z-10 flex flex-col items-center bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-md p-1 gap-1">
         {/* Zoom In */}
         <button
           type="button"
           onClick={() => mapInstanceRef.current?.zoomIn()}
-          className="h-8 w-8 rounded-xl flex items-center justify-center text-slate-700 hover:text-[#007766] hover:bg-[#ecfdf5] active:scale-90 transition-all font-bold text-base cursor-pointer"
+          className="h-8 w-8 rounded-xl flex items-center justify-center text-slate-700 hover:text-[#2563EB] hover:bg-[#EFF6FF] active:scale-90 transition-all font-bold text-base cursor-pointer"
           title="تكبير الخريطة (+)"
           aria-label="تكبير"
         >

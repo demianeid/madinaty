@@ -14,14 +14,13 @@ import { ReportStatus, UserRole } from "@prisma/client";
 import type { FieldMapReport } from "@/components/dashboard/field-map";
 import { OpsReportsTable } from "@/components/dashboard/ops-reports-table";
 import type { OpsReport } from "@/components/dashboard/ops-reports-table";
+import { Skeleton, SkeletonTable, DashboardSkeleton } from "@/components/ui/skeleton";
 
 // Dynamic import – Leaflet is SSR-incompatible
 const FieldMap = dynamic(
   () => import("@/components/dashboard/field-map").then((m) => ({ default: m.FieldMap })),
   { ssr: false, loading: () => (
-    <div className="w-full h-[400px] rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#007766] border-t-transparent" />
-    </div>
+    <Skeleton className="w-full h-[400px] rounded-xl" />
   )}
 );
 
@@ -115,9 +114,12 @@ export default function DashboardPage() {
 
   if (isPending) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50" dir="rtl">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#007766] border-t-transparent" />
-        <p className="mt-4 text-xs text-slate-600 font-semibold">جاري التحقق من الصلاحيات وتهيئة اللوحة...</p>
+      <div className="min-h-screen flex flex-col bg-[#F1F5F9]" dir="rtl">
+        <Header />
+        <main className="flex-1 container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <DashboardSkeleton />
+        </main>
+        <Footer />
       </div>
     );
   }
@@ -180,7 +182,7 @@ export default function DashboardPage() {
                 setSearchQuery(val);
               });
             }}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:border-[#007766] focus:outline-none focus:ring-1 focus:ring-[#007766] w-full sm:w-56"
+            className="rounded-lg border border-[#CBD5E1] bg-white px-3 py-1.5 text-xs text-[#142D4E] placeholder-[#64748B] focus:border-[#2563EB] focus:outline-none focus:ring-1 focus:ring-[#2563EB] w-full sm:w-56"
           />
 
           {/* Category Filter */}
@@ -188,7 +190,7 @@ export default function DashboardPage() {
             aria-label="تصفية حسب التصنيف"
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800 font-medium focus:border-[#007766] focus:ring-1 focus:ring-[#007766] cursor-pointer"
+            className="rounded-lg border border-[#CBD5E1] bg-white px-3 py-1.5 text-xs text-[#142D4E] font-medium focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] cursor-pointer"
           >
             <option value="">كافة التصنيفات</option>
             {categories.map((c) => (
@@ -203,7 +205,7 @@ export default function DashboardPage() {
             aria-label="تصفية حسب الحالة"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800 font-medium focus:border-[#007766] focus:ring-1 focus:ring-[#007766] cursor-pointer"
+            className="rounded-lg border border-[#CBD5E1] bg-white px-3 py-1.5 text-xs text-[#142D4E] font-medium focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] cursor-pointer"
           >
             <option value="">كافة الحالات</option>
             <option value={ReportStatus.NEW}>جديد</option>
@@ -238,10 +240,7 @@ export default function DashboardPage() {
       )}
 
       {reportsLoading ? (
-        <div className="py-16 text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#007766] border-t-transparent mx-auto" />
-          <p className="mt-3 text-xs text-slate-500 font-medium">جاري تحميل البلاغات...</p>
-        </div>
+        <SkeletonTable rows={5} cols={isOperationsRole ? 8 : 7} />
       ) : reports.length === 0 ? (
         <div className="py-16 text-center px-4">
           <div className="h-12 w-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3 text-lg font-bold">
@@ -257,7 +256,7 @@ export default function DashboardPage() {
             <div className="mt-4">
               <Link
                 href="/reports/new"
-                className="inline-flex rounded-lg bg-[#007766] hover:bg-[#005f52] px-4 py-2 text-xs font-bold text-white shadow-xs"
+                className="inline-flex rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] active:bg-[#1E40AF] px-4 py-2 text-xs font-bold text-white shadow-xs"
               >
                 تقديم بلاغك الأول
               </Link>
@@ -281,7 +280,7 @@ export default function DashboardPage() {
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-right text-xs">
-            <thead className="bg-[#f8fafc] text-slate-500 font-semibold border-b border-slate-100">
+            <thead className="bg-[#F1F5F9] text-slate-500 font-semibold border-b border-[#CBD5E1]">
               <tr>
                 <th className="py-3 px-4">رقم البلاغ</th>
                 <th className="py-3 px-4">عنوان المشكلة</th>
@@ -296,11 +295,11 @@ export default function DashboardPage() {
               {reports.map((report) => {
                 const meta = REPORT_STATUS_METADATA[report.status];
                 return (
-                  <tr key={report.id} className="hover:bg-[#f5faf8] transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-[#007766]">
+                  <tr key={report.id} className="hover:bg-[#F1F5F9]/60 transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-[#2563EB]">
                       {report.publicReference}
                     </td>
-                    <td className="py-3 px-4 font-semibold text-slate-900 max-w-xs truncate">
+                    <td className="py-3 px-4 font-semibold text-[#142D4E] max-w-xs truncate">
                       {report.title}
                     </td>
                     <td className="py-3 px-4 text-slate-600">
@@ -312,13 +311,23 @@ export default function DashboardPage() {
                     <td className="py-3 px-4">
                       <span
                         className={`badge-civic-pill ${
-                          report.status === ReportStatus.RESOLVED
-                            ? "badge-civic-success"
-                            : report.status === ReportStatus.REJECTED
-                            ? "badge-civic-danger"
-                            : report.status === ReportStatus.IN_PROGRESS || report.status === ReportStatus.WAITING_FOR_RESIDENT
-                            ? "badge-civic-warning"
-                            : "badge-civic-info"
+                          report.status === ReportStatus.NEW
+                            ? "badge-status-new"
+                            : report.status === ReportStatus.UNDER_REVIEW
+                            ? "badge-status-under-review"
+                            : report.status === ReportStatus.ASSIGNED
+                            ? "badge-status-assigned"
+                            : report.status === ReportStatus.IN_PROGRESS
+                            ? "badge-status-in-progress"
+                            : report.status === ReportStatus.WAITING_FOR_RESIDENT
+                            ? "badge-workflow-condition"
+                            : report.status === ReportStatus.RESOLVED
+                            ? "badge-status-resolved"
+                            : report.status === ReportStatus.CLOSED
+                            ? "badge-status-closed"
+                            : report.status === ReportStatus.CLOSED_NO_RESPONSE
+                            ? "badge-status-closed-no-response"
+                            : "badge-status-rejected"
                         }`}
                       >
                         {meta?.labelAr || report.status}
@@ -330,7 +339,7 @@ export default function DashboardPage() {
                     <td className="py-3 px-4 text-center">
                       <Link
                         href={`/reports/${report.id}`}
-                        className="inline-flex rounded-md border border-slate-200 bg-white px-3 py-1 font-semibold text-slate-700 hover:bg-[#ecfdf5] hover:text-[#007766] transition-colors"
+                        className="inline-flex rounded-md border border-[#CBD5E1] bg-white px-3 py-1 font-semibold text-slate-700 hover:bg-[#EFF6FF] hover:text-[#2563EB] transition-colors"
                       >
                         عرض التفاصيل
                       </Link>
@@ -423,44 +432,44 @@ export default function DashboardPage() {
                 type="button"
                 onClick={() => setStatusFilter("")}
                 className={`text-right rounded-xl border p-4 transition-all cursor-pointer ${
-                  statusFilter === "" ? "border-[#007766] bg-[#ecfdf5]/50 shadow-xs" : "border-slate-200 bg-white hover:border-slate-300"
+                  statusFilter === "" ? "border-[#2563EB] bg-[#EFF6FF]/60 shadow-xs" : "border-[#CBD5E1] bg-white hover:border-slate-300"
                 }`}
               >
                 <span className="text-xs font-bold text-slate-500">إجمالي البلاغات المسندة</span>
-                <p className="text-xl sm:text-2xl font-black text-slate-900 mt-1 font-mono">{totalCount}</p>
+                <p className="text-xl sm:text-2xl font-black text-[#142D4E] mt-1 font-mono">{totalCount}</p>
               </button>
 
               <button
                 type="button"
                 onClick={() => setStatusFilter("IN_PROGRESS")}
                 className={`text-right rounded-xl border p-4 transition-all cursor-pointer ${
-                  statusFilter === "IN_PROGRESS" ? "border-amber-500 bg-amber-50/50 shadow-xs" : "border-slate-200 bg-white hover:border-slate-300"
+                  statusFilter === "IN_PROGRESS" ? "border-[#C7D2FE] bg-[#EEF2FF] shadow-xs" : "border-[#CBD5E1] bg-white hover:border-slate-300"
                 }`}
               >
-                <span className="text-xs font-bold text-amber-700">قيد العمل الميداني</span>
-                <p className="text-xl sm:text-2xl font-black text-amber-900 mt-1 font-mono">{inProgressCount}</p>
+                <span className="text-xs font-bold text-[#3730A3]">قيد العمل الميداني</span>
+                <p className="text-xl sm:text-2xl font-black text-[#3730A3] mt-1 font-mono">{inProgressCount}</p>
               </button>
 
               <button
                 type="button"
                 onClick={() => setStatusFilter("WAITING_FOR_RESIDENT")}
                 className={`text-right rounded-xl border p-4 transition-all cursor-pointer ${
-                  statusFilter === "WAITING_FOR_RESIDENT" ? "border-orange-500 bg-orange-50/50 shadow-xs" : "border-slate-200 bg-white hover:border-slate-300"
+                  statusFilter === "WAITING_FOR_RESIDENT" ? "border-[#FDE68A] bg-[#FEF3C7] shadow-xs" : "border-[#CBD5E1] bg-white hover:border-slate-300"
                 }`}
               >
-                <span className="text-xs font-bold text-orange-700">بانتظار رد المواطن</span>
-                <p className="text-xl sm:text-2xl font-black text-orange-900 mt-1 font-mono">{waitingCount}</p>
+                <span className="text-xs font-bold text-[#92400E]">بانتظار رد المواطن</span>
+                <p className="text-xl sm:text-2xl font-black text-[#92400E] mt-1 font-mono">{waitingCount}</p>
               </button>
 
               <button
                 type="button"
                 onClick={() => setStatusFilter("RESOLVED")}
                 className={`text-right rounded-xl border p-4 transition-all cursor-pointer ${
-                  statusFilter === "RESOLVED" ? "border-emerald-500 bg-emerald-50/50 shadow-xs" : "border-slate-200 bg-white hover:border-slate-300"
+                  statusFilter === "RESOLVED" ? "border-[#A7F3D0] bg-[#ECFDF5] shadow-xs" : "border-[#CBD5E1] bg-white hover:border-slate-300"
                 }`}
               >
-                <span className="text-xs font-bold text-emerald-700">تمت المعالجة والإصلاح</span>
-                <p className="text-xl sm:text-2xl font-black text-emerald-900 mt-1 font-mono">{resolvedCount}</p>
+                <span className="text-xs font-bold text-[#047857]">تمت المعالجة والإصلاح</span>
+                <p className="text-xl sm:text-2xl font-black text-[#047857] mt-1 font-mono">{resolvedCount}</p>
               </button>
             </div>
 
@@ -469,15 +478,15 @@ export default function DashboardPage() {
               {/* Section header with toggle */}
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-lg bg-[#ecfdf5] border border-[#007766]/20 flex items-center justify-center">
-                    <svg className="h-4 w-4 text-[#007766]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <div className="h-7 w-7 rounded-lg bg-[#EFF6FF] border border-[#BFDBFE] flex items-center justify-center">
+                    <svg className="h-4 w-4 text-[#2563EB]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 20.25l-6.75-6.75a1.5 1.5 0 010-2.12L9 4.5m6 15.75l6.75-6.75a1.5 1.5 0 000-2.12L15 4.5" />
                       <circle cx="12" cy="10" r="2.25" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </div>
                   <div>
-                    <h2 className="text-sm font-bold text-slate-900">الخريطة الميدانية</h2>
-                    <p className="text-[11px] text-slate-500">التوزيع الجغرافي للبلاغات على خريطة مدينتي</p>
+                    <h2 className="text-sm font-bold text-[#142D4E]">الخريطة الميدانية</h2>
+                    <p className="text-[11px] text-[#64748B]">التوزيع الجغرافي للبلاغات على خريطة مدينتي</p>
                   </div>
                 </div>
                 <button
@@ -521,12 +530,12 @@ export default function DashboardPage() {
   // VIEW 2: CITIZEN FRIENDLY PORTAL (TOP NAV CONTAINER LAYOUT)
   // -------------------------------------------------------------
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50" dir="rtl">
+    <div className="min-h-screen flex flex-col bg-[#F1F5F9]" dir="rtl">
       <Header />
 
       <main className="flex-1 container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Welcome Banner */}
-        <div className="rounded-2xl bg-gradient-to-l from-[#005c4f] via-[#007766] to-[#0f172a] p-6 sm:p-8 text-white shadow-civic-2 mb-8">
+        <div className="rounded-2xl bg-gradient-to-l from-[#1D4ED8] via-[#2563EB] to-[#142D4E] p-6 sm:p-8 text-white shadow-civic-2 mb-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 border border-white/20 px-3 py-1 text-xs font-semibold text-white mb-3">
@@ -536,7 +545,7 @@ export default function DashboardPage() {
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                 أهلاً بك، {session.user.name || session.user.email}
               </h1>
-              <p className="mt-1 text-xs sm:text-sm text-emerald-100/90">
+              <p className="mt-1 text-xs sm:text-sm text-blue-100/90">
                 متابعة بلاغاتك وتحديثات المعالجة والإصلاح الميداني للأحياء
               </p>
             </div>
@@ -544,7 +553,7 @@ export default function DashboardPage() {
             <div className="flex flex-wrap items-center gap-2">
               <Link
                 href="/reports/new"
-                className="rounded-lg bg-white px-4 py-2.5 text-xs font-bold text-[#005c4f] hover:bg-[#ecfdf5] transition-colors shadow-xs"
+                className="rounded-lg bg-white px-4 py-2.5 text-xs font-bold text-[#2563EB] hover:bg-[#EFF6FF] transition-colors shadow-xs"
               >
                 + تقديم بلاغ جديد
               </Link>
@@ -560,24 +569,24 @@ export default function DashboardPage() {
 
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-civic-1">
-            <span className="text-xs font-bold text-slate-500">إجمالي البلاغات</span>
-            <p className="text-2xl font-black text-slate-900 mt-1 font-mono">{totalCount}</p>
+          <div className="rounded-xl border border-[#CBD5E1] bg-white p-5 shadow-civic-1">
+            <span className="text-xs font-bold text-[#64748B]">إجمالي البلاغات</span>
+            <p className="text-2xl font-black text-[#142D4E] mt-1 font-mono">{totalCount}</p>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-civic-1">
-            <span className="text-xs font-bold text-[#d97706]">قيد المعالجة الميدانية</span>
-            <p className="text-2xl font-black text-[#b45309] mt-1 font-mono">{inProgressCount}</p>
+          <div className="rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] p-5 shadow-civic-1">
+            <span className="text-xs font-bold text-[#1D4ED8]">قيد المعالجة الميدانية</span>
+            <p className="text-2xl font-black text-[#1D4ED8] mt-1 font-mono">{inProgressCount}</p>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-civic-1">
-            <span className="text-xs font-bold text-[#16a34a]">تم الإصلاح والمعالجة</span>
-            <p className="text-2xl font-black text-[#15803d] mt-1 font-mono">{resolvedCount}</p>
+          <div className="rounded-xl border border-[#A7F3D0] bg-[#ECFDF5] p-5 shadow-civic-1">
+            <span className="text-xs font-bold text-[#047857]">تم الإصلاح والمعالجة</span>
+            <p className="text-2xl font-black text-[#047857] mt-1 font-mono">{resolvedCount}</p>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-civic-1">
-            <span className="text-xs font-bold text-[#d97706]">بانتظار توضيحي</span>
-            <p className="text-2xl font-black text-[#b45309] mt-1 font-mono">{waitingCount}</p>
+          <div className="rounded-xl border border-[#FDE68A] bg-[#FFFBEB] p-5 shadow-civic-1">
+            <span className="text-xs font-bold text-[#B45309]">بانتظار توضيحي</span>
+            <p className="text-2xl font-black text-[#92400E] mt-1 font-mono">{waitingCount}</p>
           </div>
         </div>
 

@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Skeleton, SkeletonAvatar, SkeletonBadge } from "@/components/ui/skeleton";
 
 export interface NotificationItem {
   id: string;
@@ -38,6 +39,7 @@ export function NotificationBell() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const fetchNotifications = useCallback(async () => {
@@ -68,7 +70,9 @@ export function NotificationBell() {
       }
     }
 
-    load();
+    load().finally(() => {
+      if (isMounted) setIsInitialLoading(false);
+    });
 
     // Poll every 30 seconds for background notification updates
     const interval = setInterval(load, 30000);
@@ -175,11 +179,11 @@ export function NotificationBell() {
           dir="rtl"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 bg-slate-50/60">
+          <div className="flex items-center justify-between border-b border-[#CBD5E1] px-4 py-3 bg-[#F1F5F9]/60">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-sm text-slate-900">مركز الإشعارات</span>
+              <span className="font-bold text-sm text-[#142D4E]">مركز الإشعارات</span>
               {unreadCount > 0 && (
-                <span className="rounded-full bg-[#ecfdf5] border border-[#dce8e4] text-[#007766] text-[10px] font-bold px-2 py-0.5">
+                <span className="rounded-full bg-[#EFF6FF] border border-[#BFDBFE] text-[#1D4ED8] text-[10px] font-bold px-2 py-0.5">
                   {unreadCount} جديد
                 </span>
               )}
@@ -189,7 +193,7 @@ export function NotificationBell() {
                 type="button"
                 onClick={handleMarkAllAsRead}
                 disabled={isLoading}
-                className="text-xs font-semibold text-[#007766] hover:text-[#005f52] hover:underline cursor-pointer disabled:opacity-50"
+                className="text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8] hover:underline cursor-pointer disabled:opacity-50"
               >
                 تحديد الكل كمقروء
               </button>
@@ -198,7 +202,22 @@ export function NotificationBell() {
 
           {/* List */}
           <div className="max-h-[360px] overflow-y-auto divide-y divide-slate-100">
-            {notifications.length === 0 ? (
+            {isInitialLoading ? (
+              <div className="p-3 space-y-3" aria-busy="true">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="p-2 flex items-start gap-3">
+                    <SkeletonAvatar size={28} rounded="full" />
+                    <div className="flex-1 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <Skeleton className="h-3.5 w-1/2 rounded-sm" />
+                        <Skeleton className="h-3 w-12 rounded-sm" />
+                      </div>
+                      <Skeleton className="h-3 w-3/4 rounded-sm" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : notifications.length === 0 ? (
               <div className="p-8 text-center text-slate-400">
                 <div className="text-3xl mb-2">🔔</div>
                 <p className="text-xs font-semibold">لا توجد إشعارات حالياً</p>
@@ -214,12 +233,12 @@ export function NotificationBell() {
                     key={n.id}
                     onClick={() => handleMarkAsRead(n.id, n.reportId)}
                     className={`p-3.5 flex items-start gap-3 transition-colors cursor-pointer hover:bg-slate-50 ${
-                      isUnread ? "bg-[#f5faf8]" : "bg-white"
+                      isUnread ? "bg-[#EFF6FF]/40" : "bg-white"
                     }`}
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <p className={`text-xs truncate ${isUnread ? "font-bold text-slate-900" : "font-medium text-slate-700"}`}>
+                        <p className={`text-xs truncate ${isUnread ? "font-bold text-[#142D4E]" : "font-medium text-slate-700"}`}>
                           {n.title}
                         </p>
                         <span className="text-[10px] text-slate-400 shrink-0 font-medium">
@@ -238,7 +257,7 @@ export function NotificationBell() {
                       )}
                     </div>
                     {isUnread && (
-                      <span className="h-2 w-2 rounded-full bg-[#007766] shrink-0 mt-1.5" />
+                      <span className="h-2 w-2 rounded-full bg-[#2563EB] shrink-0 mt-1.5" />
                     )}
                   </div>
                 );
@@ -247,11 +266,11 @@ export function NotificationBell() {
           </div>
 
           {/* Footer */}
-          <div className="border-t border-slate-100 p-2.5 bg-slate-50/50 text-center">
+          <div className="border-t border-[#CBD5E1] p-2.5 bg-[#F1F5F9]/50 text-center">
             <Link
               href="/notifications"
               onClick={() => setIsOpen(false)}
-              className="text-xs font-bold text-[#007766] hover:text-[#005f52] transition-colors"
+              className="text-xs font-bold text-[#2563EB] hover:text-[#1D4ED8] transition-colors"
             >
               عرض جميع الإشعارات والسجل الكامل ←
             </Link>
