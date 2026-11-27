@@ -5,26 +5,30 @@
   --font-logo: var(--font-aref-ruqaa), "Aref Ruqaa", serif;
 
   /* ========================================================
-     Approved Core Brand & Neutral Colors
+     Approved Core Brand & Neutral Colors (Unified Oceanic Cyan)
   ======================================================== */
   --color-deep-navy: #142D4E;
-  --color-primary-blue: #2563EB;
-  --color-primary-blue-hover: #1D4ED8;
-  --color-primary-blue-active: #1E40AF;
-  --color-teal-accent: #0D9488;
-  --color-teal-accessible-text: #0F766E;
-  --color-light-bg: #F1F5F9;
+  --color-primary-cyan: #0891B2;
+  --color-primary-cyan-hover: #0E7490;
+  --color-primary-cyan-active: #155E75;
+  --color-primary-cyan-subtle: #ECFEFF;
+  --color-primary-blue: #0891B2;
+  --color-primary-blue-hover: #0E7490;
+  --color-primary-blue-active: #155E75;
+  --color-teal-accent: #0891B2;
+  --color-teal-accessible-text: #0E7490;
+  --color-light-bg: #F8FAFC;
   --color-white-surface: #FFFFFF;
   --color-neutral-gray: #64748B;
   --color-interactive-border: #64748B;
-  --color-subtle-border: #CBD5E1;
+  --color-subtle-border: #E2E8F0;
 
   /* ========================================================
      Official Report Status Colors (8 Lifecycle States)
   ======================================================== */
-  --color-status-new-bg: #EFF6FF;
-  --color-status-new-text: #1D4ED8;
-  --color-status-new-border: #BFDBFE;
+  --color-status-new-bg: #ECFEFF;
+  --color-status-new-text: #0E7490;
+  --color-status-new-border: #A5F3FC;
 
   --color-status-under-review-bg: #FFFBEB;
   --color-status-under-review-text: #B45309;
@@ -98,23 +102,28 @@
   --foreground: #F8FAFC;
   --card: #FFFFFF;
   --card-foreground: #142D4E;
-  --primary: #2563EB;
+  --primary: #0891B2;
   --primary-foreground: #FFFFFF;
-  --primary-hover: #1D4ED8;
-  --primary-active: #1E40AF;
+  --primary-hover: #0E7490;
+  --primary-active: #155E75;
   --secondary: #142D4E;
   --secondary-foreground: #FFFFFF;
-  --muted: #F1F5F9;
+  --muted: #F8FAFC;
   --muted-foreground: #64748B;
-  --accent: #0D9488;
+  --accent: #0891B2;
   --accent-foreground: #FFFFFF;
-  --accent-text: #0F766E;
+  --accent-text: #0E7490;
   --destructive: #dc2626;
   --destructive-foreground: #FFFFFF;
-  --border: #CBD5E1;
+  --border: #E2E8F0;
   --border-interactive: #64748B;
-  --border-muted: #CBD5E1;
-  --ring: #2563EB;
+  --border-muted: #E2E8F0;
+  --ring: #0891B2;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
 }
 
 body {
@@ -142,7 +151,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background-color: #2563EB;
+  background-color: #0891B2;
   color: #FFFFFF;
   font-weight: 600;
   font-size: 0.875rem;
@@ -153,13 +162,13 @@ body {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 .btn-civic-primary:hover {
-  background-color: #1D4ED8;
+  background-color: #0E7490;
 }
 .btn-civic-primary:active {
-  background-color: #1E40AF;
+  background-color: #155E75;
 }
 .btn-civic-primary:focus-visible {
-  outline: 2px solid #2563EB;
+  outline: 2px solid #0891B2;
   outline-offset: 2px;
 }
 
@@ -178,7 +187,7 @@ body {
   transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-civic-secondary:hover {
-  background-color: #1E40AF;
+  background-color: #0E7490;
 }
 
 .btn-civic-subtle {
@@ -186,18 +195,18 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background-color: #EFF6FF;
-  color: #1D4ED8;
+  background-color: #ECFEFF;
+  color: #0891B2;
   font-weight: 600;
   font-size: 0.875rem;
   height: 2.625rem;
   padding: 0 1.25rem;
-  border: 1px solid #BFDBFE;
+  border: 1px solid #A5F3FC;
   border-radius: 0.5rem;
   transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-civic-subtle:hover {
-  background-color: #DBEAFE;
+  background-color: #CFFAFE;
 }
 
 .input-civic {
@@ -212,8 +221,8 @@ body {
 }
 .input-civic:focus {
   outline: none;
-  border-color: #2563EB;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  border-color: #0891B2;
+  box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.15);
 }
 .input-civic::placeholder {
   color: #64748B;
@@ -292,12 +301,12 @@ body {
 ======================================================== */
 /* 1. NEW */
 .badge-status-new {
-  background-color: #EFF6FF;
-  color: #1D4ED8;
-  border: 1px solid #BFDBFE;
+  background-color: #ECFEFF;
+  color: #0E7490;
+  border: 1px solid #A5F3FC;
 }
 .badge-status-new::before {
-  background-color: #1D4ED8;
+  background-color: #0891B2;
 }
 
 /* 2. UNDER_REVIEW */

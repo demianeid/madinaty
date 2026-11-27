@@ -92,7 +92,7 @@ function TrackContent() {
       <main className="flex-1 container mx-auto max-w-4xl px-4 py-8">
         {/* Breadcrumb */}
         <div className="mb-6 flex items-center gap-2 text-xs font-semibold text-slate-300">
-          <Link href="/" className="hover:text-blue-400 transition-colors">
+          <Link href="/" className="hover:text-[#0891B2] transition-colors">
             الرئيسية
           </Link>
           <span>/</span>
@@ -100,16 +100,16 @@ function TrackContent() {
         </div>
 
         {/* Search Header Card */}
-        <div className="rounded-xl border border-[#CBD5E1] bg-white p-6 sm:p-8 shadow-civic-1 mb-8">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-sm mb-8">
           <div className="text-center max-w-xl mx-auto mb-6">
-            <div className="inline-flex items-center gap-2 rounded-full bg-[#EFF6FF] border border-[#BFDBFE] px-3.5 py-1 text-xs font-semibold text-[#1D4ED8] mb-3">
+            <div className="inline-flex items-center gap-2 rounded-full bg-cyan-50 border border-cyan-200/80 px-3.5 py-1 text-xs font-semibold text-[#0891B2] mb-3">
               <span>🔎</span>
               <span>بوابة الاستعلام والشفافية العامة</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#142D4E] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight">
               تتبع حالة بلاغك البلدي
             </h1>
-            <p className="text-xs sm:text-sm text-[#64748B] mt-1.5 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-500 mt-1.5 leading-relaxed">
               أدخل الرمز المرجعي العام للبلاغ للاطلاع على سير المعالجة الميدانية وقرارات الجهات المختصة
             </p>
           </div>
@@ -122,13 +122,13 @@ function TrackContent() {
                 value={referenceInput}
                 onChange={(e) => setReferenceInput(e.target.value)}
                 placeholder="MD-XXXX-XXXX"
-                className="w-full uppercase font-mono tracking-wider rounded-lg border border-[#CBD5E1] px-4 py-2.5 text-sm text-center font-bold text-[#142D4E] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
+                className="w-full uppercase font-mono tracking-wider rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-center font-bold text-[#142D4E] focus:border-[#0891B2] focus:outline-none focus:ring-2 focus:ring-[#0891B2]/20"
                 required
               />
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full sm:w-auto whitespace-nowrap rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] px-6 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
+                className="w-full sm:w-auto whitespace-nowrap rounded-xl bg-[#0891B2] hover:bg-[#0E7490] active:bg-[#155E75] px-6 py-2.5 text-sm font-bold text-white shadow-sm transition-all disabled:opacity-50 cursor-pointer"
               >
                 {isLoading ? "جاري البحث..." : "استعلام"}
               </button>
@@ -156,7 +156,7 @@ function TrackContent() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
                 <div>
                   <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <span className="font-mono text-xs sm:text-sm font-bold text-[#2563EB] bg-[#EFF6FF] px-3 py-1 rounded-md border border-[#BFDBFE]">
+                    <span className="font-mono text-xs sm:text-sm font-bold text-[#0891B2] bg-cyan-50 px-3 py-1 rounded-md border border-cyan-200">
                       #{report.publicReference}
                     </span>
                     <span
@@ -186,7 +186,7 @@ function TrackContent() {
                       {report.category.labelAr}
                     </span>
                     {report.authority && (
-                      <span className="rounded-md bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE] px-2.5 py-0.5 text-xs font-medium">
+                      <span className="rounded-md bg-cyan-50 text-[#0891B2] border border-cyan-200 px-2.5 py-0.5 text-xs font-medium">
                         {report.authority.nameAr}
                       </span>
                     )}
@@ -270,7 +270,7 @@ function TrackContent() {
                   const stepMeta = REPORT_STATUS_METADATA[step.toStatus];
                   return (
                     <div key={idx} className="flex items-start gap-3">
-                      <div className="h-6 w-6 rounded-full bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 font-mono">
+                      <div className="h-6 w-6 rounded-full bg-cyan-50 text-[#0891B2] border border-cyan-200 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 font-mono">
                         {idx + 1}
                       </div>
                       <div className="flex-1 bg-[#F8FAFC] rounded-lg p-3 border border-[#CBD5E1]">

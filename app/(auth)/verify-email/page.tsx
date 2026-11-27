@@ -52,7 +52,7 @@ function VerifyEmailContent() {
 
       {isLoading ? (
         <div className="py-8">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-[#2563EB] border-t-transparent" />
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-[#0891B2] border-t-transparent" />
           <p className="mt-4 text-sm text-slate-600">جاري التحقق من صحة الرابط...</p>
         </div>
       ) : isSuccess ? (
@@ -63,7 +63,7 @@ function VerifyEmailContent() {
           <div className="mt-4">
             <Link
               href="/dashboard"
-              className="inline-block rounded-lg bg-[#2563EB] px-6 py-2 text-xs font-semibold text-white hover:bg-[#1D4ED8] active:bg-[#1E40AF] transition-colors"
+              className="inline-block rounded-xl bg-[#0891B2] px-6 py-2 text-xs font-bold text-white hover:bg-[#0E7490] active:bg-[#155E75] transition-colors"
             >
               الانتقال إلى لوحة التحكم
             </Link>
@@ -75,7 +75,7 @@ function VerifyEmailContent() {
           <div className="mt-4">
             <Link
               href="/login"
-              className="inline-block text-xs font-semibold text-[#2563EB] underline"
+              className="inline-block text-xs font-semibold text-[#0891B2] underline"
             >
               العودة لتسجيل الدخول
             </Link>
@@ -89,7 +89,7 @@ function VerifyEmailContent() {
           <div className="mt-6">
             <Link
               href="/dashboard"
-              className="text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8]"
+              className="text-xs font-semibold text-[#0891B2] hover:text-[#0E7490]"
             >
               الانتقال للوحة التحكم
             </Link>

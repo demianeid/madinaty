@@ -182,7 +182,7 @@ export default function DashboardPage() {
                 setSearchQuery(val);
               });
             }}
-            className="rounded-lg border border-[#CBD5E1] bg-white px-3 py-1.5 text-xs text-[#142D4E] placeholder-[#64748B] focus:border-[#2563EB] focus:outline-none focus:ring-1 focus:ring-[#2563EB] w-full sm:w-56"
+            className="rounded-lg border border-[#CBD5E1] bg-white px-3 py-1.5 text-xs text-[#142D4E] placeholder-[#64748B] focus:border-[#0891B2] focus:outline-none focus:ring-1 focus:ring-[#0891B2] w-full sm:w-56"
           />
 
           {/* Category Filter */}
@@ -190,7 +190,7 @@ export default function DashboardPage() {
             aria-label="تصفية حسب التصنيف"
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="rounded-lg border border-[#CBD5E1] bg-white px-3 py-1.5 text-xs text-[#142D4E] font-medium focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] cursor-pointer"
+            className="rounded-lg border border-[#CBD5E1] bg-white px-3 py-1.5 text-xs text-[#142D4E] font-medium focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] cursor-pointer"
           >
             <option value="">كافة التصنيفات</option>
             {categories.map((c) => (
@@ -205,7 +205,7 @@ export default function DashboardPage() {
             aria-label="تصفية حسب الحالة"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-lg border border-[#CBD5E1] bg-white px-3 py-1.5 text-xs text-[#142D4E] font-medium focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] cursor-pointer"
+            className="rounded-lg border border-[#CBD5E1] bg-white px-3 py-1.5 text-xs text-[#142D4E] font-medium focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] cursor-pointer"
           >
             <option value="">كافة الحالات</option>
             <option value={ReportStatus.NEW}>جديد</option>
@@ -256,7 +256,7 @@ export default function DashboardPage() {
             <div className="mt-4">
               <Link
                 href="/reports/new"
-                className="inline-flex rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] active:bg-[#1E40AF] px-4 py-2 text-xs font-bold text-white shadow-xs"
+                className="inline-flex rounded-xl bg-[#0891B2] hover:bg-[#0E7490] active:bg-[#155E75] px-4 py-2 text-xs font-bold text-white shadow-xs transition-colors"
               >
                 تقديم بلاغك الأول
               </Link>
@@ -296,7 +296,7 @@ export default function DashboardPage() {
                 const meta = REPORT_STATUS_METADATA[report.status];
                 return (
                   <tr key={report.id} className="hover:bg-[#F1F5F9]/60 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-[#2563EB]">
+                    <td className="py-3 px-4 font-mono font-bold text-[#0891B2]">
                       {report.publicReference}
                     </td>
                     <td className="py-3 px-4 font-semibold text-[#142D4E] max-w-xs truncate">
@@ -339,7 +339,7 @@ export default function DashboardPage() {
                     <td className="py-3 px-4 text-center">
                       <Link
                         href={`/reports/${report.id}`}
-                        className="inline-flex rounded-md border border-[#CBD5E1] bg-white px-3 py-1 font-semibold text-slate-700 hover:bg-[#EFF6FF] hover:text-[#2563EB] transition-colors"
+                        className="inline-flex rounded-lg border border-slate-200 bg-white px-3 py-1 font-semibold text-slate-700 hover:bg-cyan-50 hover:text-[#0891B2] hover:border-cyan-200 transition-colors"
                       >
                         عرض التفاصيل
                       </Link>
@@ -412,7 +412,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <NotificationBell />
+              <NotificationBell variant="light" />
 
               <div className="flex items-center gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-2.5 py-1 text-xs">
                 <span className="font-semibold text-slate-700 hidden sm:inline">{session.user.name || session.user.email}</span>
@@ -432,7 +432,7 @@ export default function DashboardPage() {
                 type="button"
                 onClick={() => setStatusFilter("")}
                 className={`text-right rounded-xl border p-4 transition-all cursor-pointer ${
-                  statusFilter === "" ? "border-[#2563EB] bg-[#EFF6FF]/60 shadow-xs" : "border-[#CBD5E1] bg-white hover:border-slate-300"
+                  statusFilter === "" ? "border-[#0891B2] bg-cyan-50/60 shadow-xs" : "border-[#CBD5E1] bg-white hover:border-slate-300"
                 }`}
               >
                 <span className="text-xs font-bold text-slate-500">إجمالي البلاغات المسندة</span>
@@ -478,8 +478,8 @@ export default function DashboardPage() {
               {/* Section header with toggle */}
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-lg bg-[#EFF6FF] border border-[#BFDBFE] flex items-center justify-center">
-                    <svg className="h-4 w-4 text-[#2563EB]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <div className="h-7 w-7 rounded-lg bg-cyan-50 border border-cyan-200 flex items-center justify-center">
+                    <svg className="h-4 w-4 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 20.25l-6.75-6.75a1.5 1.5 0 010-2.12L9 4.5m6 15.75l6.75-6.75a1.5 1.5 0 000-2.12L15 4.5" />
                       <circle cx="12" cy="10" r="2.25" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -535,7 +535,7 @@ export default function DashboardPage() {
 
       <main className="flex-1 container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Welcome Banner */}
-        <div className="rounded-2xl bg-gradient-to-l from-[#1D4ED8] via-[#2563EB] to-[#142D4E] p-6 sm:p-8 text-white shadow-civic-2 mb-8">
+        <div className="rounded-2xl bg-gradient-to-l from-[#0E7490] via-[#0891B2] to-[#142D4E] p-6 sm:p-8 text-white shadow-civic-2 mb-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 border border-white/20 px-3 py-1 text-xs font-semibold text-white mb-3">
@@ -545,7 +545,7 @@ export default function DashboardPage() {
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                 أهلاً بك، {session.user.name || session.user.email}
               </h1>
-              <p className="mt-1 text-xs sm:text-sm text-blue-100/90">
+              <p className="mt-1 text-xs sm:text-sm text-cyan-100/90">
                 متابعة بلاغاتك وتحديثات المعالجة والإصلاح الميداني للأحياء
               </p>
             </div>
@@ -553,13 +553,13 @@ export default function DashboardPage() {
             <div className="flex flex-wrap items-center gap-2">
               <Link
                 href="/reports/new"
-                className="rounded-lg bg-white px-4 py-2.5 text-xs font-bold text-[#2563EB] hover:bg-[#EFF6FF] transition-colors shadow-xs"
+                className="rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-[#0891B2] hover:bg-cyan-50 transition-colors shadow-xs"
               >
                 + تقديم بلاغ جديد
               </Link>
               <button
                 onClick={() => signOut()}
-                className="rounded-lg border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white hover:bg-white/20 transition-colors cursor-pointer"
+                className="rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white hover:bg-white/20 transition-colors cursor-pointer"
               >
                 تسجيل الخروج
               </button>
@@ -574,9 +574,9 @@ export default function DashboardPage() {
             <p className="text-2xl font-black text-[#142D4E] mt-1 font-mono">{totalCount}</p>
           </div>
 
-          <div className="rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] p-5 shadow-civic-1">
-            <span className="text-xs font-bold text-[#1D4ED8]">قيد المعالجة الميدانية</span>
-            <p className="text-2xl font-black text-[#1D4ED8] mt-1 font-mono">{inProgressCount}</p>
+          <div className="rounded-xl border border-cyan-200 bg-cyan-50 p-5 shadow-civic-1">
+            <span className="text-xs font-bold text-[#0891B2]">قيد المعالجة الميدانية</span>
+            <p className="text-2xl font-black text-[#0891B2] mt-1 font-mono">{inProgressCount}</p>
           </div>
 
           <div className="rounded-xl border border-[#A7F3D0] bg-[#ECFDF5] p-5 shadow-civic-1">

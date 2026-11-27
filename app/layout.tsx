@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl" className={`${ibmPlexSansArabic.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans bg-[#0B1E38] text-slate-100 selection:bg-[#2563EB] selection:text-white relative">
+      <body className="min-h-full flex flex-col font-sans bg-[#0B1E38] text-slate-100 selection:bg-[#0891B2] selection:text-white relative">
         <WebsiteBackground />
         {children}
       </body>

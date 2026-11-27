@@ -79,7 +79,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
                 dir="ltr"
-                className="w-full rounded-lg border border-[#CBD5E1] px-3.5 py-2.5 text-sm focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
+                className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#0891B2] focus:outline-none focus:ring-2 focus:ring-[#0891B2]/20"
               />
             </div>
 
@@ -90,7 +90,7 @@ export default function LoginPage() {
                 </label>
                 <Link
                   href="/forgot-password"
-                  className="text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8]"
+                  className="text-xs font-semibold text-[#0891B2] hover:text-[#0E7490]"
                 >
                   نسيت كلمة المرور؟
                 </Link>
@@ -102,14 +102,14 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 dir="ltr"
-                className="w-full rounded-lg border border-[#CBD5E1] px-3.5 py-2.5 text-sm focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
+                className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#0891B2] focus:outline-none focus:ring-2 focus:ring-[#0891B2]/20"
               />
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-lg bg-[#2563EB] py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-[#1D4ED8] active:bg-[#1E40AF] disabled:opacity-50 transition-colors cursor-pointer"
+              className="w-full rounded-xl bg-[#0891B2] py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#0E7490] active:bg-[#155E75] disabled:opacity-50 transition-colors cursor-pointer"
             >
               {isLoading ? "جاري التحقق..." : "تسجيل الدخول"}
             </button>
@@ -117,7 +117,7 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center text-xs text-slate-600">
             ليس لديك حساب بعد؟{" "}
-            <Link href="/register" className="font-bold text-[#2563EB] hover:text-[#1D4ED8]">
+            <Link href="/register" className="font-bold text-[#0891B2] hover:text-[#0E7490]">
               إنشاء حساب مواطن جديد
             </Link>
           </div>

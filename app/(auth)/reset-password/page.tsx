@@ -82,7 +82,7 @@ export default function ResetPasswordPage() {
                 سيتم توجيهك إلى صفحة تسجيل الدخول خلال لحظات...
               </p>
               <div className="mt-4">
-                <Link href="/login" className="text-xs font-semibold text-[#2563EB] underline">
+                <Link href="/login" className="text-xs font-semibold text-[#0891B2] underline">
                   الانتقال لتسجيل الدخول مباشرة
                 </Link>
               </div>
@@ -100,7 +100,7 @@ export default function ResetPasswordPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="8 أحرف على الأقل"
                   dir="ltr"
-                  className="w-full rounded-lg border border-[#CBD5E1] px-3.5 py-2.5 text-sm focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
+                  className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#0891B2] focus:outline-none focus:ring-2 focus:ring-[#0891B2]/20"
                 />
               </div>
 
@@ -115,14 +115,14 @@ export default function ResetPasswordPage() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
                   dir="ltr"
-                  className="w-full rounded-lg border border-[#CBD5E1] px-3.5 py-2.5 text-sm focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
+                  className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#0891B2] focus:outline-none focus:ring-2 focus:ring-[#0891B2]/20"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full rounded-lg bg-[#2563EB] py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-[#1D4ED8] active:bg-[#1E40AF] disabled:opacity-50 transition-colors cursor-pointer"
+                className="w-full rounded-xl bg-[#0891B2] py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#0E7490] active:bg-[#155E75] disabled:opacity-50 transition-colors cursor-pointer"
               >
                 {isLoading ? "جاري الحفظ..." : "حفظ كلمة المرور الجديدة"}
               </button>

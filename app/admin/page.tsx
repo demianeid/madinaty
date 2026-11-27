@@ -219,7 +219,7 @@ export default function AdminDashboardPage() {
 
       <main className="flex-1 container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Admin Banner */}
-        <div className="rounded-xl bg-gradient-to-l from-[#142D4E] via-[#1D4ED8] to-[#2563EB] p-6 sm:p-8 text-white shadow-civic-3 mb-8">
+        <div className="rounded-xl bg-gradient-to-l from-[#0E7490] via-[#0891B2] to-[#142D4E] p-6 sm:p-8 text-white shadow-civic-3 mb-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/20 px-3 py-1 text-xs font-semibold text-white mb-3">
@@ -229,7 +229,7 @@ export default function AdminDashboardPage() {
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                 مركز تدقيق ومراقبة منصة مدينتي
               </h1>
-              <p className="mt-1 text-xs sm:text-sm text-blue-100/80">
+              <p className="mt-1 text-xs sm:text-sm text-cyan-100/80">
                 متابعة سجل التدقيق غير القابل للتعديل (Audit Log Inspector) وإدارة الجهات والسياسات البلدية
               </p>
             </div>
@@ -310,7 +310,7 @@ export default function AdminDashboardPage() {
                       setPage(1);
                     });
                   }}
-                  className="rounded-lg border border-[#CBD5E1] bg-white px-3 py-1.5 text-xs text-[#142D4E] placeholder-[#64748B] focus:border-[#2563EB] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                  className="rounded-lg border border-[#CBD5E1] bg-white px-3 py-1.5 text-xs text-[#142D4E] placeholder-[#64748B] focus:border-[#0891B2] focus:outline-none focus:ring-1 focus:ring-[#0891B2]"
                 />
 
                 {/* Entity Filter */}
@@ -320,7 +320,7 @@ export default function AdminDashboardPage() {
                     setEntityFilter(e.target.value);
                     setPage(1);
                   }}
-                  className="rounded-lg border border-[#CBD5E1] bg-white px-3 py-1.5 text-xs text-[#142D4E] font-medium focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] cursor-pointer"
+                  className="rounded-lg border border-[#CBD5E1] bg-white px-3 py-1.5 text-xs text-[#142D4E] font-medium focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] cursor-pointer"
                 >
                   <option value="ALL">كافة الكيانات</option>
                   <option value="Report">البلاغات (Report)</option>
@@ -377,7 +377,7 @@ export default function AdminDashboardPage() {
                           )}
                         </td>
                         <td className="py-3 px-4">
-                          <span className="inline-flex rounded-md bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] px-2 py-0.5 font-mono text-[11px] font-bold">
+                          <span className="inline-flex rounded-md bg-cyan-50 text-[#0891B2] border border-cyan-200 px-2 py-0.5 font-mono text-[11px] font-bold">
                             {log.action}
                           </span>
                         </td>
@@ -468,9 +468,9 @@ export default function AdminDashboardPage() {
                     <span className="text-xs font-bold text-[#047857]">الجهات البلدية الفعالة</span>
                     <p className="text-3xl font-black text-[#047857] mt-2 font-mono">{stats.totalAuthorities}</p>
                   </div>
-                  <div className="rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] p-5 shadow-civic-1">
-                    <span className="text-xs font-bold text-[#1D4ED8]">التصنيفات والخدمات البلدية</span>
-                    <p className="text-3xl font-black text-[#1D4ED8] mt-2 font-mono">{stats.totalCategories}</p>
+                  <div className="rounded-xl border border-cyan-200 bg-cyan-50 p-5 shadow-civic-1">
+                    <span className="text-xs font-bold text-[#0891B2]">التصنيفات والخدمات البلدية</span>
+                    <p className="text-3xl font-black text-[#0891B2] mt-2 font-mono">{stats.totalCategories}</p>
                   </div>
                   <div className="rounded-xl border border-[#CBD5E1] bg-white p-5 shadow-civic-1">
                     <span className="text-xs font-bold text-[#64748B]">إجمالي المستخدمين</span>
@@ -557,11 +557,11 @@ export default function AdminDashboardPage() {
                       </div>
                       <div className="rounded-md bg-white p-2.5 border border-slate-100 shadow-xs">
                         <span className="text-[10px] text-[#64748B] block">البلاغات المسندة</span>
-                        <span className="font-mono font-bold text-[#2563EB] text-sm">{auth.reportsCount}</span>
+                        <span className="font-mono font-bold text-[#0891B2] text-sm">{auth.reportsCount}</span>
                       </div>
                       <div className="rounded-md bg-white p-2.5 border border-slate-100 shadow-xs">
                         <span className="text-[10px] text-[#64748B] block">التصنيفات التابعة</span>
-                        <span className="font-mono font-bold text-[#1D4ED8] text-sm">{auth.categoriesCount}</span>
+                        <span className="font-mono font-bold text-[#0E7490] text-sm">{auth.categoriesCount}</span>
                       </div>
                     </div>
                   </div>
@@ -590,7 +590,7 @@ export default function AdminDashboardPage() {
               <div className="mt-4 text-left">
                 <button
                   onClick={() => setSelectedLogMetadata(null)}
-                  className="rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] px-4 py-2 text-xs font-bold text-white cursor-pointer"
+                  className="rounded-lg bg-[#0891B2] hover:bg-[#0E7490] px-4 py-2 text-xs font-bold text-white cursor-pointer"
                 >
                   إغلاق
                 </button>

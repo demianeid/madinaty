@@ -62,11 +62,11 @@ export function LeafletMap({
           <div style="width: 34px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
             <svg width="34" height="44" viewBox="0 0 34 44" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 7px rgba(0,0,0,0.35));">
               <!-- Teardrop pin pointing straight down to (17, 42) -->
-              <path d="M17 1C8.716 1 2 7.716 2 16C2 26.5 17 42 17 42C17 42 32 26.5 32 16C32 7.716 25.284 1 17 1Z" fill="#2563EB" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M17 1C8.716 1 2 7.716 2 16C2 26.5 17 42 17 42C17 42 32 26.5 32 16C32 7.716 25.284 1 17 1Z" fill="#0891B2" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="round"/>
               <!-- Inner white circular disc -->
               <circle cx="17" cy="16" r="6" fill="#FFFFFF"/>
-              <!-- Inner blue dot -->
-              <circle cx="17" cy="16" r="3" fill="#2563EB"/>
+              <!-- Inner cyan dot -->
+              <circle cx="17" cy="16" r="3" fill="#0891B2"/>
             </svg>
           </div>
         `,

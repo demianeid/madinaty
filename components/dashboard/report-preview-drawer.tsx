@@ -98,7 +98,7 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
           {/* Header */}
           <div className="p-4 sm:p-5 border-b border-[#CBD5E1] bg-[#F1F5F9] flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="font-mono text-xs font-black text-[#1D4ED8] bg-[#EFF6FF] border border-[#BFDBFE] px-2.5 py-1 rounded-lg">
+              <span className="font-mono text-xs font-black text-[#0891B2] bg-cyan-50 border border-cyan-200 px-2.5 py-1 rounded-lg">
                 {report.publicReference}
               </span>
               <button
@@ -145,7 +145,7 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
             <div>
               <div className="flex items-center justify-between mb-2.5">
                 <h3 className="text-xs font-bold text-[#142D4E] flex items-center gap-1.5">
-                  <svg className="w-4 h-4 text-[#2563EB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-4 h-4 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   التوثيق المصور المرفق ({report.media?.length || 0})
@@ -168,7 +168,7 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
                           <div
                             key={m.id}
                             onClick={() => setSelectedPhoto(`/api/media/${m.id}`)}
-                            className="group relative aspect-4/3 rounded-xl overflow-hidden border border-[#CBD5E1] bg-slate-100 cursor-pointer shadow-xs hover:border-[#2563EB] transition-all"
+                            className="group relative aspect-4/3 rounded-xl overflow-hidden border border-[#CBD5E1] bg-slate-100 cursor-pointer shadow-xs hover:border-[#0891B2] transition-all"
                           >
                             <Image
                               src={`/api/media/${m.id}`}
@@ -221,7 +221,7 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
             {/* Location & GIS Details */}
             <div className="rounded-xl border border-[#CBD5E1] p-4 space-y-3 bg-white shadow-xs">
               <h3 className="text-xs font-bold text-[#142D4E] flex items-center gap-1.5">
-                <svg className="w-4 h-4 text-[#2563EB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
@@ -244,7 +244,7 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
                         href={`https://www.google.com/maps/dir/?api=1&destination=${report.latitude},${report.longitude}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-1.5 rounded-lg border border-[#CBD5E1] bg-white hover:bg-[#EFF6FF] hover:text-[#2563EB] hover:border-[#2563EB]/30 py-2 px-3 text-[11px] font-bold text-slate-700 transition-colors shadow-xs"
+                        className="flex items-center justify-center gap-1.5 rounded-lg border border-[#CBD5E1] bg-white hover:bg-cyan-50 hover:text-[#0891B2] hover:border-[#0891B2]/30 py-2 px-3 text-[11px] font-bold text-slate-700 transition-colors shadow-xs"
                       >
                         <span>🚗</span>
                         <span>ملاحة Google Maps</span>
@@ -305,7 +305,7 @@ export function ReportPreviewDrawer({ report, isOpen, onClose, role }: ReportPre
 
             <Link
               href={`/reports/${report.id}`}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] active:bg-[#1E40AF] text-white px-5 py-2.5 text-xs font-bold transition-all shadow-xs"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#0891B2] hover:bg-[#0E7490] active:bg-[#155E75] text-white px-5 py-2.5 text-xs font-bold transition-all shadow-xs"
             >
               <span>{role === UserRole.STAFF ? "الانتقال لصفحة المعالجة الكاملة" : "صفحة البلاغ التفصيلية"}</span>
               <span className="text-sm font-mono leading-none">←</span>

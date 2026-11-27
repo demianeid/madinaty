@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
               <div className="mt-4">
                 <Link
                   href="/login"
-                  className="inline-block text-xs font-semibold text-[#2563EB] hover:underline"
+                  className="inline-block text-xs font-semibold text-[#0891B2] hover:underline"
                 >
                   العودة لتسجيل الدخول
                 </Link>
@@ -76,14 +76,14 @@ export default function ForgotPasswordPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
                   dir="ltr"
-                  className="w-full rounded-lg border border-[#CBD5E1] px-3.5 py-2.5 text-sm focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
+                  className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-[#0891B2] focus:outline-none focus:ring-2 focus:ring-[#0891B2]/20"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full rounded-lg bg-[#2563EB] py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-[#1D4ED8] active:bg-[#1E40AF] disabled:opacity-50 transition-colors cursor-pointer"
+                className="w-full rounded-xl bg-[#0891B2] py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#0E7490] active:bg-[#155E75] disabled:opacity-50 transition-colors cursor-pointer"
               >
                 {isLoading ? "جاري الإرسال..." : "إرسال رابط استعادة كلمة المرور"}
               </button>
@@ -92,7 +92,7 @@ export default function ForgotPasswordPage() {
 
           <div className="mt-6 text-center text-xs text-slate-600">
             تذكرت كلمة المرور؟{" "}
-            <Link href="/login" className="font-bold text-[#2563EB] hover:text-[#1D4ED8]">
+            <Link href="/login" className="font-bold text-[#0891B2] hover:text-[#0E7490]">
               تسجيل الدخول
             </Link>
           </div>

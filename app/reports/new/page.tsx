@@ -352,11 +352,11 @@ export default function NewReportPage() {
               تم توجيه البلاغ للجهة المختصة وفحصه بالذكاء الاصطناعي وبدء إجراءات التدقيق والمتابعة الميدانية.
             </p>
 
-            <div className="mx-auto max-w-xs rounded-lg bg-[#F8FAFC] border border-[#CBD5E1] p-4 mb-6">
-              <span className="block text-xs font-semibold text-[#64748B] mb-1">
+            <div className="mx-auto max-w-xs rounded-xl bg-[#F8FAFC] border border-slate-200 p-4 mb-6">
+              <span className="block text-xs font-semibold text-slate-500 mb-1">
                 الرمز المرجعي العام للبلاغ
               </span>
-              <span className="font-mono text-xl font-bold text-[#2563EB] tracking-wider">
+              <span className="font-mono text-xl font-bold text-[#0891B2] tracking-wider">
                 {createdReference}
               </span>
             </div>
@@ -364,7 +364,7 @@ export default function NewReportPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 href={`/reports/${createdReference}`}
-                className="w-full sm:w-auto rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] px-6 py-2.5 text-sm font-semibold text-white transition-colors"
+                className="w-full sm:w-auto rounded-xl bg-[#0891B2] hover:bg-[#0E7490] active:bg-[#155E75] px-6 py-2.5 text-sm font-bold text-white shadow-sm transition-colors"
               >
                 متابعة تفاصيل البلاغ
               </Link>
@@ -380,7 +380,7 @@ export default function NewReportPage() {
           /* Report Creation Form */
           <div className="rounded-xl border border-[#CBD5E1] bg-white p-6 sm:p-10 shadow-civic-1">
             <div className="mb-8 border-b border-slate-100 pb-4">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-[#EFF6FF] border border-[#BFDBFE] px-3 py-1 text-xs font-semibold text-[#1D4ED8] mb-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-cyan-50 border border-cyan-200/80 px-3 py-1 text-xs font-semibold text-[#0891B2] mb-2">
                 بلاغ جديد
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#142D4E]">
@@ -419,7 +419,7 @@ export default function NewReportPage() {
                           runMediaPreCheck(uploadedMedia, newCatId);
                         }
                       }}
-                      className="w-full rounded-lg border border-[#CBD5E1] px-3.5 py-2.5 text-sm text-[#142D4E] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
+                      className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-[#142D4E] focus:border-[#0891B2] focus:outline-none focus:ring-2 focus:ring-[#0891B2]/20"
                     >
                       {categories.map((cat) => (
                         <option key={cat.id} value={cat.id}>
@@ -431,7 +431,7 @@ export default function NewReportPage() {
                     {/* Auto-Switch Undo Chip */}
                     {categoryAutoSwitch && (
                       <div className="mt-1.5 flex items-center gap-2 text-[11px] text-[#64748B]">
-                        <span className="text-[#2563EB]">✦</span>
+                        <span className="text-[#0891B2]">✦</span>
                         <span>
                           عدّل الذكاء الاصطناعي التصنيف إلى{" "}
                           <strong className="text-[#142D4E]">«{categoryAutoSwitch.newLabel}»</strong>
@@ -463,7 +463,7 @@ export default function NewReportPage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="مثال: هبوط أسفلتي وتجمع مياه أمام مدرسة الحي"
-                  className="w-full rounded-lg border border-[#CBD5E1] px-3.5 py-2.5 text-sm text-[#142D4E] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
+                  className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-[#142D4E] focus:border-[#0891B2] focus:outline-none focus:ring-2 focus:ring-[#0891B2]/20"
                 />
               </div>
 
@@ -479,7 +479,7 @@ export default function NewReportPage() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="صف المشكلة باختصار... (مثال: كابل كهرباء مكشوف، حفرة عميقة، بالوعة مكسورة)"
-                  className="w-full rounded-lg border border-[#CBD5E1] px-3.5 py-2.5 text-sm text-[#142D4E] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/15"
+                  className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-[#142D4E] focus:border-[#0891B2] focus:outline-none focus:ring-2 focus:ring-[#0891B2]/20"
                 />
               </div>
 
@@ -513,7 +513,7 @@ export default function NewReportPage() {
                     <button
                       type="button"
                       onClick={() => setShowManualCoords(!showManualCoords)}
-                      className="text-[11px] font-semibold text-[#64748B] hover:text-[#2563EB] underline cursor-pointer"
+                      className="text-[11px] font-semibold text-[#64748B] hover:text-[#0891B2] underline cursor-pointer"
                     >
                       {showManualCoords ? "إخفاء تفاصيل الإحداثيات اليدوية" : "تعديل الإحداثيات يدوياً"}
                     </button>
@@ -524,7 +524,7 @@ export default function NewReportPage() {
                     value={addressText}
                     onChange={(e) => setAddressText(e.target.value)}
                     placeholder="اسم الشارع، رقم المبنى، أو أقرب معلم مشهور"
-                    className="mt-1.5 w-full rounded-xl border border-[#CBD5E1] bg-white px-3.5 py-2 text-sm text-[#142D4E] focus:border-[#2563EB] focus:outline-none"
+                    className="mt-1.5 w-full rounded-xl border border-[#CBD5E1] bg-white px-3.5 py-2 text-sm text-[#142D4E] focus:border-[#0891B2] focus:outline-none"
                   />
 
                   {showManualCoords && (
@@ -733,7 +733,7 @@ export default function NewReportPage() {
                     className={`relative rounded-2xl border-2 border-dashed p-6 text-center transition-colors bg-slate-50/50 ${
                       uploadedMedia.length === 0
                         ? "border-amber-300 hover:border-amber-400"
-                        : "border-[#CBD5E1] hover:border-[#2563EB]"
+                        : "border-[#CBD5E1] hover:border-[#0891B2]"
                     }`}
                   >
                     <input
@@ -781,12 +781,12 @@ export default function NewReportPage() {
                     mediaValidationState.isChecking ||
                     mediaValidationState.isInvalid
                   }
-                  className={`rounded-lg px-8 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors cursor-pointer ${
+                  className={`rounded-xl px-8 py-2.5 text-sm font-bold text-white shadow-xs transition-colors cursor-pointer ${
                     mediaValidationState.isInvalid
                       ? "bg-[#B91C1C] hover:bg-[#991B1B] disabled:opacity-60 cursor-not-allowed"
                       : uploadedMedia.length === 0
                       ? "bg-slate-400 cursor-not-allowed disabled:opacity-70"
-                      : "bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-50"
+                      : "bg-[#0891B2] hover:bg-[#0E7490] active:bg-[#155E75] disabled:opacity-50"
                   }`}
                 >
                   {isSubmitting

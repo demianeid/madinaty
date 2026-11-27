@@ -28,10 +28,10 @@ export function Footer() {
             <p>© 2026 مدينتي — المنصة الموحدة للبلاغات والخدمات البلدية. جميع الحقوق محفوظة.</p>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/privacy" className="hover:text-[#2563EB] transition-colors">
+            <Link href="/privacy" className="hover:text-[#0891B2] transition-colors">
               سياسة الخصوصية
             </Link>
-            <Link href="/terms" className="hover:text-[#2563EB] transition-colors">
+            <Link href="/terms" className="hover:text-[#0891B2] transition-colors">
               شروط الاستخدام
             </Link>
             <span className="text-slate-300">|</span>

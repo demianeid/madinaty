@@ -590,7 +590,7 @@ export function AdminDashboardSkeleton() {
   return (
     <div className="space-y-8" aria-busy="true" aria-label="جاري تحميل لوحة الإدارة">
       {/* Admin Top Banner Skeleton */}
-      <div className="rounded-xl bg-gradient-to-l from-[#142D4E] via-[#1D4ED8] to-[#2563EB] p-6 sm:p-8 shadow-civic-3 space-y-4">
+      <div className="rounded-xl bg-gradient-to-l from-[#0E7490] via-[#0891B2] to-[#142D4E] p-6 sm:p-8 shadow-civic-3 space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-2">
             <Skeleton variant="dark" className="h-5 w-40 rounded-full" />

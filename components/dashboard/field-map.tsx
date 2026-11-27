@@ -38,7 +38,7 @@ interface FieldMapProps {
 function statusColor(status: ReportStatus): string {
   switch (status) {
     case ReportStatus.NEW:
-      return "#1D4ED8"; // Primary Blue
+      return "#0891B2"; // Oceanic Cyan
     case ReportStatus.UNDER_REVIEW:
       return "#B45309"; // Amber
     case ReportStatus.ASSIGNED:
@@ -670,7 +670,7 @@ export function FieldMap({
         <button
           type="button"
           onClick={() => mapInstanceRef.current?.zoomIn()}
-          className="h-8 w-8 rounded-xl flex items-center justify-center text-slate-700 hover:text-[#2563EB] hover:bg-[#EFF6FF] active:scale-90 transition-all font-bold text-base cursor-pointer"
+          className="h-8 w-8 rounded-xl flex items-center justify-center text-slate-700 hover:text-[#0891B2] hover:bg-cyan-50 active:scale-90 transition-all font-bold text-base cursor-pointer"
           title="تكبير الخريطة (+)"
           aria-label="تكبير"
         >

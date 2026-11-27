@@ -33,7 +33,12 @@ function formatRelativeTime(dateString: string): string {
   return date.toLocaleDateString("ar-EG", { month: "short", day: "numeric" });
 }
 
-export function NotificationBell() {
+interface NotificationBellProps {
+  className?: string;
+  variant?: "nav" | "light";
+}
+
+export function NotificationBell({ className, variant = "nav" }: NotificationBellProps = {}) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -146,7 +151,12 @@ export function NotificationBell() {
           if (!isOpen) fetchNotifications();
         }}
         aria-label="التنبيهات والإشعارات"
-        className="relative rounded-xl p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
+        className={
+          className ||
+          (variant === "nav"
+            ? "relative rounded-xl p-2 text-white/80 hover:text-white hover:bg-white/10 active:bg-white/15 transition-colors cursor-pointer"
+            : "relative rounded-xl p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer")
+        }
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -183,7 +193,7 @@ export function NotificationBell() {
             <div className="flex items-center gap-2">
               <span className="font-bold text-sm text-[#142D4E]">مركز الإشعارات</span>
               {unreadCount > 0 && (
-                <span className="rounded-full bg-[#EFF6FF] border border-[#BFDBFE] text-[#1D4ED8] text-[10px] font-bold px-2 py-0.5">
+                <span className="rounded-full bg-cyan-50 border border-cyan-200 text-[#0891B2] text-[10px] font-bold px-2 py-0.5">
                   {unreadCount} جديد
                 </span>
               )}
@@ -193,7 +203,7 @@ export function NotificationBell() {
                 type="button"
                 onClick={handleMarkAllAsRead}
                 disabled={isLoading}
-                className="text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8] hover:underline cursor-pointer disabled:opacity-50"
+                className="text-xs font-semibold text-[#0891B2] hover:text-[#0E7490] hover:underline cursor-pointer disabled:opacity-50"
               >
                 تحديد الكل كمقروء
               </button>
@@ -233,7 +243,7 @@ export function NotificationBell() {
                     key={n.id}
                     onClick={() => handleMarkAsRead(n.id, n.reportId)}
                     className={`p-3.5 flex items-start gap-3 transition-colors cursor-pointer hover:bg-slate-50 ${
-                      isUnread ? "bg-[#EFF6FF]/40" : "bg-white"
+                      isUnread ? "bg-cyan-50/50" : "bg-white"
                     }`}
                   >
                     <div className="flex-1 min-w-0">
@@ -257,7 +267,7 @@ export function NotificationBell() {
                       )}
                     </div>
                     {isUnread && (
-                      <span className="h-2 w-2 rounded-full bg-[#2563EB] shrink-0 mt-1.5" />
+                      <span className="h-2 w-2 rounded-full bg-[#0891B2] shrink-0 mt-1.5" />
                     )}
                   </div>
                 );
@@ -270,7 +280,7 @@ export function NotificationBell() {
             <Link
               href="/notifications"
               onClick={() => setIsOpen(false)}
-              className="text-xs font-bold text-[#2563EB] hover:text-[#1D4ED8] transition-colors"
+              className="text-xs font-bold text-[#0891B2] hover:text-[#0E7490] transition-colors"
             >
               عرض جميع الإشعارات والسجل الكامل ←
             </Link>

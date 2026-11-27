@@ -20,7 +20,7 @@ function getTypeBadge(type: string): { label: string; color: string } {
     case "STATUS_CHANGED":
       return { label: "تحديث مرحلة", color: "badge-civic-pill badge-civic-info" };
     case "APPEAL_SUBMITTED":
-      return { label: "اعتراض مسجل", color: "badge-civic-pill bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE]" };
+      return { label: "اعتراض مسجل", color: "badge-civic-pill bg-cyan-50 text-[#0891B2] border border-cyan-200" };
     case "AUTO_CLOSED":
       return { label: "إغلاق نهائي", color: "badge-civic-pill bg-slate-100 text-slate-700 border border-slate-200" };
     case "REPORT_CREATED":
@@ -151,7 +151,7 @@ export default function NotificationsPage() {
       <main className="flex-1 container mx-auto max-w-4xl px-4 py-8">
         {/* Breadcrumb */}
         <div className="mb-6 flex items-center gap-2 text-xs font-semibold text-slate-300">
-          <Link href="/dashboard" className="hover:text-blue-400 transition-colors">
+          <Link href="/dashboard" className="hover:text-[#0891B2] transition-colors">
             لوحة التحكم
           </Link>
           <span>/</span>
@@ -174,7 +174,7 @@ export default function NotificationsPage() {
             <button
               type="button"
               onClick={handleMarkAllAsRead}
-              className="rounded-xl border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-[#EFF6FF] hover:text-[#2563EB] shadow-xs transition-colors self-start sm:self-auto cursor-pointer"
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-cyan-50 hover:text-[#0891B2] hover:border-cyan-200 shadow-xs transition-colors self-start sm:self-auto cursor-pointer"
             >
               ✓ تحديد جميع التنبيهات كمقروءة
             </button>
@@ -186,9 +186,9 @@ export default function NotificationsPage() {
           <button
             type="button"
             onClick={() => setFilter("all")}
-            className={`rounded-lg px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
+            className={`rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
               filter === "all"
-                ? "bg-[#2563EB] text-white shadow-xs"
+                ? "bg-[#0891B2] text-white shadow-xs"
                 : "bg-white text-slate-600 border border-[#CBD5E1] hover:bg-slate-50"
             }`}
           >
@@ -197,16 +197,16 @@ export default function NotificationsPage() {
           <button
             type="button"
             onClick={() => setFilter("unread")}
-            className={`rounded-lg px-4 py-2 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               filter === "unread"
-                ? "bg-[#2563EB] text-white shadow-xs"
+                ? "bg-[#0891B2] text-white shadow-xs"
                 : "bg-white text-slate-600 border border-[#CBD5E1] hover:bg-slate-50"
             }`}
           >
             <span>غير المقروءة فقط</span>
             {unreadCount > 0 && (
               <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono font-bold ${
-                filter === "unread" ? "bg-white text-[#2563EB]" : "bg-[#FEF2F2] text-[#B91C1C] border border-[#FECACA]"
+                filter === "unread" ? "bg-white text-[#0891B2]" : "bg-[#FEF2F2] text-[#B91C1C] border border-[#FECACA]"
               }`}>
                 {unreadCount}
               </span>
@@ -253,7 +253,7 @@ export default function NotificationsPage() {
                   key={n.id}
                   className={`rounded-xl border p-5 transition-all shadow-civic-1 ${
                     isUnread
-                      ? "bg-white border-[#BFDBFE] ring-2 ring-[#2563EB]/10"
+                      ? "bg-white border-cyan-200 ring-2 ring-[#0891B2]/15"
                       : "bg-white border-[#CBD5E1] hover:border-slate-300"
                   }`}
                 >
@@ -269,7 +269,7 @@ export default function NotificationsPage() {
                             </span>
                           )}
                           {isUnread && (
-                            <span className="rounded-full bg-[#2563EB] text-white text-[9px] font-bold px-2 py-0.5">
+                            <span className="rounded-full bg-[#0891B2] text-white text-[9px] font-bold px-2 py-0.5">
                               جديد
                             </span>
                           )}
@@ -312,7 +312,7 @@ export default function NotificationsPage() {
                       {n.reportId && (
                         <Link
                           href={`/reports/${n.reportId}`}
-                          className="rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] px-4 py-1.5 text-xs font-bold text-white shadow-xs transition-colors"
+                          className="rounded-xl bg-[#0891B2] hover:bg-[#0E7490] active:bg-[#155E75] px-4 py-1.5 text-xs font-bold text-white shadow-xs transition-colors"
                         >
                           عرض البلاغ ←
                         </Link>
