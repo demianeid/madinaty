@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { MadinatyLogo } from "@/components/ui/madinaty-logo";
 import { UserRole } from "@prisma/client";
 import { signOut } from "@/lib/auth/auth-client";
 
@@ -39,6 +41,23 @@ export function DashboardSidebar({
   const isStaff = role === UserRole.STAFF;
 
   const roleLabel = isAdmin ? "مدير النظام" : isStaff ? "طاقم العمليات" : "مواطن";
+
+  // Handle ESC key and scroll lock on mobile
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && mobileOpen) {
+        onCloseMobile();
+      }
+    }
+    if (mobileOpen) {
+      document.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen, onCloseMobile]);
 
   const navItems = [
     {
@@ -126,16 +145,20 @@ export function DashboardSidebar({
         ) : (
           /* ── Expanded: logo + text on right, toggle on left ── */
           <div className="flex items-center justify-between w-full px-4">
-            <Link href="/" className="flex items-center gap-2.5 overflow-hidden">
+            <Link href="/" className="flex items-center gap-2.5 overflow-hidden group">
               <Image
                 src="/images/logo/madinaty-app-icon.svg"
                 alt="مدينتي"
                 width={36}
                 height={36}
-                className="h-9 w-9 object-contain shrink-0"
+                className="h-9 w-9 object-contain shrink-0 transition-transform group-hover:scale-105"
               />
               <div className="min-w-0">
-                <span className="text-base font-bold text-[#142D4E] block truncate leading-tight">مدينتي</span>
+                <MadinatyLogo
+                  variant="dark"
+                  className="h-6 w-auto object-contain block drop-shadow-xs"
+                  priority
+                />
                 <span className="text-[10px] font-semibold text-[#0891B2] block truncate">
                   {isAdmin ? "الرقابة المركزية" : "لوحة العمليات"}
                 </span>
@@ -218,7 +241,9 @@ export function DashboardSidebar({
           <div>
             {!isCollapsed && (
               <p className="px-3 text-[11px] font-bold text-amber-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <span>🛡️</span>
+                <svg className="w-3.5 h-3.5 text-amber-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
                 <span>الحوكمة والرقابة</span>
               </p>
             )}
@@ -332,7 +357,7 @@ export function DashboardSidebar({
             onClick={onCloseMobile}
           />
           {/* Drawer Window */}
-          <div className="relative w-72 max-w-[85vw] h-full bg-white shadow-2xl z-10">
+          <div className="relative w-72 max-w-[85vw] h-full bg-white shadow-2xl z-10 animate-in slide-in-from-right duration-200">
             {sidebarContent}
           </div>
         </div>

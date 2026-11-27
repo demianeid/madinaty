@@ -113,10 +113,10 @@ export function LeafletMap({
             [bounds.maxLat, bounds.maxLng],
           ],
           {
-            color: "#059669",
+            color: "#0891B2",
             weight: 1.5,
-            fillColor: "#10b981",
-            fillOpacity: 0.05,
+            fillColor: "#06b6d4",
+            fillOpacity: 0.06,
             dashArray: "4, 4",
           }
         ).addTo(map);
@@ -234,7 +234,7 @@ export function LeafletMap({
             type="button"
             onClick={handleLocateMe}
             disabled={isLocating}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-white/95 backdrop-blur-xs px-3.5 py-2 text-xs font-bold text-slate-800 shadow-md border border-slate-200/80 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 disabled:opacity-50 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-white/95 backdrop-blur-xs px-3.5 py-2 text-xs font-bold text-slate-800 shadow-md border border-slate-200/80 hover:bg-cyan-50 hover:text-[#0891B2] hover:border-cyan-300 disabled:opacity-50 transition-all cursor-pointer"
           >
             <span className={isLocating ? "animate-spin" : ""}>📍</span>
             <span>{isLocating ? "جاري التحديد..." : "موقعي الحالي"}</span>

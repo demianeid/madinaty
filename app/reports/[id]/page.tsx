@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useSession } from "@/lib/auth/auth-client";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
+import { MadinatyLogo } from "@/components/ui/madinaty-logo";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { REPORT_STATUS_METADATA, ALLOWED_TRANSITIONS } from "@/lib/reports/lifecycle";
 import { ReportStatus, UserRole } from "@prisma/client";
 import { Skeleton, ReportDetailSkeleton } from "@/components/ui/skeleton";
@@ -16,7 +16,7 @@ const LeafletMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <Skeleton className="h-[220px] w-full rounded-xl" />
+      <Skeleton className="h-[200px] w-full rounded-xl" />
     ),
   }
 );
@@ -116,6 +116,48 @@ interface ReportDetail {
   aiReviewState?: string | null;
 }
 
+function statusBadgeClass(status: ReportStatus): string {
+  switch (status) {
+    case ReportStatus.NEW:
+      return "badge-status-new";
+    case ReportStatus.UNDER_REVIEW:
+      return "badge-status-under-review";
+    case ReportStatus.ASSIGNED:
+      return "badge-status-assigned";
+    case ReportStatus.IN_PROGRESS:
+      return "badge-status-in-progress";
+    case ReportStatus.WAITING_FOR_RESIDENT:
+      return "badge-workflow-condition";
+    case ReportStatus.RESOLVED:
+      return "badge-status-resolved";
+    case ReportStatus.CLOSED:
+      return "badge-status-closed";
+    case ReportStatus.CLOSED_NO_RESPONSE:
+      return "badge-status-closed-no-response";
+    case ReportStatus.REJECTED:
+      return "badge-status-rejected";
+    default:
+      return "badge-status-new";
+  }
+}
+
+function formatClearArabicDateTime(dateStr: string): { date: string; time: string; full: string } {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return { date: dateStr, time: "", full: dateStr };
+
+  const date = d.toLocaleDateString("ar-EG", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const time = d.toLocaleTimeString("ar-EG", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return { date, time, full: `${date} • ${time}` };
+}
+
 export default function ReportDetailPage({
   params,
 }: {
@@ -124,12 +166,23 @@ export default function ReportDetailPage({
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex flex-col bg-[#F1F5F9]" dir="rtl">
-          <Header />
-          <main className="flex-1 container mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900" dir="rtl">
+          <header className="h-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/80 flex items-center justify-between sticky top-0 z-20 shadow-xs">
+            <div className="flex items-center gap-3">
+              <Link href="/" className="flex items-center gap-2">
+                <MadinatyLogo variant="dark" className="h-8 w-auto object-contain" />
+              </Link>
+              <div className="h-5 w-[1px] bg-slate-200 mx-1 hidden sm:block" />
+              <span className="text-xs sm:text-sm font-bold text-slate-800">تفاصيل البلاغ</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-xl bg-slate-100 animate-pulse" />
+              <div className="h-8 w-24 rounded-xl bg-slate-100 animate-pulse" />
+            </div>
+          </header>
+          <main className="flex-1 container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <ReportDetailSkeleton />
           </main>
-          <Footer />
         </div>
       }
     >
@@ -152,6 +205,8 @@ function ReportDetailContent({
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [copiedRef, setCopiedRef] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
   // Citizen Action States
   const [clarificationBody, setClarificationBody] = useState("");
@@ -241,6 +296,15 @@ function ReportDetailContent({
     };
   }, [session, sessionLoading, reportIdOrRef, router]);
 
+  const handleCopyRef = async () => {
+    if (!report?.publicReference) return;
+    try {
+      await navigator.clipboard.writeText(report.publicReference);
+      setCopiedRef(true);
+      setTimeout(() => setCopiedRef(false), 2000);
+    } catch {}
+  };
+
   // Citizen Submit Clarification
   const handleClarificationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -312,7 +376,7 @@ function ReportDetailContent({
       const data = await res.json();
       if (data.success) {
         setShowRatingModal(false);
-        setSuccessMessage("شكراً لك! تم تسجيل تقييمك وإغلاق البلاغ نهائياً.");
+        setSuccessMessage("تم تسجيل تقييمك بنجاح. نشكرك لمشاركتنا رأيك.");
         await fetchReport();
       } else {
         setErrorMessage(data.error || "فشل تسجيل التقييم.");
@@ -417,33 +481,64 @@ function ReportDetailContent({
 
   if (loading || sessionLoading) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#F1F5F9]" dir="rtl">
-        <Header />
-        <main className="flex-1 container mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900" dir="rtl">
+        <header className="h-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/80 flex items-center justify-between sticky top-0 z-20 shadow-xs">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-2">
+              <MadinatyLogo variant="dark" className="h-8 w-auto object-contain" />
+            </Link>
+            <div className="h-5 w-[1px] bg-slate-200 mx-1 hidden sm:block" />
+            <span className="text-xs sm:text-sm font-bold text-slate-800">تفاصيل البلاغ</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-xl bg-slate-100 animate-pulse" />
+            <div className="h-8 w-24 rounded-xl bg-slate-100 animate-pulse" />
+          </div>
+        </header>
+        <main className="flex-1 container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <ReportDetailSkeleton />
         </main>
-        <Footer />
       </div>
     );
   }
 
   if (errorMessage && !report) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#F1F5F9]">
-        <Header />
-        <main className="flex-1 container mx-auto max-w-4xl px-4 py-12 text-center">
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-8 shadow-xs">
-            <h1 className="text-xl font-bold text-red-800 mb-2">تعذر عرض البلاغ</h1>
-            <p className="text-sm text-red-600 mb-6">{errorMessage}</p>
-            <Link
-              href="/dashboard"
-              className="inline-flex rounded-xl bg-slate-800 px-5 py-2.5 text-xs font-semibold text-white hover:bg-slate-900"
-            >
-              العودة إلى لوحة التحكم
+      <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900" dir="rtl">
+        <header className="h-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/80 flex items-center justify-between sticky top-0 z-20 shadow-xs">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-2">
+              <MadinatyLogo variant="dark" className="h-8 w-auto object-contain" />
             </Link>
+            <div className="h-5 w-[1px] bg-slate-200 mx-1 hidden sm:block" />
+            <span className="text-xs sm:text-sm font-bold text-slate-800">تفاصيل البلاغ</span>
+          </div>
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-cyan-50 hover:text-[#0891B2] text-xs font-bold text-slate-700 transition-all shadow-xs"
+          >
+            <span>لوحة التحكم</span>
+          </Link>
+        </header>
+        <main className="flex-1 container mx-auto max-w-3xl px-4 py-16 text-center">
+          <div className="rounded-3xl border border-red-200 bg-white p-8 shadow-sm space-y-4">
+            <div className="h-14 w-14 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto text-2xl font-bold">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h1 className="text-xl font-bold text-slate-900">تعذر عرض تفاصيل البلاغ</h1>
+            <p className="text-sm text-slate-600 max-w-md mx-auto">{errorMessage}</p>
+            <div className="pt-2">
+              <Link
+                href="/dashboard"
+                className="inline-flex rounded-xl bg-[#0891B2] hover:bg-[#0E7490] px-5 py-2.5 text-xs font-bold text-white shadow-xs transition-colors"
+              >
+                العودة إلى لوحة التحكم
+              </Link>
+            </div>
           </div>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -456,63 +551,110 @@ function ReportDetailContent({
   const statusMeta = REPORT_STATUS_METADATA[report.status];
   const { isAppealWindowActive, daysRemaining } = appealState;
 
-  return (
-    <div className="min-h-screen flex flex-col bg-[#F1F5F9]">
-      <Header />
+  const problemPhotos = report.media?.filter((m) => !m.isResolutionPhoto) || [];
+  const resolutionPhotos = report.media?.filter((m) => m.isResolutionPhoto) || [];
 
-      <main className="flex-1 container mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Navigation Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-[#64748B] mb-6 font-medium">
-          <Link href="/dashboard" className="hover:text-[#0891B2] transition-colors">
-            لوحة التحكم
+  const createdDateTime = formatClearArabicDateTime(report.createdAt);
+
+  return (
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900" dir="rtl">
+      {/* Light Top Navigation Bar for Report Detail */}
+      <header className="h-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/80 flex items-center justify-between sticky top-0 z-20 shadow-xs">
+        <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-2 group transition-opacity hover:opacity-90">
+            <MadinatyLogo variant="dark" priority className="h-8 w-auto object-contain" />
           </Link>
-          <span>/</span>
-          <span>البلاغات</span>
-          <span>/</span>
-          <span className="font-mono text-[#142D4E] font-bold">{report.publicReference}</span>
+          <div className="h-5 w-[1px] bg-slate-200 mx-1 hidden sm:block" />
+          <span className="text-xs sm:text-sm font-bold text-slate-800 hidden sm:inline">تفاصيل وتحديثات البلاغ</span>
         </div>
+
+        <div className="flex items-center gap-2.5">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-cyan-50 hover:text-[#0891B2] hover:border-cyan-200 text-xs font-bold text-slate-700 transition-all shadow-xs"
+          >
+            <svg className="w-3.5 h-3.5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+            <span>لوحة التحكم</span>
+          </Link>
+
+          <NotificationBell variant="light" />
+
+          {session?.user && (
+            <div className="flex items-center gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-2.5 py-1 text-xs">
+              <div className="h-6 w-6 rounded-full bg-[#0891B2] text-white flex items-center justify-center font-bold text-[11px]">
+                {session.user.name?.[0]?.toUpperCase() || session.user.email?.[0]?.toUpperCase() || "م"}
+              </div>
+              <span className="font-semibold text-slate-800 hidden sm:inline max-w-[130px] truncate">
+                {session.user.name || session.user.email}
+              </span>
+            </div>
+          )}
+        </div>
+      </header>
+
+      <main className="flex-1 container mx-auto max-w-7xl px-3.5 py-6 sm:px-6 lg:px-8 space-y-6">
+        {/* Navigation Breadcrumb */}
+        <nav aria-label="مسار التنقل" className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 font-bold text-[#0891B2] hover:text-[#0E7490] hover:underline"
+          >
+            <svg className="w-3.5 h-3.5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+            <span>لوحة التحكم</span>
+          </Link>
+          <span className="text-slate-300">/</span>
+          <span>البلاغات</span>
+          <span className="text-slate-300">/</span>
+          <span className="font-mono text-slate-800 font-bold">{report.publicReference}</span>
+        </nav>
 
         {/* Global Feedback Banners */}
         {errorMessage && (
-          <div className="mb-6 rounded-xl border border-[#FECACA] bg-[#FEF2F2] p-4 text-xs font-semibold text-[#B91C1C]">
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-800 animate-in fade-in">
             {errorMessage}
           </div>
         )}
         {successMessage && (
-          <div className="mb-6 rounded-xl border border-[#A7F3D0] bg-[#ECFDF5] p-4 text-xs font-semibold text-[#047857]">
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-semibold text-emerald-800 animate-in fade-in">
             {successMessage}
           </div>
         )}
 
         {/* Citizen Action Callout: WAITING_FOR_RESIDENT */}
         {isReporter && report.status === ReportStatus.WAITING_FOR_RESIDENT && (
-          <div className="mb-8 rounded-2xl border-2 border-amber-300 bg-amber-50 p-6 shadow-sm">
-            <div className="flex items-start gap-4">
-              <div className="h-10 w-10 rounded-full bg-amber-200 text-amber-800 flex items-center justify-center shrink-0 font-bold text-lg">
-                !
+          <div className="rounded-2xl border-2 border-amber-300 bg-amber-50/90 p-5 sm:p-6 shadow-sm">
+            <div className="flex items-start gap-3.5">
+              <div className="h-10 w-10 rounded-xl bg-amber-200 text-amber-900 flex items-center justify-center shrink-0 font-bold text-lg">
+                <svg className="w-5 h-5 text-amber-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
               </div>
-              <div className="flex-1">
-                <h2 className="text-base font-bold text-amber-900 mb-1">
+              <div className="flex-1 space-y-2">
+                <h2 className="text-sm sm:text-base font-bold text-amber-900">
                   مطلوب توضيح إضافي لاستكمال معالجة البلاغ
                 </h2>
-                <p className="text-xs text-amber-800 mb-4 leading-relaxed">
+                <p className="text-xs text-amber-800 leading-relaxed">
                   قامت الجهة المختصة بطلب معلومات إضافية أو تدقيق في تفاصيل الموقع لتتمكن فرق العمل من إنجاز المهمة. يرجى تزويدهم بالتفاصيل أدناه.
                 </p>
 
-                <form onSubmit={handleClarificationSubmit} className="space-y-3">
+                <form onSubmit={handleClarificationSubmit} className="space-y-3 pt-2">
                   <textarea
                     rows={3}
                     value={clarificationBody}
                     onChange={(e) => setClarificationBody(e.target.value)}
                     placeholder="اكتب التوضيح المطلوب هنا (مثال: الشارع المتفرع من شارع النصر بجوار الصيدلية)..."
-                    className="w-full rounded-xl border border-amber-300 bg-white p-3 text-xs text-slate-800 placeholder-slate-400 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+                    className="w-full rounded-xl border border-amber-300 bg-white p-3 text-xs text-slate-900 placeholder-slate-400 focus:border-amber-600 focus:ring-1 focus:ring-amber-600 shadow-xs"
                     required
                   />
                   <div className="flex justify-end">
                     <button
                       type="submit"
                       disabled={submittingClarification}
-                      className="rounded-xl bg-amber-700 px-5 py-2 text-xs font-bold text-white hover:bg-amber-800 disabled:opacity-50 transition-colors shadow-xs"
+                      className="rounded-xl bg-amber-700 hover:bg-amber-800 px-5 py-2.5 text-xs font-bold text-white disabled:opacity-50 transition-colors shadow-xs"
                     >
                       {submittingClarification ? "جاري الإرسال..." : "إرسال التوضيح واستئناف البلاغ"}
                     </button>
@@ -523,75 +665,132 @@ function ReportDetailContent({
           </div>
         )}
 
-        {/* Top Header Card */}
-        <div className="rounded-xl border border-[#CBD5E1] bg-white p-6 shadow-civic-1 mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
-            <div>
-              <div className="flex flex-wrap items-center gap-2 mb-2">
-                <span className="font-mono text-sm font-bold text-[#0891B2] bg-cyan-50 px-3 py-1 rounded-md border border-cyan-200">
-                  {report.publicReference}
-                </span>
-                <span
-                  className={`badge-civic-pill ${
-                    report.status === ReportStatus.RESOLVED
-                      ? "badge-status-resolved"
-                      : report.status === ReportStatus.REJECTED
-                      ? "badge-status-rejected"
-                      : report.status === ReportStatus.IN_PROGRESS
-                      ? "badge-status-in-progress"
-                      : report.status === ReportStatus.WAITING_FOR_RESIDENT
-                      ? "badge-workflow-condition"
-                      : report.status === ReportStatus.ASSIGNED
-                      ? "badge-status-assigned"
-                      : report.status === ReportStatus.UNDER_REVIEW
-                      ? "badge-status-under-review"
-                      : report.status === ReportStatus.CLOSED
-                      ? "badge-status-closed"
-                      : report.status === ReportStatus.CLOSED_NO_RESPONSE
-                      ? "badge-status-closed-no-response"
-                      : "badge-status-new"
-                  }`}
+        {/* ── TOP HERO HEADER CARD (Clean, Emoji-Free, Clear Date) ── */}
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-7 shadow-civic-1 space-y-4">
+          {/* Card Top Row: Code + Status Badge (Right) & Clear Date / Time Badge (Left) */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Reference Code Pill with SVG Copy */}
+              <div className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-[#0891B2] bg-cyan-50 border border-cyan-200/90 px-3 py-1 rounded-lg">
+                <span>{report.publicReference}</span>
+                <button
+                  type="button"
+                  onClick={handleCopyRef}
+                  className="p-1 hover:text-slate-900 text-slate-400 hover:bg-cyan-100 rounded transition-colors"
+                  title="نسخ رقم البلاغ"
+                  aria-label="نسخ"
                 >
-                  {statusMeta.labelAr}
-                </span>
-                <span className="rounded-md bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
-                  {report.category.labelAr}
-                </span>
-                {report.authority && (
-                  <span className="rounded-md bg-cyan-50 text-[#0891B2] border border-cyan-200 px-2.5 py-0.5 text-xs font-medium">
-                    {report.authority.nameAr}
-                  </span>
-                )}
-                {report.aiValidationResult && (
-                  <span
-                    className={`rounded-md px-2.5 py-0.5 text-xs font-medium border ${
-                      report.aiValidationResult === "VALID"
-                        ? "bg-[#ECFDF5] text-[#047857] border-[#A7F3D0]"
-                        : "bg-purple-50 text-purple-800 border-purple-200"
-                    }`}
-                  >
-                    🤖 {report.aiValidationResult === "VALID" ? "فحص ذكي: مطابق للبلاغات البلدية" : "فحص ذكي: قيد المراجعة البشرية"}
-                  </span>
-                )}
+                  {copiedRef ? (
+                    <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg className="w-3.5 h-3.5 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  )}
+                </button>
               </div>
-              <h1 className="text-xl sm:text-2xl font-bold text-[#142D4E] tracking-tight">
-                {report.title}
-              </h1>
+
+              {/* Status Pill */}
+              <span className={`badge-civic-pill ${statusBadgeClass(report.status)} text-[11px] font-bold`}>
+                <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70 ml-1 inline-block" />
+                <span>{statusMeta.labelAr}</span>
+              </span>
             </div>
 
-            {/* Quick Actions (Appeal / Rate) */}
+            {/* Clear, Prominent Date & Time Badge */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/90 text-xs font-semibold text-slate-700 shadow-2xs self-start sm:self-auto">
+              <svg className="w-4 h-4 text-[#0891B2] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span>تاريخ التسجيل:</span>
+              <span className="font-bold text-slate-900">{createdDateTime.date}</span>
+              <span className="text-slate-300">•</span>
+              <span className="font-mono text-slate-600 font-bold" dir="ltr">{createdDateTime.time}</span>
+            </div>
+          </div>
+
+          {/* Title & Citizen Field Description */}
+          <div className="space-y-3">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 leading-snug tracking-tight">
+              {report.title}
+            </h1>
+
+            {/* Field Description Box */}
+            <div className="rounded-xl bg-slate-50/90 border border-slate-200/80 p-3.5 sm:p-4 text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">
+              <span className="text-[11px] font-bold text-slate-400 block mb-1">الوصف الميداني المقدم من المواطن:</span>
+              <p className="text-slate-800 font-medium">{report.description || "لا يوجد وصف كتابي إضافي مرفق."}</p>
+            </div>
+
+            {/* Resolution Summary (If resolved) */}
+            {report.resolutionSummary && (
+              <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3.5 space-y-1">
+                <span className="text-[11px] font-bold text-emerald-800 flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>تقرير المعالجة الميدانية والإنجاز:</span>
+                </span>
+                <p className="text-xs text-emerald-900 leading-relaxed font-medium">
+                  {report.resolutionSummary}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Bottom Metadata Tags Ribbon (Organized & Emoji-Free) */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Category Tag */}
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold">
+                <svg className="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+                <span>{report.category.labelAr}</span>
+              </span>
+
+              {/* Authority Tag */}
+              {report.authority && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-cyan-50 text-[#0891B2] border border-cyan-200/90 text-xs font-semibold">
+                  <svg className="w-3.5 h-3.5 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  <span>{report.authority.nameAr}</span>
+                </span>
+              )}
+
+              {/* AI Validation Tag */}
+              {report.aiValidationResult && (
+                <span
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold border ${
+                    report.aiValidationResult === "VALID"
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                      : "bg-purple-50 text-purple-800 border-purple-200"
+                  }`}
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  <span>{report.aiValidationResult === "VALID" ? "فحص ذكي: مطابق للبلاغات البلدية" : "فحص ذكي: قيد المراجعة البشرية"}</span>
+                </span>
+              )}
+            </div>
+
+            {/* Quick Action Buttons for Citizens (Appeal / Rating) */}
             <div className="flex items-center gap-2">
               {isReporter && (report.status === ReportStatus.RESOLVED || report.status === ReportStatus.REJECTED) && (
                 <>
                   {isAppealWindowActive ? (
                     <button
+                      type="button"
                       onClick={() => setShowAppealModal(true)}
-                      className="rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-2 text-xs font-bold text-[#B91C1C] hover:bg-red-100 transition-colors"
+                      className="rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 px-4 py-2 text-xs font-bold text-rose-700 transition-colors shadow-xs cursor-pointer"
                     >
                       تقديم اعتراض ({daysRemaining} أيام متبقية)
                     </button>
                   ) : (
-                    <span className="text-xs text-[#64748B] font-medium">
+                    <span className="text-xs text-slate-400 font-medium">
                       انتهت مهلة الاعتراض (7 أيام)
                     </span>
                   )}
@@ -600,281 +799,141 @@ function ReportDetailContent({
 
               {isReporter && report.status === ReportStatus.RESOLVED && report.ratings.length === 0 && (
                 <button
+                  type="button"
                   onClick={() => setShowRatingModal(true)}
-                  className="rounded-lg bg-[#0891B2] hover:bg-[#0E7490] px-4 py-2 text-xs font-semibold text-white transition-colors shadow-xs cursor-pointer"
+                  className="rounded-xl bg-[#0891B2] hover:bg-[#0E7490] px-4 py-2 text-xs font-bold text-white transition-colors shadow-xs cursor-pointer inline-flex items-center gap-1.5"
                 >
-                  تقييم الخدمة وإغلاق البلاغ
+                  <svg className="w-3.5 h-3.5 text-amber-300" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  <span>تقييم الخدمة وإغلاق البلاغ</span>
                 </button>
               )}
             </div>
           </div>
-
-          {/* Description & Location */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
-            <div className="md:col-span-2">
-              <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                تفاصيل البلاغ والوصف
-              </h2>
-              <p className="text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">
-                {report.description}
-              </p>
-
-              {report.resolutionSummary && (
-                <div className="mt-6 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] p-4">
-                  <h3 className="text-xs font-bold text-[#047857] mb-1">تقرير المعالجة الميدانية:</h3>
-                  <p className="text-xs text-[#047857] leading-relaxed">
-                    {report.resolutionSummary}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 space-y-3">
-              <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                الموقع الجغرافي
-              </h2>
-
-              <div className="overflow-hidden rounded-xl">
-                <LeafletMap
-                  latitude={report.latitude}
-                  longitude={report.longitude}
-                  readOnly
-                  height="180px"
-                  showBoundaryNotice={false}
-                />
-              </div>
-
-              <div className="space-y-2 text-xs">
-                <div>
-                  <span className="text-slate-500">العنوان التقريبي:</span>
-                  <p className="font-semibold text-slate-800 mt-0.5">
-                    {report.addressText || "غير محدد بدقة"}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-slate-500">الإحداثيات:</span>
-                  <p className="font-mono text-slate-700 mt-0.5" dir="ltr">
-                    {report.latitude.toFixed(6)}, {report.longitude.toFixed(6)}
-                  </p>
-                </div>
-                <div className="pt-1">
-                  <a
-                    href={`https://maps.google.com/?q=${report.latitude},${report.longitude}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-[#0891B2] font-bold hover:underline"
-                  >
-                    عرض على خرائط Google ↗
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Media Attachments Gallery */}
-          {report.media && report.media.length > 0 && (
-            <div className="mt-6 pt-6 border-t border-slate-100">
-              <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
-                الصور والمرفقات الميدانية ({report.media.length})
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                {report.media.map((img) => (
-                  <div
-                    key={img.id}
-                    className="group relative rounded-xl overflow-hidden border border-slate-200 bg-slate-100 aspect-square"
-                  >
-                    {/* Secure authorized media endpoint */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={`/api/media/${img.id}`}
-                      alt="مرفق البلاغ"
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                      loading="lazy"
-                    />
-                    {img.isResolutionPhoto && (
-                      <span className="absolute bottom-1 right-1 rounded-md bg-[#047857]/90 text-white text-[10px] px-1.5 py-0.5 font-bold">
-                        صورة الإصلاح
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Staff Transition & Management Toolbar */}
-        {isStaffOrAdmin && (
-          <div className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
-            <h2 className="text-sm font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 flex items-center justify-between">
-              <span>إدارة حالة البلاغ (خاص بالجهة المختصة)</span>
-              <span className="text-xs font-normal text-slate-500">
-                إصدار السجل: <span className="font-mono font-bold">{report.version}</span>
-              </span>
-            </h2>
+        {/* ── 2-COLUMN RESPONSIVE ARCHITECTURE ───────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            <form onSubmit={handleTransitionSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    الانتقال إلى مرحلة جديدة
-                  </label>
-                  {(() => {
-                    const availableTransitions = ALLOWED_TRANSITIONS.filter(
-                      (t) =>
-                        t.from === report.status &&
-                        (Array.isArray(t.allowedRoles) ? t.allowedRoles.includes(userRole) : false)
-                    );
+          {/* ── MAIN COLUMN (2 Cols on Desktop: Media, Updates, Timeline) ── */}
+          <div className="lg:col-span-2 space-y-6">
 
-                    return availableTransitions.length === 0 ? (
-                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-500">
-                        لا توجد مراحل تالية متاحة للبلاغ من حالته الحالية ({report.status}).
-                      </div>
-                    ) : (
-                      <select
-                        value={selectedNextStatus}
-                        onChange={(e) => setSelectedNextStatus(e.target.value as ReportStatus)}
-                        className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-800 font-semibold focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2]"
-                        required
-                      >
-                        <option value="">-- اختر الحالة الجديدة المتاحة --</option>
-                        {availableTransitions.map((rule) => (
-                          <option key={rule.to} value={rule.to}>
-                            {REPORT_STATUS_METADATA[rule.to]?.labelAr || rule.to} ({rule.to})
-                            {rule.requiresReason ? " [يتطلب سبباً]" : ""}
-                            {rule.requiresEvidence ? " [يتطلب إثباتاً]" : ""}
-                          </option>
+            {/* 2. Photo Documentation Gallery */}
+            <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-civic-1 space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <svg className="w-4 h-4 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>التوثيق المصور المرفق ({report.media?.length || 0})</span>
+                </h2>
+                {report.media && report.media.length > 0 && (
+                  <span className="text-[11px] text-slate-400">انقر على أي صورة لتكبيرها</span>
+                )}
+              </div>
+
+              {(!report.media || report.media.length === 0) ? (
+                <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center bg-slate-50/50">
+                  <p className="text-xs font-semibold text-slate-500">لم يرفق المواطن صوراً ميدانية مع هذا البلاغ</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Problem Photos */}
+                  {problemPhotos.length > 0 && (
+                    <div>
+                      <span className="text-[11px] font-bold text-slate-600 block mb-2">صور المشكلة (قبل البدء):</span>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {problemPhotos.map((m) => (
+                          <div
+                            key={m.id}
+                            onClick={() => setSelectedPhoto(`/api/media/${m.id}`)}
+                            className="group relative aspect-4/3 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 cursor-pointer shadow-xs hover:border-[#0891B2] transition-all"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={`/api/media/${m.id}`}
+                              alt="صورة المشكلة"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                              loading="lazy"
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors flex items-center justify-center">
+                              <span className="opacity-0 group-hover:opacity-100 text-white text-[11px] font-bold bg-black/60 px-2.5 py-1 rounded-md transition-opacity">
+                                تكبير
+                              </span>
+                            </div>
+                          </div>
                         ))}
-                      </select>
-                    );
-                  })()}
-                </div>
+                      </div>
+                    </div>
+                  )}
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    سبب الانتقال / الملاحظة
-                  </label>
-                  <input
-                    type="text"
-                    value={transitionReason}
-                    onChange={(e) => setTransitionReason(e.target.value)}
-                    placeholder="مثال: وصول فرقة الصيانة إلى الموقع..."
-                    className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-800 focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2]"
-                  />
-                </div>
-              </div>
-
-              {/* Optional documentation when transitioning to RESOLVED */}
-              {selectedNextStatus === ReportStatus.RESOLVED && (
-                <div className="rounded-xl border border-[#A7F3D0] bg-[#ECFDF5]/50 p-4 space-y-3">
-                  <h3 className="text-xs font-bold text-[#047857]">
-                    توثيق المعالجة والإصلاح (اختياري)
-                  </h3>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      وصف الأعمال المنفذة والإصلاح (اختياري)
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={repairDescription}
-                      onChange={(e) => setRepairDescription(e.target.value)}
-                      placeholder="صف ما تم إنجازه (اختياري)..."
-                      className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-800"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      رفع صور الإثبات الميداني بعد الإصلاح (اختياري)
-                    </label>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      multiple
-                      onChange={handleEvidenceUpload}
-                      disabled={isUploadingEvidence}
-                      className="block w-full text-xs text-slate-500 file:mr-0 file:ml-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#0891B2] file:text-white hover:file:bg-[#0E7490] cursor-pointer"
-                    />
-                    {evidenceMediaIds.length > 0 && (
-                      <p className="mt-1 text-[11px] font-bold text-[#047857]">
-                        تم تجهيز {evidenceMediaIds.length} صورة إثبات معتمدة.
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              <div className="flex justify-end pt-2">
-                <button
-                  type="submit"
-                  disabled={submittingTransition || !selectedNextStatus}
-                  className="rounded-xl bg-slate-900 px-6 py-2.5 text-xs font-bold text-white hover:bg-slate-800 disabled:opacity-50 transition-colors shadow-xs"
-                >
-                  {submittingTransition ? "جاري التحديث..." : "حفظ الانتقال رسمياً"}
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* Timeline & Discussion Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Status History Timeline */}
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-civic-1">
-            <h2 className="text-sm font-bold text-slate-900 mb-6 pb-2 border-b border-slate-100">
-              سجل المراحل والتدقيق الميداني (Timeline)
-            </h2>
-
-            <div className="relative border-r-2 border-slate-200 mr-3 pr-6 space-y-6">
-              {report.statusHistory.map((item) => (
-                <div key={item.id} className="relative group">
-                  {/* Timeline bullet dot */}
-                  <div className="absolute -right-[31px] top-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-[#0891B2] ring-2 ring-[#0891B2]/20" />
-
-                  <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-                    <span className="font-semibold text-slate-700">
-                      {REPORT_STATUS_METADATA[item.toStatus]?.labelAr || item.toStatus}
-                    </span>
-                    <time className="font-mono text-[11px]">
-                      {new Date(item.createdAt).toLocaleString("ar-EG", {
-                        dateStyle: "short",
-                        timeStyle: "short",
-                      })}
-                    </time>
-                  </div>
-
-                  {item.reason && (
-                    <p className="text-xs text-slate-600 bg-[#f8fafc] rounded-lg p-2.5 mt-1 border border-slate-100">
-                      {item.reason}
-                    </p>
+                  {/* Resolution Photos */}
+                  {resolutionPhotos.length > 0 && (
+                    <div>
+                      <span className="text-[11px] font-bold text-emerald-800 block mb-2">توثيق الإصلاح الميداني (بعد المعالجة):</span>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {resolutionPhotos.map((m) => (
+                          <div
+                            key={m.id}
+                            onClick={() => setSelectedPhoto(`/api/media/${m.id}`)}
+                            className="group relative aspect-4/3 rounded-xl overflow-hidden border-2 border-emerald-300 bg-emerald-50 cursor-pointer shadow-xs hover:border-emerald-500 transition-all"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={`/api/media/${m.id}`}
+                              alt="توثيق الإصلاح"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                              loading="lazy"
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors flex items-center justify-center">
+                              <span className="opacity-0 group-hover:opacity-100 text-white text-[11px] font-bold bg-black/60 px-2.5 py-1 rounded-md transition-opacity">
+                                تكبير
+                              </span>
+                            </div>
+                            <span className="absolute bottom-1 right-1 rounded-md bg-emerald-700 text-white text-[10px] px-1.5 py-0.5 font-bold flex items-center gap-1">
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span>تم الإصلاح</span>
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
-              ))}
+              )}
             </div>
-          </div>
 
-          {/* Public Updates & Clarifications Thread */}
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-civic-1 flex flex-col justify-between">
-            <div>
-              <h2 className="text-sm font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100">
-                التحديثات والتوضيحات العامة
+            {/* 3. Public Updates & Thread */}
+            <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-civic-1 space-y-4">
+              <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <svg className="w-4 h-4 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                التحديثات والتواصل الميداني
               </h2>
 
               {report.updates.length === 0 ? (
-                <div className="py-12 text-center text-xs text-slate-400">
-                  لا توجد استفسارات أو توضيحات إضافية مسجلة بعد.
+                <div className="py-8 text-center text-xs text-slate-400 bg-slate-50/50 rounded-xl border border-slate-100">
+                  لا توجد استفسارات أو تعقيبات إضافية مسجلة بعد.
                 </div>
               ) : (
-                <div className="space-y-4 max-h-96 overflow-y-auto pr-1">
+                <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
                   {report.updates.map((update) => (
                     <div
                       key={update.id}
-                      className="rounded-lg border border-slate-100 bg-[#f8fafc] p-3 text-xs"
+                      className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 text-xs space-y-1.5"
                     >
-                      <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1.5 font-medium">
-                        <span className="font-bold text-slate-800">
-                          {update.author.name || "مستخدم"} ({update.author.role === "CITIZEN" ? "المواطن" : "الجهة المختصة"})
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
+                        <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                          <span>{update.author.name || "مستخدم"}</span>
+                          <span className="text-[10px] text-[#0891B2] bg-cyan-50 px-1.5 py-0.5 rounded font-mono">
+                            {update.author.role === "CITIZEN" ? "المواطن" : "الجهة المختصة"}
+                          </span>
                         </span>
-                        <time className="font-mono">
+                        <time className="font-mono text-[10px]">
                           {new Date(update.createdAt).toLocaleTimeString("ar-EG", {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -888,110 +947,357 @@ function ReportDetailContent({
                   ))}
                 </div>
               )}
-            </div>
 
-            {/* General Clarification Box (available to reporter and staff anytime) */}
-            <form onSubmit={handleClarificationSubmit} className="mt-4 pt-4 border-t border-slate-100 space-y-2">
-              <input
-                type="text"
-                value={clarificationBody}
-                onChange={(e) => setClarificationBody(e.target.value)}
-                placeholder="أضف تعقيباً أو تفصيلاً جديداً..."
-                className="w-full rounded-lg border border-[#CBD5E1] bg-white p-2.5 text-xs text-slate-800 focus:border-[#0891B2] focus:outline-none focus:ring-1 focus:ring-[#0891B2]"
-              />
-              <div className="flex justify-end">
+              {/* Add Clarification Box */}
+              <form onSubmit={handleClarificationSubmit} className="pt-2 flex gap-2">
+                <input
+                  type="text"
+                  value={clarificationBody}
+                  onChange={(e) => setClarificationBody(e.target.value)}
+                  placeholder="أضف تعقيباً أو تفصيلاً جديداً..."
+                  className="flex-1 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-[#0891B2] focus:outline-none focus:ring-1 focus:ring-[#0891B2] shadow-xs"
+                />
                 <button
                   type="submit"
                   disabled={submittingClarification || !clarificationBody.trim()}
-                  className="rounded-lg bg-[#0891B2] hover:bg-[#0E7490] px-4 py-2 text-xs font-semibold text-white disabled:opacity-50 transition-colors cursor-pointer"
+                  className="rounded-xl bg-[#0891B2] hover:bg-[#0E7490] active:bg-[#155E75] px-4 py-2 text-xs font-bold text-white disabled:opacity-40 transition-colors shadow-xs cursor-pointer shrink-0"
                 >
-                  إرسال تعقيب
+                  إرسال
                 </button>
-              </div>
-            </form>
-          </div>
-        </div>
+              </form>
+            </div>
 
-        {/* Staff Only: Internal Notes Section */}
-        {isStaffOrAdmin && (
-          <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-xs">
-            <h2 className="text-sm font-bold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center justify-between">
-              <span>ملاحظات العمل الداخلية (خاصة بالموظفين والإدارة فقط — غير مرئية للمواطن)</span>
-              <span className="text-xs text-rose-600 font-semibold">سري داخلي</span>
-            </h2>
+            {/* 4. Lifecycle Timeline Card */}
+            <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-civic-1 space-y-4">
+              <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <svg className="w-4 h-4 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                سجل المراحل والتدقيق الميداني (Audit Timeline)
+              </h2>
 
-            {report.internalNotes && report.internalNotes.length > 0 ? (
-              <div className="space-y-3 mb-4">
-                {report.internalNotes.map((note) => (
-                  <div key={note.id} className="rounded-xl bg-white p-3 border border-slate-200 text-xs">
-                    <div className="flex justify-between items-center text-[11px] text-slate-500 mb-1">
-                      <span className="font-bold text-slate-800">{note.author.name || "موظف"}</span>
-                      <time className="font-mono">
-                        {new Date(note.createdAt).toLocaleString("ar-EG", {
+              <div className="relative border-r-2 border-slate-200 mr-2 pr-5 space-y-5 pt-1">
+                {report.statusHistory.map((item) => (
+                  <div key={item.id} className="relative group">
+                    {/* Bullet */}
+                    <div className="absolute -right-[27px] top-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-[#0891B2] ring-2 ring-cyan-100" />
+
+                    <div className="flex items-center justify-between text-xs text-slate-500 mb-1 flex-wrap gap-1">
+                      <span className="font-bold text-slate-800">
+                        {REPORT_STATUS_METADATA[item.toStatus]?.labelAr || item.toStatus}
+                      </span>
+                      <time className="font-mono text-[10px] text-slate-400">
+                        {new Date(item.createdAt).toLocaleString("ar-EG", {
                           dateStyle: "short",
                           timeStyle: "short",
                         })}
                       </time>
                     </div>
-                    <p className="text-slate-700 leading-relaxed">{note.body}</p>
+
+                    {item.reason && (
+                      <p className="text-xs text-slate-600 bg-slate-50 rounded-xl p-2.5 mt-1 border border-slate-100 leading-relaxed">
+                        {item.reason}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
-            ) : (
-              <p className="text-xs text-slate-400 mb-4">لا توجد ملاحظات داخلية مسجلة بعد.</p>
-            )}
-
-            <form onSubmit={handleInternalNoteSubmit} className="flex gap-2">
-              <input
-                type="text"
-                value={internalNoteBody}
-                onChange={(e) => setInternalNoteBody(e.target.value)}
-                placeholder="اكتب ملاحظة فنية أو إدارية داخلية للزملاء..."
-                className="flex-1 rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-800 focus:border-slate-700"
-              />
-              <button
-                type="submit"
-                disabled={submittingNote || !internalNoteBody.trim()}
-                className="rounded-xl bg-slate-800 px-4 py-2 text-xs font-bold text-white hover:bg-slate-900 disabled:opacity-50 transition-colors"
-              >
-                إضافة ملاحظة
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* Citizen Rating Information Display */}
-        {report.ratings.length > 0 && (
-          <div className="mt-8 rounded-2xl border border-[#A7F3D0] bg-[#ECFDF5]/60 p-6 shadow-xs">
-            <h2 className="text-sm font-bold text-[#047857] mb-2">
-              تقييم المواطن لخدمة الإصلاح
-            </h2>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="flex text-amber-500 text-lg">
-                {"★".repeat(report.ratings[0].score)}
-                {"☆".repeat(5 - report.ratings[0].score)}
-              </div>
-              <span className="text-xs font-bold text-[#047857] font-mono">
-                ({report.ratings[0].score} من 5)
-              </span>
             </div>
-            {report.ratings[0].comment && (
-              <p className="text-xs text-[#047857] italic">
-                &ldquo;{report.ratings[0].comment}&rdquo;
-              </p>
-            )}
+
           </div>
-        )}
+
+          {/* ── SIDE RAIL (1 Col on Desktop: Location, Actions Console, Internal Notes) ── */}
+          <div className="space-y-6">
+
+            {/* 1. Geographic Location Card */}
+            <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-civic-1 space-y-3.5">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <svg className="w-4 h-4 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  الموقع الجغرافي الميداني
+                </h2>
+              </div>
+
+              {/* Map */}
+              <div className="overflow-hidden rounded-xl border border-slate-200 shadow-xs">
+                <LeafletMap
+                  latitude={report.latitude}
+                  longitude={report.longitude}
+                  readOnly
+                  height="190px"
+                  showBoundaryNotice={false}
+                />
+              </div>
+
+              {/* Address & Navigation */}
+              <div className="space-y-2 text-xs pt-1">
+                <div>
+                  <span className="text-[11px] text-slate-400 block font-medium">العنوان التقريبي:</span>
+                  <p className="font-bold text-slate-800 mt-0.5">
+                    {report.addressText || "غير محدد بدقة"}
+                  </p>
+                </div>
+
+                <div>
+                  <span className="text-[11px] text-slate-400 block font-medium">الإحداثيات الجغرافية:</span>
+                  <p className="font-mono text-slate-600 mt-0.5 text-[11px]" dir="ltr">
+                    {report.latitude.toFixed(6)}, {report.longitude.toFixed(6)}
+                  </p>
+                </div>
+
+                <div className="pt-2">
+                  <a
+                    href={`https://maps.google.com/?q=${report.latitude},${report.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-slate-100 hover:bg-cyan-50 hover:text-[#0891B2] hover:border-cyan-200 border border-slate-200 py-2.5 text-xs font-bold text-slate-700 transition-colors shadow-xs"
+                  >
+                    <span>فتح الملاحة عبر خرائط Google</span>
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Staff/Admin Transition & Operations Console */}
+            {isStaffOrAdmin && (
+              <div className="rounded-2xl border border-cyan-200/90 bg-gradient-to-b from-cyan-50/40 to-white p-5 shadow-civic-1 space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <svg className="w-4 h-4 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    إدارة المعالجة والحالة الميدانية
+                  </h2>
+                  <span className="text-[10px] text-slate-400 font-mono">v{report.version}</span>
+                </div>
+
+                <form onSubmit={handleTransitionSubmit} className="space-y-3.5">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      المرحلة الميدانية التالية
+                    </label>
+                    {(() => {
+                      const availableTransitions = ALLOWED_TRANSITIONS.filter(
+                        (t) =>
+                          t.from === report.status &&
+                          (Array.isArray(t.allowedRoles) ? t.allowedRoles.includes(userRole) : false)
+                      );
+
+                      return availableTransitions.length === 0 ? (
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-500 font-medium">
+                          لا توجد مراحل تالية متاحة للبلاغ من حالته الحالية.
+                        </div>
+                      ) : (
+                        <select
+                          value={selectedNextStatus}
+                          onChange={(e) => setSelectedNextStatus(e.target.value as ReportStatus)}
+                          className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-800 font-semibold focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] shadow-xs cursor-pointer"
+                          required
+                        >
+                          <option value="">-- اختر الحالة الجديدة --</option>
+                          {availableTransitions.map((rule) => (
+                            <option key={rule.to} value={rule.to}>
+                              {REPORT_STATUS_METADATA[rule.to]?.labelAr || rule.to}
+                              {rule.requiresReason ? " [يتطلب سبباً]" : ""}
+                              {rule.requiresEvidence ? " [يتطلب إثباتاً]" : ""}
+                            </option>
+                          ))}
+                        </select>
+                      );
+                    })()}
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      سبب التحويل / الملاحظة
+                    </label>
+                    <input
+                      type="text"
+                      value={transitionReason}
+                      onChange={(e) => setTransitionReason(e.target.value)}
+                      placeholder="مثال: وصول فرقة الصيانة إلى الموقع..."
+                      className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-900 focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] shadow-xs"
+                    />
+                  </div>
+
+                  {/* Resolution fields when selecting RESOLVED */}
+                  {selectedNextStatus === ReportStatus.RESOLVED && (
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3.5 space-y-3">
+                      <h3 className="text-xs font-bold text-emerald-800">
+                        توثيق الإصلاح الميداني
+                      </h3>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          وصف الأعمال المنفذة (اختياري)
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={repairDescription}
+                          onChange={(e) => setRepairDescription(e.target.value)}
+                          placeholder="صف ما تم إنجازه..."
+                          className="w-full rounded-xl border border-slate-300 bg-white p-2 text-xs text-slate-900 shadow-xs resize-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          رفع صور الإثبات بعد الإصلاح
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          multiple
+                          onChange={handleEvidenceUpload}
+                          disabled={isUploadingEvidence}
+                          className="block w-full text-xs text-slate-500 file:mr-0 file:ml-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#0891B2] file:text-white cursor-pointer"
+                        />
+                        {evidenceMediaIds.length > 0 && (
+                          <p className="mt-1 text-[10px] font-bold text-emerald-800">
+                            تم تجهيز {evidenceMediaIds.length} صورة إثبات.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={submittingTransition || !selectedNextStatus}
+                    className="w-full rounded-xl bg-[#0891B2] hover:bg-[#0E7490] active:bg-[#155E75] py-2.5 text-xs font-bold text-white disabled:opacity-40 transition-colors shadow-xs cursor-pointer"
+                  >
+                    {submittingTransition ? "جاري الحفظ والتحديث..." : "تأكيد تحديث الحالة"}
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {/* 3. Internal Notes Panel (Staff Only) */}
+            {isStaffOrAdmin && (
+              <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-civic-1 space-y-3.5">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    الملاحظات الداخلية للفريق
+                  </h2>
+                  <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded font-bold">
+                    سري داخلي
+                  </span>
+                </div>
+
+                {report.internalNotes && report.internalNotes.length > 0 ? (
+                  <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
+                    {report.internalNotes.map((note) => (
+                      <div key={note.id} className="rounded-xl bg-slate-50 p-3 border border-slate-200/70 text-xs space-y-1">
+                        <div className="flex justify-between items-center text-[10px] text-slate-500 font-medium">
+                          <span className="font-bold text-slate-800">{note.author.name || "موظف"}</span>
+                          <time className="font-mono text-slate-400">
+                            {new Date(note.createdAt).toLocaleString("ar-EG", {
+                              dateStyle: "short",
+                              timeStyle: "short",
+                            })}
+                          </time>
+                        </div>
+                        <p className="text-slate-700 leading-relaxed">{note.body}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 py-2">لا توجد ملاحظات داخلية بعد.</p>
+                )}
+
+                <form onSubmit={handleInternalNoteSubmit} className="pt-1 flex gap-2">
+                  <input
+                    type="text"
+                    value={internalNoteBody}
+                    onChange={(e) => setInternalNoteBody(e.target.value)}
+                    placeholder="ملاحظة فنية أو إدارية..."
+                    className="flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-slate-700 shadow-xs"
+                  />
+                  <button
+                    type="submit"
+                    disabled={submittingNote || !internalNoteBody.trim()}
+                    className="rounded-xl bg-slate-800 hover:bg-slate-900 px-3.5 py-2 text-xs font-bold text-white disabled:opacity-40 transition-colors shadow-xs cursor-pointer shrink-0"
+                  >
+                    إضافة
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {/* 4. Citizen Rating Showcase (If already rated) */}
+            {report.ratings.length > 0 && (
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5 shadow-civic-1 space-y-2">
+                <h2 className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+                  <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  <span>تقييم المواطن لجودة الخدمة</span>
+                </h2>
+                <div className="flex items-center gap-2">
+                  <div className="flex text-amber-500 text-base">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span key={star} className={report.ratings[0].score >= star ? "text-amber-500" : "text-slate-300"}>
+                        ★
+                      </span>
+                    ))}
+                  </div>
+                  <span className="text-xs font-bold text-emerald-900 font-mono">
+                    ({report.ratings[0].score} من 5)
+                  </span>
+                </div>
+                {report.ratings[0].comment && (
+                  <p className="text-xs text-emerald-800 italic pt-1 leading-relaxed">
+                    &ldquo;{report.ratings[0].comment}&rdquo;
+                  </p>
+                )}
+              </div>
+            )}
+
+          </div>
+
+        </div>
       </main>
 
-      {/* Appeal Submission Modal */}
+      {/* ── IMAGE ZOOM LIGHTBOX MODAL ─────────────────────────────── */}
+      {selectedPhoto && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 cursor-zoom-out animate-in fade-in duration-200"
+          onClick={() => setSelectedPhoto(null)}
+        >
+          <div className="relative max-w-4xl max-h-[85vh] w-full h-full flex items-center justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={selectedPhoto}
+              alt="صورة مكبرة"
+              className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => setSelectedPhoto(null)}
+            className="absolute top-5 right-5 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full h-10 w-10 flex items-center justify-center text-lg font-bold transition-colors cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* ── APPEAL SUBMISSION MODAL ──────────────────────────────── */}
       {showAppealModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl border border-slate-200">
-            <h3 className="text-lg font-bold text-slate-900 mb-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4" dir="rtl">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900">
               تقديم اعتراض رسمي على نتيجة البلاغ
             </h3>
-            <p className="text-xs text-slate-600 mb-4 leading-relaxed">
+            <p className="text-xs text-slate-600 leading-relaxed">
               وفقاً لحوكمة المنصة، يحق للمواطن الاعتراض خلال 7 أيام من تاريخ المعالجة أو الرفض. سيتم تحويل البلاغ للمراجعة والتدقيق الإداري.
             </p>
 
@@ -1004,24 +1310,24 @@ function ReportDetailContent({
                   rows={4}
                   value={appealReason}
                   onChange={(e) => setAppealReason(e.target.value)}
-                  placeholder="اشرح بدقة لماذا تعتبر المعالجة غير مكتملة أو لماذا تعترض على الرفض..."
-                  className="w-full rounded-xl border border-slate-300 p-3 text-xs text-slate-800 focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                  placeholder="اشرح بدقة لماذا تعتبر المعالجة غير مكتملة أو لماذا تعترض على القرار..."
+                  className="w-full rounded-xl border border-slate-300 p-3 text-xs text-slate-900 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 shadow-xs"
                   required
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() => setShowAppealModal(false)}
-                  className="rounded-xl border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                  className="rounded-xl border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition-colors"
                 >
                   إلغاء
                 </button>
                 <button
                   type="submit"
                   disabled={submittingAppeal || appealReason.trim().length < 10}
-                  className="rounded-xl bg-rose-600 px-5 py-2 text-xs font-bold text-white hover:bg-rose-700 disabled:opacity-50"
+                  className="rounded-xl bg-rose-600 hover:bg-rose-700 px-5 py-2 text-xs font-bold text-white disabled:opacity-50 transition-colors shadow-xs"
                 >
                   {submittingAppeal ? "جاري الإرسال..." : "تأكيد تقديم الاعتراض"}
                 </button>
@@ -1031,15 +1337,15 @@ function ReportDetailContent({
         </div>
       )}
 
-      {/* Rating Submission Modal */}
+      {/* ── RATING SUBMISSION MODAL ──────────────────────────────── */}
       {showRatingModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-slate-200">
-            <h3 className="text-lg font-bold text-slate-900 mb-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4" dir="rtl">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900">
               تقييم جودة المعالجة والإصلاح
             </h3>
-            <p className="text-xs text-slate-600 mb-4">
-              رأيك يساهم في قياس أداء الجهات البلدية ومؤشرات جودة الحياة. إرسال التقييم سيؤكد إغلاق البلاغ نهائياً.
+            <p className="text-xs text-slate-600 leading-relaxed">
+              رأيك يساهم في قياس أداء الجهات البلدية ومؤشرات جودة الخدمات. إرسال التقييم سيؤكد إغلاق البلاغ نهائياً.
             </p>
 
             <form onSubmit={handleRatingSubmit} className="space-y-4">
@@ -1047,16 +1353,16 @@ function ReportDetailContent({
                 <label className="block text-xs font-bold text-slate-700 mb-2">
                   درجة الرضا العام
                 </label>
-                <div className="flex gap-2">
+                <div className="flex gap-2 justify-center py-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
                       type="button"
                       onClick={() => setRatingScore(star)}
-                      className={`h-10 w-10 rounded-xl text-xl font-bold transition-colors ${
+                      className={`h-11 w-11 rounded-xl text-2xl font-bold transition-all cursor-pointer ${
                         ratingScore >= star
-                          ? "bg-amber-100 text-amber-600 border border-amber-300"
-                          : "bg-slate-100 text-slate-400 border border-slate-200"
+                          ? "bg-amber-100 text-amber-500 border border-amber-300 scale-105"
+                          : "bg-slate-100 text-slate-300 border border-slate-200 hover:bg-slate-200"
                       }`}
                     >
                       ★
@@ -1074,22 +1380,22 @@ function ReportDetailContent({
                   value={ratingComment}
                   onChange={(e) => setRatingComment(e.target.value)}
                   placeholder="اكتب ملاحظاتك حول سرعة أو جودة الخدمة..."
-                  className="w-full rounded-xl border border-slate-300 p-3 text-xs text-slate-800"
+                  className="w-full rounded-xl border border-slate-300 p-3 text-xs text-slate-900 focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] shadow-xs"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() => setShowRatingModal(false)}
-                  className="rounded-xl border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                  className="rounded-xl border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition-colors"
                 >
                   إلغاء
                 </button>
                 <button
                   type="submit"
                   disabled={submittingRating}
-                  className="rounded-xl bg-[#0891B2] px-5 py-2 text-xs font-bold text-white hover:bg-[#0E7490] disabled:opacity-50"
+                  className="rounded-xl bg-[#0891B2] hover:bg-[#0E7490] px-5 py-2 text-xs font-bold text-white disabled:opacity-50 transition-colors shadow-xs"
                 >
                   {submittingRating ? "جاري الإرسال..." : "إرسال التقييم وإغلاق البلاغ"}
                 </button>
@@ -1098,8 +1404,6 @@ function ReportDetailContent({
           </div>
         </div>
       )}
-
-      <Footer />
     </div>
   );
 }

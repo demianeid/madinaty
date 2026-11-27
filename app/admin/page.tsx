@@ -1,11 +1,11 @@
 "use client";
 
-import { useSession } from "@/lib/auth/auth-client";
+import { useSession, signOut } from "@/lib/auth/auth-client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
+import { MadinatyLogo } from "@/components/ui/madinaty-logo";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { UserRole } from "@prisma/client";
 import { Skeleton, SkeletonTable, AdminDashboardSkeleton } from "@/components/ui/skeleton";
 
@@ -191,31 +191,90 @@ export default function AdminDashboardPage() {
 
   if (sessionLoading) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#F1F5F9]" dir="rtl">
-        <Header />
+      <div className="min-h-screen flex flex-col bg-[#F1F5F9] text-slate-900" dir="rtl">
+        <header className="h-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/80 flex items-center justify-between sticky top-0 z-20 shadow-xs">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-2">
+              <MadinatyLogo variant="dark" className="h-8 w-auto object-contain" />
+            </Link>
+            <div className="h-5 w-[1px] bg-slate-200 mx-1 hidden sm:block" />
+            <span className="text-xs sm:text-sm font-bold text-slate-800">مركز الرقابة والإدارة</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-xl bg-slate-100 animate-pulse" />
+            <div className="h-8 w-24 rounded-xl bg-slate-100 animate-pulse" />
+          </div>
+        </header>
         <main className="flex-1 container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <AdminDashboardSkeleton />
         </main>
-        <Footer />
       </div>
     );
   }
 
   if (!session?.user || userRole !== UserRole.ADMIN) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#F1F5F9]" dir="rtl">
-        <Header />
+      <div className="min-h-screen flex flex-col bg-[#F1F5F9] text-slate-900" dir="rtl">
+        <header className="h-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/80 flex items-center justify-between sticky top-0 z-20 shadow-xs">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-2">
+              <MadinatyLogo variant="dark" className="h-8 w-auto object-contain" />
+            </Link>
+            <div className="h-5 w-[1px] bg-slate-200 mx-1 hidden sm:block" />
+            <span className="text-xs sm:text-sm font-bold text-slate-800">مركز الرقابة والإدارة</span>
+          </div>
+        </header>
         <main className="flex-1 container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <AdminDashboardSkeleton />
         </main>
-        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F1F5F9]" dir="rtl">
-      <Header />
+    <div className="min-h-screen flex flex-col bg-[#F1F5F9] text-slate-900" dir="rtl">
+      {/* Light Top Navigation Bar for Admin */}
+      <header className="h-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/80 flex items-center justify-between sticky top-0 z-20 shadow-xs">
+        <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-2 group transition-opacity hover:opacity-90">
+            <MadinatyLogo variant="dark" priority className="h-8 w-auto object-contain" />
+          </Link>
+          <div className="h-5 w-[1px] bg-slate-200 mx-1 hidden sm:block" />
+          <span className="text-xs sm:text-sm font-bold text-slate-800 hidden sm:inline">مركز الرقابة والإدارة المركزية</span>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-cyan-50 hover:text-[#0891B2] hover:border-cyan-200 text-xs font-bold text-slate-700 transition-all shadow-xs"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <span>لوحة العمليات</span>
+          </Link>
+
+          <NotificationBell variant="light" />
+
+          <div className="flex items-center gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-2.5 py-1 text-xs">
+            <div className="h-6 w-6 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold text-[11px]">
+              {session.user.name?.[0]?.toUpperCase() || session.user.email?.[0]?.toUpperCase() || "أ"}
+            </div>
+            <span className="font-semibold text-slate-800 hidden sm:inline max-w-[130px] truncate">
+              {session.user.name || session.user.email}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => signOut()}
+            className="text-xs text-rose-600 hover:text-rose-700 font-bold px-2.5 py-1.5 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
+            title="تسجيل الخروج"
+          >
+            خروج
+          </button>
+        </div>
+      </header>
 
       <main className="flex-1 container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Admin Banner */}
@@ -599,8 +658,6 @@ export default function AdminDashboardPage() {
           </div>
         )}
       </main>
-
-      <Footer />
     </div>
   );
 }

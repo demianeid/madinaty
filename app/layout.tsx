@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import { WebsiteBackground } from "@/components/ui/website-background";
@@ -28,7 +29,9 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" className={`${ibmPlexSansArabic.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans bg-[#0B1E38] text-slate-100 selection:bg-[#0891B2] selection:text-white relative">
-        <WebsiteBackground />
+        <Suspense fallback={null}>
+          <WebsiteBackground />
+        </Suspense>
         {children}
       </body>
     </html>

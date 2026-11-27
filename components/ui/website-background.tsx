@@ -1,21 +1,27 @@
-import React from "react";
+"use client";
+
+import React, { Suspense } from "react";
+import { usePathname } from "next/navigation";
 
 /**
  * WebsiteBackground
  * -----------------
  * Full website-wide layered background system for Madinaty.
  * Creates an organic, flowing, navy-dominant canvas inspired by the brand reference artwork.
- * Blends:
- *   - Deep Navy: #142D4E / #0B1E38 / #07101E
- *   - Primary Cyan: #0891B2 / #0E7490 / #155E75
- *   - Teal Accent: #0D9488 / #0F766E
- *   - Supporting Civic Cyan & Deep Oceanic tones
- *
- * Uses multi-layered radial gradients, soft overlapping blurred light glows,
- * and delicate organic wave paths. Hardware-accelerated CSS animations drift slowly
- * and respect prefers-reduced-motion. Stays fixed and visually stable while scrolling.
+ * Automatically disabled on dashboard, admin, and report consoles for clean civic readability.
+ * Wrapped in Suspense to prevent Next.js prerender/streaming route blocking on dynamic routes.
  */
-export function WebsiteBackground() {
+function WebsiteBackgroundContent() {
+  const pathname = usePathname();
+  const isExcluded =
+    pathname?.startsWith("/dashboard") ||
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/reports");
+
+  if (isExcluded) {
+    return null;
+  }
+
   return (
     <div
       className="fixed inset-0 pointer-events-none -z-50 overflow-hidden select-none"
@@ -58,29 +64,27 @@ export function WebsiteBackground() {
             <stop offset="0%" stopColor="#0D9488" stopOpacity="0.3" />
             <stop offset="50%" stopColor="#0891B2" stopOpacity="0.2" />
             <stop offset="85%" stopColor="#0284C7" stopOpacity="0.1" />
-            <stop offset="100%" stopColor="#142D4E" stopOpacity="0" />
+            <stop offset="100%" stopColor="#142D4E" stopOpacity="0.02" />
           </linearGradient>
         </defs>
 
         <path
-          d="M-100 380 C 250 260, 580 520, 1050 320 C 1300 210, 1480 290, 1600 340 L 1600 1050 L -100 1050 Z"
+          d="M0,280 C360,180 720,380 1080,240 C1260,170 1380,210 1440,230 L1440,1000 L0,1000 Z"
           fill="url(#madinatyWaveGrad1)"
         />
-
         <path
-          d="M-80 580 C 380 440, 720 720, 1180 480 C 1380 390, 1540 440, 1640 470 L 1640 1050 L -80 1050 Z"
+          d="M0,520 C280,440 680,620 1040,480 C1240,400 1380,460 1440,490 L1440,1000 L0,1000 Z"
           fill="url(#madinatyWaveGrad2)"
         />
       </svg>
-
-      {/* Layer 3: Soft Edge Vignette */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(7, 16, 30, 0.4) 100%)",
-        }}
-      />
     </div>
+  );
+}
+
+export function WebsiteBackground() {
+  return (
+    <Suspense fallback={null}>
+      <WebsiteBackgroundContent />
+    </Suspense>
   );
 }

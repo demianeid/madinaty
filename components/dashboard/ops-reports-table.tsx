@@ -54,7 +54,20 @@ function getSlaInfo(createdAt: string, status: ReportStatus) {
     return { label: `${days} أيام`, color: "text-amber-700 bg-amber-50 border-amber-200" };
   }
   const days = Math.floor(ageH / 24);
-  return { label: `${days} يوم ⚠`, color: "text-rose-700 bg-rose-50 border-rose-200" };
+  return { label: `${days} يوم (متأخر)`, color: "text-rose-700 bg-rose-50 border-rose-200" };
+}
+
+// ─────────────────────────────────────────────
+// Date format helper
+// ─────────────────────────────────────────────
+function formatReportDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString("ar-EG", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 // ─────────────────────────────────────────────
@@ -106,7 +119,6 @@ function StatusPopover({
   const [error, setError] = useState("");
   const ref = useRef<HTMLDivElement>(null);
 
-  // Available transitions for this role from current status
   const available = ALLOWED_TRANSITIONS.filter(
     (t) =>
       t.from === currentStatus &&
@@ -156,9 +168,8 @@ function StatusPopover({
   const meta = REPORT_STATUS_METADATA[currentStatus];
 
   if (available.length === 0) {
-    // Terminal or no transitions for this role — non-interactive badge
     return (
-      <span className={`badge-civic-pill ${statusBadgeClass(currentStatus)}`}>
+      <span className={`badge-civic-pill ${statusBadgeClass(currentStatus)} text-[11px]`}>
         {meta?.labelAr || currentStatus}
       </span>
     );
@@ -169,26 +180,35 @@ function StatusPopover({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`badge-civic-pill ${statusBadgeClass(currentStatus)} cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1`}
+        className={`badge-civic-pill ${statusBadgeClass(currentStatus)} cursor-pointer hover:opacity-85 transition-opacity flex items-center gap-1.5 text-[11px] font-bold`}
         title="انقر لتغيير الحالة"
       >
-        {meta?.labelAr || currentStatus}
+        <span>{meta?.labelAr || currentStatus}</span>
         <svg className="w-2.5 h-2.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
       {open && (
         <div
           dir="rtl"
-          className="absolute top-full mt-1.5 right-0 z-50 w-56 rounded-xl bg-white border border-slate-200 shadow-xl overflow-hidden"
+          className="absolute top-full mt-1.5 left-0 sm:left-auto sm:right-0 z-50 w-60 rounded-xl bg-white border border-slate-200 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
         >
-          <p className="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-wide border-b border-slate-100">
-            تحويل الحالة إلى
-          </p>
+          <div className="px-3 py-2 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-wide">
+              تحويل الحالة إلى
+            </span>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="text-slate-400 hover:text-slate-600 text-xs"
+            >
+              ✕
+            </button>
+          </div>
 
           {!pendingTo ? (
-            <div className="py-1">
+            <div className="py-1 max-h-56 overflow-y-auto">
               {available.map((t) => {
                 const toMeta = REPORT_STATUS_METADATA[t.to];
                 return (
@@ -205,8 +225,8 @@ function StatusPopover({
                     className="w-full text-right px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-cyan-50 hover:text-[#0891B2] flex items-center gap-2 transition-colors cursor-pointer"
                   >
                     <span className={`h-2 w-2 rounded-full shrink-0 ${statusBadgeClass(t.to).includes("success") ? "bg-emerald-500" : statusBadgeClass(t.to).includes("danger") ? "bg-rose-500" : statusBadgeClass(t.to).includes("warning") ? "bg-amber-500" : "bg-sky-500"}`} />
-                    {toMeta?.labelAr || t.to}
-                    {t.requiresReason && <span className="mr-auto text-[10px] text-slate-400">يتطلب سبب</span>}
+                    <span>{toMeta?.labelAr || t.to}</span>
+                    {t.requiresReason && <span className="mr-auto text-[10px] text-slate-400 font-normal">يتطلب سبب</span>}
                   </button>
                 );
               })}
@@ -221,7 +241,7 @@ function StatusPopover({
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="سبب التحويل (إلزامي)..."
                 rows={2}
-                className="w-full rounded-lg border border-[#CBD5E1] px-2 py-1.5 text-xs text-[#142D4E] placeholder-slate-400 focus:border-[#0891B2] focus:outline-none focus:ring-1 focus:ring-[#0891B2] resize-none"
+                className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:border-[#0891B2] focus:outline-none focus:ring-1 focus:ring-[#0891B2] resize-none"
               />
               {error && <p className="text-[10px] text-rose-600 font-semibold">{error}</p>}
               <div className="flex gap-2">
@@ -236,7 +256,7 @@ function StatusPopover({
                 <button
                   type="button"
                   onClick={() => { setPendingTo(null); setReason(""); setError(""); }}
-                  className="rounded-lg border border-[#CBD5E1] text-slate-600 text-[11px] font-bold py-1.5 px-2 cursor-pointer hover:bg-slate-50 transition-colors"
+                  className="rounded-lg border border-slate-300 text-slate-600 text-[11px] font-bold py-1.5 px-2 cursor-pointer hover:bg-slate-50 transition-colors"
                 >
                   إلغاء
                 </button>
@@ -250,7 +270,7 @@ function StatusPopover({
 }
 
 // ─────────────────────────────────────────────
-// Internal Notes Panel (expanded row)
+// Internal Notes Panel (expanded row / card)
 // ─────────────────────────────────────────────
 interface NoteItem {
   id: string;
@@ -298,21 +318,31 @@ function NotesPanel({ reportId }: { reportId: string }) {
   }
 
   return (
-    <div dir="rtl" className="bg-[#F1F5F9]/80 border-t border-[#CBD5E1] px-4 py-3 space-y-3">
+    <div dir="rtl" className="bg-slate-50/90 border-t border-slate-200 px-4 py-3 sm:px-6 sm:py-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+          <svg className="w-3.5 h-3.5 text-[#0891B2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+          </svg>
+          الملاحظات الداخلية للفريق
+        </span>
+        <span className="text-[10px] text-slate-400">مرئية للمشرفين والفريق الميداني فقط</span>
+      </div>
+
       {/* Input */}
       <div className="flex gap-2">
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="أضف ملاحظة داخلية للفريق..."
+          placeholder="أضف ملاحظة أو توجيه ميداني..."
           rows={2}
-          className="flex-1 rounded-xl border border-[#CBD5E1] bg-white px-3 py-2 text-xs text-[#142D4E] placeholder-slate-400 focus:border-[#0891B2] focus:outline-none focus:ring-1 focus:ring-[#0891B2] resize-none shadow-xs"
+          className="flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-[#0891B2] focus:outline-none focus:ring-1 focus:ring-[#0891B2] resize-none shadow-xs"
         />
         <button
           type="button"
           onClick={addNote}
           disabled={submitting || !body.trim()}
-          className="self-end rounded-xl bg-[#0891B2] hover:bg-[#0E7490] active:bg-[#155E75] disabled:opacity-40 text-white text-xs font-bold px-3 py-2 cursor-pointer transition-colors shadow-xs"
+          className="self-end rounded-xl bg-[#0891B2] hover:bg-[#0E7490] active:bg-[#155E75] disabled:opacity-40 text-white text-xs font-bold px-4 py-2 cursor-pointer transition-colors shadow-xs"
         >
           {submitting ? "..." : "إضافة"}
         </button>
@@ -328,9 +358,9 @@ function NotesPanel({ reportId }: { reportId: string }) {
       ) : notes.length === 0 ? (
         <p className="text-[11px] text-slate-400 font-medium">لا توجد ملاحظات داخلية بعد.</p>
       ) : (
-        <div className="space-y-2 max-h-40 overflow-y-auto">
+        <div className="space-y-2 max-h-48 overflow-y-auto">
           {notes.map((n) => (
-            <div key={n.id} className="rounded-lg bg-white border border-slate-100 px-3 py-2 shadow-xs">
+            <div key={n.id} className="rounded-lg bg-white border border-slate-200/80 px-3 py-2 shadow-xs">
               <p className="text-xs text-slate-800 leading-relaxed">{n.body}</p>
               <p className="text-[10px] text-slate-400 mt-1 font-medium">
                 {n.author?.name || n.author?.email || "موظف"} &bull;{" "}
@@ -345,7 +375,7 @@ function NotesPanel({ reportId }: { reportId: string }) {
 }
 
 // ─────────────────────────────────────────────
-// Main Table Component
+// Main Table & Mobile Cards Component
 // ─────────────────────────────────────────────
 export function OpsReportsTable({
   reports,
@@ -358,6 +388,9 @@ export function OpsReportsTable({
 }: OpsReportsTableProps) {
   const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set());
   const [internalPreviewReport, setInternalPreviewReport] = useState<OpsReport | null>(null);
+
+  const isAdmin = role === UserRole.ADMIN;
+  const isStaff = role === UserRole.STAFF;
 
   const previewReport = controlledPreviewReport !== undefined ? controlledPreviewReport : internalPreviewReport;
   const setPreview = (rep: OpsReport | null) => {
@@ -381,21 +414,161 @@ export function OpsReportsTable({
 
   return (
     <>
-      <div className="overflow-x-auto">
+      {/* ─────────────────────────────────────────────────────────────
+          1. MOBILE CARD VIEW (< md)
+          Eliminates horizontal scrolling and presents high-density, touch-friendly cards
+         ───────────────────────────────────────────────────────────── */}
+      <div className="md:hidden divide-y divide-slate-100 bg-white">
+        {reports.map((report) => {
+          const sla = getSlaInfo(report.createdAt, report.status);
+          const notesOpen = expandedNotes.has(report.id);
+          const isHovered = hoveredReportId === report.id;
+
+          return (
+            <div
+              key={`mob-${report.id}`}
+              className={`p-4 space-y-3 transition-colors ${
+                isHovered ? "bg-cyan-50/60" : "hover:bg-slate-50/70"
+              }`}
+            >
+              {/* Card Top: Reference + SLA + Status */}
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPreview(report)}
+                    className="font-mono text-xs font-bold text-[#0891B2] bg-cyan-50 hover:bg-cyan-100 border border-cyan-200/90 px-2 py-0.5 rounded-md transition-colors"
+                    title="معاينة البلاغ"
+                  >
+                    {report.publicReference}
+                  </button>
+
+                  {sla && (
+                    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${sla.color}`}>
+                      <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {sla.label}
+                    </span>
+                  )}
+                </div>
+
+                <StatusPopover
+                  reportId={report.id}
+                  currentStatus={report.status}
+                  role={role}
+                  onChanged={(ns) => onReportUpdated(report.id, ns)}
+                />
+              </div>
+
+              {/* Title & Metadata */}
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setPreview(report)}
+                  className="font-bold text-slate-900 hover:text-[#0891B2] text-sm text-right block line-clamp-2 leading-relaxed transition-colors"
+                >
+                  {report.title}
+                </button>
+
+                {report.addressText && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <svg className="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span className="text-[10px] text-slate-500 truncate">{report.addressText}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2 mt-2 flex-wrap text-xs text-slate-500">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-medium">
+                    {report.category?.labelAr || "عام"}
+                  </span>
+
+                  {isAdmin && report.authority?.nameAr && (
+                    <span className="text-[11px] text-slate-500 truncate max-w-[160px]">
+                      • {report.authority.nameAr}
+                    </span>
+                  )}
+
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-100/90 px-2 py-0.5 rounded-md mr-auto">
+                    <svg className="w-3 h-3 text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>{formatReportDate(report.createdAt)}</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Card Actions Bar */}
+              <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
+                <Link
+                  href={`/reports/${report.id}`}
+                  className="flex-1 py-2 px-3 text-center text-xs font-bold rounded-xl bg-[#0891B2] hover:bg-[#0E7490] active:bg-[#155E75] text-white transition-all shadow-xs"
+                >
+                  {isStaff ? "معالجة البلاغ" : "عرض التفاصيل"}
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={() => setPreview(report)}
+                  className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-cyan-50 hover:text-[#0891B2] hover:border-cyan-200 transition-colors"
+                  title="معاينة سريعة"
+                  aria-label="معاينة"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => toggleNotes(report.id)}
+                  className={`p-2 rounded-xl border transition-colors ${
+                    notesOpen
+                      ? "border-cyan-300 bg-cyan-50 text-[#0891B2]"
+                      : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                  }`}
+                  title="الملاحظات الداخلية"
+                  aria-label="ملاحظات"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Inline Expandable Notes for Mobile */}
+              {notesOpen && (
+                <div className="pt-1">
+                  <NotesPanel reportId={report.id} />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ─────────────────────────────────────────────────────────────
+          2. DESKTOP & TABLET TABLE (>= md)
+          Streamlined columns: merges reference & title, hides redundant staff department,
+          and bundles actions for a clean, spacious look.
+         ───────────────────────────────────────────────────────────── */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-right text-xs">
-          <thead className="bg-[#f8fafc] text-slate-500 font-semibold border-b border-slate-100">
+          <thead className="bg-[#F8FAFC] text-slate-600 font-bold border-b border-slate-200/80">
             <tr>
-              <th className="py-3 px-4">رقم البلاغ</th>
-              <th className="py-3 px-4">عنوان المشكلة</th>
-              <th className="py-3 px-4">التصنيف</th>
-              <th className="py-3 px-4">الجهة المختصة</th>
-              <th className="py-3 px-4">الحالة</th>
-              <th className="py-3 px-4">الوقت المنقضي</th>
-              <th className="py-3 px-4 text-center">ملاحظات</th>
-              <th className="py-3 px-4 text-center">الإجراء</th>
+              <th className="py-3 px-4 min-w-[240px]">البلاغ والعنوان</th>
+              <th className="py-3 px-4 min-w-[130px]">التصنيف</th>
+              {isAdmin && <th className="py-3 px-4 min-w-[140px]">الجهة المختصة</th>}
+              <th className="py-3 px-4 min-w-[120px]">الحالة</th>
+              <th className="py-3 px-4 min-w-[95px]">الاستجابة</th>
+              <th className="py-3 px-4 text-center min-w-[110px]">الإجراءات</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-slate-100">
             {reports.map((report) => {
               const sla = getSlaInfo(report.createdAt, report.status);
               const notesOpen = expandedNotes.has(report.id);
@@ -406,50 +579,71 @@ export function OpsReportsTable({
                   <tr
                     onMouseEnter={() => onHoverReport?.(report.id)}
                     onMouseLeave={() => onHoverReport?.(null)}
-                    className={`border-b border-slate-100 transition-colors ${
+                    className={`transition-colors ${
                       isHovered
-                        ? "bg-cyan-50/70 ring-1 ring-[#0891B2]/30"
+                        ? "bg-cyan-50/70"
                         : notesOpen
-                        ? "bg-[#F1F5F9]/70"
-                        : "hover:bg-[#F1F5F9]/50"
+                        ? "bg-slate-50/80"
+                        : "hover:bg-slate-50/60"
                     }`}
                   >
-                    {/* Reference */}
-                    <td className="py-3 px-4 font-mono font-bold">
-                      <button
-                        type="button"
-                        onClick={() => setPreview(report)}
-                        className="text-[#0891B2] hover:underline cursor-pointer font-bold tracking-tight"
-                        title="معاينة تفاصيل البلاغ"
-                      >
-                        {report.publicReference}
-                      </button>
-                    </td>
+                    {/* Unified Reference & Title */}
+                    <td className="py-3 px-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setPreview(report)}
+                            className="font-mono font-bold text-[#0891B2] bg-cyan-50 hover:bg-cyan-100 border border-cyan-200/80 px-2 py-0.5 rounded text-[11px] transition-colors"
+                            title="معاينة تفاصيل البلاغ"
+                          >
+                            {report.publicReference}
+                          </button>
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-100/90 px-2 py-0.5 rounded-md">
+                            <svg className="w-3 h-3 text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span>{formatReportDate(report.createdAt)}</span>
+                          </span>
+                        </div>
 
-                    {/* Title */}
-                    <td className="py-3 px-4 max-w-[220px]">
-                      <button
-                        type="button"
-                        onClick={() => setPreview(report)}
-                        className="font-semibold text-[#142D4E] hover:text-[#0891B2] text-right truncate block w-full cursor-pointer transition-colors"
-                        title="انقر للمعاينة السريعة"
-                      >
-                        {report.title}
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => setPreview(report)}
+                          className="font-semibold text-slate-900 hover:text-[#0891B2] text-right block max-w-sm lg:max-w-md truncate transition-colors leading-normal"
+                          title={report.title}
+                        >
+                          {report.title}
+                        </button>
+
+                        {report.addressText && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <svg className="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            <span className="text-[10px] text-slate-500 truncate max-w-[200px]">{report.addressText}</span>
+                          </div>
+                        )}
+                      </div>
                     </td>
 
                     {/* Category */}
-                    <td className="py-3 px-4 text-slate-600">
-                      {report.category?.labelAr || "—"}
-                    </td>
-
-                    {/* Authority */}
-                    <td className="py-3 px-4 text-slate-600">
-                      {report.authority?.nameAr || "قيد التعيين"}
-                    </td>
-
-                    {/* Inline Status Change */}
                     <td className="py-3 px-4">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-medium whitespace-nowrap">
+                        {report.category?.labelAr || "—"}
+                      </span>
+                    </td>
+
+                    {/* Authority (Only visible to Admin) */}
+                    {isAdmin && (
+                      <td className="py-3 px-4 text-slate-600 font-medium whitespace-nowrap">
+                        {report.authority?.nameAr || "قيد التعيين"}
+                      </td>
+                    )}
+
+                    {/* Inline Status Change Popover */}
+                    <td className="py-3 px-4 whitespace-nowrap">
                       <StatusPopover
                         reportId={report.id}
                         currentStatus={report.status}
@@ -459,7 +653,7 @@ export function OpsReportsTable({
                     </td>
 
                     {/* SLA Timer */}
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 whitespace-nowrap">
                       {sla ? (
                         <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${sla.color}`}>
                           <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -468,58 +662,56 @@ export function OpsReportsTable({
                           {sla.label}
                         </span>
                       ) : (
-                        <span className="text-slate-300 text-[10px]">—</span>
+                        <span className="text-slate-300 text-[11px]">—</span>
                       )}
                     </td>
 
-                    {/* Notes Toggle */}
-                    <td className="py-3 px-4 text-center">
-                      <button
-                        type="button"
-                        onClick={() => toggleNotes(report.id)}
-                        className={`inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[10px] font-bold transition-all cursor-pointer ${
-                          notesOpen
-                            ? "border-[#0891B2]/40 bg-cyan-50 text-[#0891B2]"
-                            : "border-[#CBD5E1] bg-white text-slate-500 hover:border-[#0891B2]/40 hover:text-[#0891B2] hover:bg-cyan-50"
-                        }`}
-                        title="الملاحظات الداخلية"
-                      >
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                        </svg>
-                        {notesOpen ? "إغلاق" : "ملاحظة"}
-                      </button>
-                    </td>
+                    {/* Actions Group: Primary button + Quick Preview Icon + Notes Icon */}
+                    <td className="py-3 px-4 text-center whitespace-nowrap">
+                      <div className="inline-flex items-center justify-center gap-1.5">
+                        <Link
+                          href={`/reports/${report.id}`}
+                          className="inline-flex items-center rounded-lg bg-[#0891B2] hover:bg-[#0E7490] active:bg-[#155E75] text-white px-3 py-1 text-[11px] font-bold shadow-xs transition-colors"
+                        >
+                          {isStaff ? "معالجة" : "تفاصيل"}
+                        </Link>
 
-                    {/* Actions */}
-                    <td className="py-3 px-4 text-center">
-                      <div className="flex items-center justify-center gap-1.5">
                         <button
                           type="button"
                           onClick={() => setPreview(report)}
-                          className="inline-flex items-center gap-1 rounded-md border border-[#CBD5E1] bg-white px-2 py-1 font-semibold text-slate-700 hover:border-[#0891B2]/40 hover:bg-cyan-50 hover:text-[#0891B2] transition-colors text-[11px] cursor-pointer"
-                          title="معاينة الصور والوصف الميداني"
+                          className="h-7 w-7 rounded-lg border border-slate-200 bg-white hover:bg-cyan-50 hover:border-cyan-300 hover:text-[#0891B2] text-slate-500 flex items-center justify-center transition-colors"
+                          title="معاينة سريعة"
+                          aria-label="معاينة"
                         >
-                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
-                          معاينة
                         </button>
-                        <Link
-                          href={`/reports/${report.id}`}
-                          className="inline-flex rounded-md border border-[#CBD5E1] bg-white px-2.5 py-1 font-semibold text-slate-700 hover:bg-cyan-50 hover:text-[#0891B2] transition-colors text-[11px]"
+
+                        <button
+                          type="button"
+                          onClick={() => toggleNotes(report.id)}
+                          className={`h-7 w-7 rounded-lg border flex items-center justify-center transition-colors ${
+                            notesOpen
+                              ? "border-cyan-300 bg-cyan-50 text-[#0891B2]"
+                              : "border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800"
+                          }`}
+                          title="الملاحظات الداخلية"
+                          aria-label="الملاحظات"
                         >
-                          {role === UserRole.STAFF ? "معالجة" : "تفاصيل"}
-                        </Link>
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                          </svg>
+                        </button>
                       </div>
                     </td>
                   </tr>
 
-                  {/* Expandable Notes Row */}
+                  {/* Expandable Notes Row for Desktop */}
                   {notesOpen && (
                     <tr key={`notes-${report.id}`}>
-                      <td colSpan={8} className="p-0">
+                      <td colSpan={isAdmin ? 6 : 5} className="p-0">
                         <NotesPanel reportId={report.id} />
                       </td>
                     </tr>
@@ -541,4 +733,3 @@ export function OpsReportsTable({
     </>
   );
 }
-

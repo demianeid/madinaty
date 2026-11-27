@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useSession } from "@/lib/auth/auth-client";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
+import { MadinatyLogo } from "@/components/ui/madinaty-logo";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Skeleton, NewReportFormSkeleton } from "@/components/ui/skeleton";
 
 const LeafletMap = dynamic(
@@ -324,19 +324,64 @@ export default function NewReportPage() {
 
   if (sessionLoading) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#F1F5F9]" dir="rtl">
-        <Header />
+      <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900" dir="rtl">
+        <header className="h-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/80 flex items-center justify-between sticky top-0 z-20 shadow-xs">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-2">
+              <MadinatyLogo variant="dark" className="h-8 w-auto object-contain" />
+            </Link>
+            <div className="h-5 w-[1px] bg-slate-200 mx-1 hidden sm:block" />
+            <span className="text-xs sm:text-sm font-bold text-slate-800">تقديم بلاغ جديد</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-xl bg-slate-100 animate-pulse" />
+            <div className="h-8 w-24 rounded-xl bg-slate-100 animate-pulse" />
+          </div>
+        </header>
         <main className="flex-1 container mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
           <NewReportFormSkeleton />
         </main>
-        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F1F5F9]">
-      <Header />
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900" dir="rtl">
+      {/* Light Top Navigation Bar for New Report */}
+      <header className="h-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/80 flex items-center justify-between sticky top-0 z-20 shadow-xs">
+        <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-2 group transition-opacity hover:opacity-90">
+            <MadinatyLogo variant="dark" priority className="h-8 w-auto object-contain" />
+          </Link>
+          <div className="h-5 w-[1px] bg-slate-200 mx-1 hidden sm:block" />
+          <span className="text-xs sm:text-sm font-bold text-slate-800 hidden sm:inline">تقديم بلاغ جديد</span>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-cyan-50 hover:text-[#0891B2] hover:border-cyan-200 text-xs font-bold text-slate-700 transition-all shadow-xs"
+          >
+            <svg className="w-3.5 h-3.5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+            <span>لوحة التحكم</span>
+          </Link>
+
+          <NotificationBell variant="light" />
+
+          {session?.user && (
+            <div className="flex items-center gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-2.5 py-1 text-xs">
+              <div className="h-6 w-6 rounded-full bg-[#0891B2] text-white flex items-center justify-center font-bold text-[11px]">
+                {session.user.name?.[0]?.toUpperCase() || session.user.email?.[0]?.toUpperCase() || "م"}
+              </div>
+              <span className="font-semibold text-slate-800 hidden sm:inline max-w-[130px] truncate">
+                {session.user.name || session.user.email}
+              </span>
+            </div>
+          )}
+        </div>
+      </header>
 
       <main className="flex-1 container mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         {createdReference ? (
@@ -806,8 +851,6 @@ export default function NewReportPage() {
           </div>
         )}
       </main>
-
-      <Footer />
     </div>
   );
 }

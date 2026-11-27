@@ -113,9 +113,9 @@ function buildPinHtml(
               width: 46px;
               height: 46px;
               border-radius: 50%;
-              border: 3px solid #007766;
-              background: rgba(0, 119, 102, 0.22);
-              box-shadow: 0 0 16px rgba(0, 119, 102, 0.55);
+              border: 3px solid #0891B2;
+              background: rgba(8, 145, 178, 0.22);
+              box-shadow: 0 0 16px rgba(8, 145, 178, 0.55);
               pointer-events: none;
             "></div>`
           : isUrgent
@@ -137,7 +137,7 @@ function buildPinHtml(
         <ellipse cx="18" cy="43.5" rx="5.5" ry="2" fill="rgba(15,23,42,0.28)"/>
         <!-- Teardrop pin body pointing straight down to (18, 43) -->
         <path d="M18 1.5C9.44 1.5 2.5 8.44 2.5 17C2.5 27.8 18 43 18 43C18 43 33.5 27.8 33.5 17C33.5 8.44 26.56 1.5 18 1.5Z" fill="${color}" stroke="${
-          isSelected ? "#007766" : "#FFFFFF"
+          isSelected ? "#0891B2" : "#FFFFFF"
         }" stroke-width="${isSelected ? "3.6" : isHovered ? "3.2" : "2.2"}" stroke-linejoin="round"/>
         <!-- Inner white disc for crisp contrast -->
         <circle cx="18" cy="16.5" r="6" fill="#FFFFFF"/>
@@ -154,10 +154,10 @@ function buildClusterHtml(count: number): string {
     <div style="
       width: 42px; height: 42px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #007766 0%, #004d40 100%);
+      background: linear-gradient(135deg, #0891B2 0%, #0e7490 100%);
       color: white;
       border: 3px solid white;
-      box-shadow: 0 4px 14px rgba(0, 119, 102, 0.45);
+      box-shadow: 0 4px 14px rgba(8, 145, 178, 0.45);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -686,7 +686,7 @@ export function FieldMap({
         <button
           type="button"
           onClick={() => mapInstanceRef.current?.zoomOut()}
-          className="h-8 w-8 rounded-xl flex items-center justify-center text-slate-700 hover:text-[#007766] hover:bg-[#ecfdf5] active:scale-90 transition-all font-bold text-base cursor-pointer"
+          className="h-8 w-8 rounded-xl flex items-center justify-center text-slate-700 hover:text-[#0891B2] hover:bg-cyan-50 active:scale-90 transition-all font-bold text-base cursor-pointer"
           title="تصغير الخريطة (−)"
           aria-label="تصغير"
         >
@@ -702,7 +702,7 @@ export function FieldMap({
         <button
           type="button"
           onClick={handleFitAllReports}
-          className="h-8 w-8 rounded-xl flex items-center justify-center text-slate-700 hover:text-[#007766] hover:bg-[#ecfdf5] active:scale-90 transition-all cursor-pointer"
+          className="h-8 w-8 rounded-xl flex items-center justify-center text-slate-700 hover:text-[#0891B2] hover:bg-cyan-50 active:scale-90 transition-all cursor-pointer"
           title="إعادة التمركز واحتواء كافة البلاغات"
           aria-label="إعادة التمركز"
         >
@@ -722,8 +722,8 @@ export function FieldMap({
         {/* Reports Count Pill */}
         <div className="inline-flex items-center gap-2 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-sm px-3.5 py-1.5 text-xs font-bold text-slate-800">
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#007766] opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#007766]" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0891B2] opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#0891B2]" />
           </span>
           <span>
             {displayedReports.length} {displayedReports.length === reportsWithCoords.length ? "بلاغ" : `من ${reportsWithCoords.length}`}
@@ -737,8 +737,8 @@ export function FieldMap({
             onClick={() => setMapMode("streets")}
             className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               mapMode === "streets"
-                ? "bg-[#007766] text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/60"
+                ? "bg-[#0891B2] text-white shadow-xs"
+                : "text-slate-600 hover:text-[#0891B2] hover:bg-cyan-50/60"
             }`}
             title="عرض خريطة الشوارع التفاعلية"
           >
@@ -752,8 +752,8 @@ export function FieldMap({
             onClick={() => setMapMode("satellite")}
             className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               mapMode === "satellite"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/60"
+                ? "bg-[#142D4E] text-white shadow-xs"
+                : "text-slate-600 hover:text-[#142D4E] hover:bg-slate-100/60"
             }`}
             title="عرض صور القمر الصناعي الجوية"
           >
@@ -770,8 +770,8 @@ export function FieldMap({
           onClick={() => setEnableClustering((c) => !c)}
           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-sm text-xs font-bold transition-all cursor-pointer ${
             enableClustering
-              ? "text-[#007766] border-[#007766]/30 bg-[#ecfdf5]/80"
-              : "text-slate-500 hover:text-slate-800"
+              ? "text-[#0891B2] border-[#0891B2]/30 bg-cyan-50/80"
+              : "text-slate-600 hover:text-[#0891B2] hover:bg-cyan-50/50"
           }`}
           title={enableClustering ? "تجميع النقاط المتقاربة: مُفعّل" : "تجميع النقاط: مُعطّل"}
         >
@@ -781,7 +781,7 @@ export function FieldMap({
           <span>تجميع</span>
           <span
             className={`h-1.5 w-1.5 rounded-full transition-colors ${
-              enableClustering ? "bg-[#007766]" : "bg-slate-300"
+              enableClustering ? "bg-[#0891B2]" : "bg-slate-300"
             }`}
           />
         </button>
@@ -793,7 +793,7 @@ export function FieldMap({
           className={`h-8 w-8 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-sm flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
             isFullscreen
               ? "text-rose-600 hover:bg-rose-50 hover:border-rose-200"
-              : "text-slate-700 hover:text-slate-900 hover:bg-slate-100/80"
+              : "text-slate-700 hover:text-[#0891B2] hover:bg-cyan-50/80"
           }`}
           title={isFullscreen ? "إنهاء ملء الشاشة (Esc)" : "تكبير الخريطة لملء الشاشة"}
           aria-label={isFullscreen ? "إنهاء ملء الشاشة" : "ملء الشاشة"}
@@ -819,8 +819,8 @@ export function FieldMap({
             onClick={() => setActiveStatusFilter(null)}
             className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer text-[11px] ${
               activeStatusFilter === null
-                ? "bg-slate-900 text-white shadow-xs"
-                : "text-slate-600 hover:bg-slate-100"
+                ? "bg-[#142D4E] text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             }`}
           >
             كافة البلاغات ({reportsWithCoords.length})
@@ -838,7 +838,7 @@ export function FieldMap({
                 onClick={() => setActiveStatusFilter(isSelected ? null : item.status)}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl font-bold transition-all cursor-pointer text-[11px] ${
                   isSelected
-                    ? "bg-[#ecfdf5] text-[#007766] ring-1.5 ring-[#007766]"
+                    ? "bg-cyan-50 text-[#0891B2] ring-1.5 ring-[#0891B2]"
                     : "text-slate-700 hover:bg-slate-100/80"
                 }`}
                 title={`انقر لتصفية بلاغات ${item.label}`}
@@ -855,7 +855,7 @@ export function FieldMap({
             <button
               type="button"
               onClick={() => setActiveStatusFilter(null)}
-              className="text-[10px] text-red-600 hover:text-red-700 font-bold px-2 py-1 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
+              className="text-[10px] text-rose-600 hover:text-rose-700 font-bold px-2 py-1 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
               title="إلغاء التصفية"
             >
               ✕ مسح
