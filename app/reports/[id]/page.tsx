@@ -982,15 +982,31 @@ function ReportDetailContent({
                     {/* Bullet */}
                     <div className="absolute -right-[27px] top-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-[#0891B2] ring-2 ring-cyan-100" />
 
-                    <div className="flex items-center justify-between text-xs text-slate-500 mb-1 flex-wrap gap-1">
+                    <div className="flex items-center justify-between text-xs text-slate-500 mb-1 flex-wrap gap-2">
                       <span className="font-bold text-slate-800">
                         {REPORT_STATUS_METADATA[item.toStatus]?.labelAr || item.toStatus}
                       </span>
-                      <time className="font-mono text-[10px] text-slate-400">
-                        {new Date(item.createdAt).toLocaleString("ar-EG", {
-                          dateStyle: "short",
-                          timeStyle: "short",
-                        })}
+                      <time
+                        dateTime={new Date(item.createdAt).toISOString()}
+                        className="inline-flex items-center gap-1.5 bg-transparent py-0.5 text-[11px] font-semibold text-slate-700"
+                      >
+                        <svg className="w-3.5 h-3.5 text-[#0891B2] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>
+                          {new Date(item.createdAt).toLocaleDateString("ar-EG", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </span>
+                        <span className="text-slate-400">•</span>
+                        <span className="text-slate-800 font-bold">
+                          {new Date(item.createdAt).toLocaleTimeString("ar-EG", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
                       </time>
                     </div>
 
@@ -1098,7 +1114,8 @@ function ReportDetailContent({
                         <select
                           value={selectedNextStatus}
                           onChange={(e) => setSelectedNextStatus(e.target.value as ReportStatus)}
-                          className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-800 font-semibold focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] shadow-xs cursor-pointer"
+                          disabled={submittingTransition}
+                          className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-800 font-semibold focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] shadow-xs cursor-pointer disabled:bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed"
                           required
                         >
                           <option value="">-- اختر الحالة الجديدة --</option>
@@ -1122,8 +1139,9 @@ function ReportDetailContent({
                       type="text"
                       value={transitionReason}
                       onChange={(e) => setTransitionReason(e.target.value)}
+                      disabled={submittingTransition}
                       placeholder="مثال: وصول فرقة الصيانة إلى الموقع..."
-                      className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-900 focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] shadow-xs"
+                      className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-900 focus:border-[#0891B2] focus:ring-1 focus:ring-[#0891B2] shadow-xs disabled:bg-slate-50 disabled:opacity-60"
                     />
                   </div>
 
@@ -1169,9 +1187,17 @@ function ReportDetailContent({
                   <button
                     type="submit"
                     disabled={submittingTransition || !selectedNextStatus}
-                    className="w-full rounded-xl bg-[#0891B2] hover:bg-[#0E7490] active:bg-[#155E75] py-2.5 text-xs font-bold text-white disabled:opacity-40 transition-colors shadow-xs cursor-pointer"
+                    className={`w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#0891B2] hover:bg-[#0E7490] active:bg-[#155E75] py-2.5 text-xs font-bold text-white transition-colors shadow-xs cursor-pointer disabled:cursor-not-allowed ${
+                      submittingTransition ? "opacity-80" : "disabled:opacity-40"
+                    }`}
                   >
-                    {submittingTransition ? "جاري الحفظ والتحديث..." : "تأكيد تحديث الحالة"}
+                    {submittingTransition && (
+                      <svg className="h-3.5 w-3.5 animate-spin text-white shrink-0" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" />
+                      </svg>
+                    )}
+                    <span>{submittingTransition ? "جاري الحفظ والتحديث..." : "تأكيد تحديث الحالة"}</span>
                   </button>
                 </form>
               </div>
