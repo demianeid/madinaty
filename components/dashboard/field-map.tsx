@@ -200,6 +200,7 @@ export function FieldMap({
   const [enableClustering, setEnableClustering] = useState(true);
   const [activeStatusFilter, setActiveStatusFilter] = useState<string | null>(null);
   const [selectedReport, setSelectedReport] = useState<FieldMapReport | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const hasAutoFittedRef = useRef(false);
 
   const reportsWithCoords = useMemo(
@@ -213,6 +214,20 @@ export function FieldMap({
       ? reportsWithCoords.filter((r) => r.status === activeStatusFilter)
       : reportsWithCoords;
   }, [reportsWithCoords, activeStatusFilter]);
+
+  // Search results for fullscreen quick jump (by reference, title, or street/address)
+  const searchResults = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    return reportsWithCoords
+      .filter(
+        (r) =>
+          r.publicReference.toLowerCase().includes(q) ||
+          r.title.toLowerCase().includes(q) ||
+          (r.addressText && r.addressText.toLowerCase().includes(q))
+      )
+      .slice(0, 6);
+  }, [reportsWithCoords, searchQuery]);
 
   // Global helper for opening preview drawer from Leaflet popup DOM
   useEffect(() => {
@@ -269,9 +284,9 @@ export function FieldMap({
         inertiaDeceleration: 3000,
         inertiaMaxSpeed: 1500,
         easeLinearity: 0.2,
-        fadeAnimation: false,
-        zoomAnimation: false,
-        markerZoomAnimation: false,
+        fadeAnimation: true,
+        zoomAnimation: true,
+        markerZoomAnimation: true,
       });
 
       map.on("zoomend", () => {
@@ -372,18 +387,41 @@ export function FieldMap({
     }
   }, [mapMode, mapReady]);
 
-  // Invalidate map size on fullscreen toggle
+  // Toggle scrollWheelZoom, body scroll lock, and invalidate map size on fullscreen toggle
   useEffect(() => {
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.invalidateSize();
+    const map = mapInstanceRef.current;
+    if (map) {
+      if (isFullscreen) {
+        map.scrollWheelZoom.enable();
+      } else {
+        map.scrollWheelZoom.disable();
+      }
+      map.invalidateSize();
     }
+
     const timer = setTimeout(() => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.invalidateSize();
       }
     }, 150);
-    return () => clearTimeout(timer);
-  }, [isFullscreen]);
+
+    let prevOverflow: string | undefined;
+    if (isFullscreen && typeof document !== "undefined") {
+      prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+    }
+
+    if (!isFullscreen) {
+      setSearchQuery("");
+    }
+
+    return () => {
+      clearTimeout(timer);
+      if (prevOverflow !== undefined && typeof document !== "undefined") {
+        document.body.style.overflow = prevOverflow;
+      }
+    };
+  }, [isFullscreen, mapReady]);
 
   // Auto-center and fit bounds on initial load when reports with coordinates are ready
   useEffect(() => {
@@ -410,16 +448,35 @@ export function FieldMap({
     }
   }, [mapReady, reportsWithCoords]);
 
-  // Handle ESC key to exit fullscreen
+  // Handle ESC key to clear search first or exit fullscreen
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape" && isFullscreen) {
-        setIsFullscreen(false);
+        if (searchQuery.trim()) {
+          setSearchQuery("");
+        } else {
+          setIsFullscreen(false);
+        }
       }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isFullscreen]);
+  }, [isFullscreen, searchQuery]);
+
+  // Jump immediately to a searched report on the map
+  const handleJumpToReport = (report: FieldMapReport) => {
+    setSelectedReport(report);
+    setSearchQuery("");
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.flyTo([report.latitude, report.longitude], 17, {
+        animate: true,
+        duration: 0.7,
+      });
+    }
+    if (onSelectReport) {
+      onSelectReport(report);
+    }
+  };
 
   // ─────────────────────────────────────────────────────────────
   // RENDER MARKERS / CLUSTERS & SUBTLE AMBIENT DENSITY HALOS
@@ -717,8 +774,9 @@ export function FieldMap({
         </button>
       </div>
 
-      {/* ── 2. Top Executive Command Dock (Top Right) ── */}
-      <div className="absolute top-3.5 right-3.5 z-10 flex flex-wrap items-center gap-2">
+      {/* ── 2. Top Executive Command Dock & Fullscreen Search (Top Right) ── */}
+      <div className="absolute top-3.5 right-3.5 z-20 flex flex-col items-start gap-2 max-w-[calc(100%-4.5rem)] pointer-events-none">
+        <div className="flex flex-wrap items-center gap-2 pointer-events-auto">
         {/* Reports Count Pill */}
         <div className="inline-flex items-center gap-2 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-sm px-3.5 py-1.5 text-xs font-bold text-slate-800">
           <span className="relative flex h-2 w-2">
@@ -808,6 +866,82 @@ export function FieldMap({
             </svg>
           )}
         </button>
+      </div>
+
+      {/* ── 2b. Compact Quick Search & Jump Bar (Fullscreen Only) ── */}
+      {isFullscreen && (
+        <div dir="rtl" className="w-72 sm:w-80 max-w-full pointer-events-auto">
+          <div className="relative flex items-center rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md px-3 py-1.5 focus-within:border-[#0891B2] focus-within:ring-2 focus-within:ring-[#0891B2]/20 transition-all">
+            <svg className="w-4 h-4 text-[#0891B2] shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && searchResults.length > 0) {
+                  e.preventDefault();
+                  handleJumpToReport(searchResults[0]);
+                }
+              }}
+              placeholder="ابحث بالرقم المرجعي أو الشارع..."
+              className="w-full bg-transparent border-0 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-0 py-1"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="text-slate-400 hover:text-slate-700 p-0.5 rounded-md transition-colors cursor-pointer shrink-0"
+                aria-label="مسح البحث"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* Search Results Dropdown */}
+          {searchQuery.trim() && (
+            <div className="mt-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-xl overflow-hidden max-h-72 overflow-y-auto animate-in fade-in-0 slide-in-from-top-1 duration-150">
+              {searchResults.length === 0 ? (
+                <div className="px-3.5 py-3 text-center text-[11px] text-slate-400 font-medium">
+                  لا توجد نتائج مطابقة على الخريطة
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {searchResults.map((r) => (
+                    <button
+                      key={r.id}
+                      type="button"
+                      onClick={() => handleJumpToReport(r)}
+                      className="w-full text-right px-3.5 py-2.5 hover:bg-cyan-50/70 transition-colors flex items-start gap-2.5 cursor-pointer"
+                    >
+                      <span
+                        className="mt-1.5 h-2.5 w-2.5 rounded-full shrink-0 ring-2 ring-white shadow-xs"
+                        style={{ backgroundColor: statusColor(r.status) }}
+                      />
+                      <div className="min-w-0 flex-1 space-y-0.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-mono text-[10px] font-bold text-[#0891B2] bg-cyan-50 border border-cyan-200/80 px-1.5 py-0.5 rounded">
+                            {r.publicReference}
+                          </span>
+                          <span className="text-[10px] text-slate-400">انتقال ←</span>
+                        </div>
+                        <p className="text-xs font-bold text-slate-800 truncate">{r.title}</p>
+                        {r.addressText && (
+                          <p className="text-[10px] text-slate-500 truncate">{r.addressText}</p>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
       </div>
 
       {/* ── 3. Interactive Bottom Status Filter Ribbon (Bottom Center) ── */}

@@ -536,7 +536,7 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => setMobileSidebarOpen(true)}
-                className="md:hidden h-10 w-10 text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer"
+                className="md:hidden h-10 w-10 text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-100 active:scale-90 touch-manipulation flex items-center justify-center transition-all cursor-pointer"
                 aria-label="فتح القائمة الجانبية"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

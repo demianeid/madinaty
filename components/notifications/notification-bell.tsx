@@ -87,17 +87,32 @@ export function NotificationBell({ className, variant = "nav" }: NotificationBel
     };
   }, []);
 
-  // Close dropdown on outside click
+  // Close dropdown on outside click or touch
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    function handleClickOutside(event: MouseEvent | TouchEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside, { passive: true });
     }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [isOpen]);
+
+  // Lock body scroll on mobile viewports when notifications modal is open
+  useEffect(() => {
+    if (isOpen && typeof window !== "undefined" && window.innerWidth < 640) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
   }, [isOpen]);
 
   const handleMarkAsRead = async (notificationId: string, reportId?: string | null) => {
@@ -154,8 +169,8 @@ export function NotificationBell({ className, variant = "nav" }: NotificationBel
         className={
           className ||
           (variant === "nav"
-            ? "relative rounded-xl p-2 text-white/80 hover:text-white hover:bg-white/10 active:bg-white/15 transition-colors cursor-pointer"
-            : "relative rounded-xl p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer")
+            ? "relative rounded-xl p-2 text-white/80 hover:text-white hover:bg-white/10 active:bg-white/15 active:scale-90 touch-manipulation transition-all cursor-pointer"
+            : "relative rounded-xl p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 active:scale-90 touch-manipulation transition-all cursor-pointer")
         }
       >
         <svg
@@ -181,37 +196,58 @@ export function NotificationBell({ className, variant = "nav" }: NotificationBel
         )}
       </button>
 
-      {/* Notifications Dropdown Panel */}
+      {/* Mobile Backdrop Overlay */}
       {isOpen && (
         <div
-          className="absolute left-0 mt-2 rounded-2xl border border-slate-200 bg-white shadow-xl z-50 overflow-hidden animate-in fade-in duration-150"
-          style={{ width: "min(24rem, calc(100vw - 1rem))" }}
+          className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-40 sm:hidden animate-in fade-in duration-150"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Notifications Dropdown Panel (Viewport-safe on Mobile, Docks neatly on Desktop) */}
+      {isOpen && (
+        <div
+          className="fixed sm:absolute inset-x-2.5 sm:inset-x-auto sm:left-0 top-[4.25rem] sm:top-full sm:mt-2 z-50 flex flex-col w-auto sm:w-96 max-w-[calc(100vw-1.25rem)] sm:max-w-md max-h-[calc(100dvh-5.5rem)] sm:max-h-[32rem] rounded-2xl border border-slate-200/90 bg-white shadow-2xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-150"
           dir="rtl"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[#CBD5E1] px-4 py-3 bg-[#F1F5F9]/60">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-sm text-[#142D4E]">مركز الإشعارات</span>
+          <div className="flex items-center justify-between border-b border-slate-200/90 px-4 py-3 bg-slate-50/90 shrink-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="font-bold text-sm text-[#142D4E] truncate">مركز الإشعارات</span>
               {unreadCount > 0 && (
-                <span className="rounded-full bg-cyan-50 border border-cyan-200 text-[#0891B2] text-[10px] font-bold px-2 py-0.5">
+                <span className="rounded-full bg-cyan-50 border border-cyan-200 text-[#0891B2] text-[10px] font-bold px-2 py-0.5 shrink-0">
                   {unreadCount} جديد
                 </span>
               )}
             </div>
-            {unreadCount > 0 && (
+            <div className="flex items-center gap-2">
+              {unreadCount > 0 && (
+                <button
+                  type="button"
+                  onClick={handleMarkAllAsRead}
+                  disabled={isLoading}
+                  className="text-xs font-semibold text-[#0891B2] hover:text-[#0E7490] hover:underline cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                >
+                  تحديد الكل كمقروء
+                </button>
+              )}
+              {/* Mobile Close Button (✕) */}
               <button
                 type="button"
-                onClick={handleMarkAllAsRead}
-                disabled={isLoading}
-                className="text-xs font-semibold text-[#0891B2] hover:text-[#0E7490] hover:underline cursor-pointer disabled:opacity-50"
+                onClick={() => setIsOpen(false)}
+                className="sm:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 active:scale-90 transition-all cursor-pointer"
+                aria-label="إغلاق التنبيهات"
               >
-                تحديد الكل كمقروء
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
-            )}
+            </div>
           </div>
 
           {/* List */}
-          <div className="max-h-[360px] overflow-y-auto divide-y divide-slate-100">
+          <div className="flex-1 overflow-y-auto overscroll-contain divide-y divide-slate-100 scrollbar-thin">
             {isInitialLoading ? (
               <div className="p-3 space-y-3" aria-busy="true">
                 {[1, 2, 3].map((i) => (
@@ -276,11 +312,11 @@ export function NotificationBell({ className, variant = "nav" }: NotificationBel
           </div>
 
           {/* Footer */}
-          <div className="border-t border-[#CBD5E1] p-2.5 bg-[#F1F5F9]/50 text-center">
+          <div className="border-t border-slate-200/90 p-2.5 bg-slate-50/90 text-center shrink-0">
             <Link
               href="/notifications"
               onClick={() => setIsOpen(false)}
-              className="text-xs font-bold text-[#0891B2] hover:text-[#0E7490] transition-colors"
+              className="text-xs font-bold text-[#0891B2] hover:text-[#0E7490] transition-colors block py-0.5"
             >
               عرض جميع الإشعارات والسجل الكامل ←
             </Link>

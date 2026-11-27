@@ -193,6 +193,17 @@ function HeaderContent() {
     }
   };
 
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen && typeof window !== "undefined") {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [mobileMenuOpen]);
+
   // ========================================================
   // Outside Click & Escape Key Handler (Closes ALL Dropdowns)
   // ========================================================
@@ -283,22 +294,33 @@ function HeaderContent() {
 
   return (
     <>
+      {/* Mobile Drawer Backdrop Overlay — always mounted, toggled via CSS */}
+      <div
+        className={`fixed inset-0 bg-black/50 backdrop-blur-xs z-30 md:hidden transition-opacity duration-200 ease-out ${
+          mobileMenuOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setMobileMenuOpen(false)}
+        aria-hidden="true"
+      />
+
       {/* ========================================================
           Navbar Container (RTL layout, dir="rtl"):
           - At top of page: 100% width edge-to-edge navbar with subtle border
           - Upon scrolling: smoothly morphs into a floating glassmorphic pill
-          - Fluid 500ms physics easing without layout shift
+          - Fluid physics easing without layout shift
       ======================================================== */}
       <header
         dir="rtl"
-        className={`fixed top-0 inset-x-0 z-40 w-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isScrolled
+        className={`fixed top-0 inset-x-0 z-40 w-full transition-[padding,transform] duration-200 ease-out ${isScrolled
           ? "pt-2.5 sm:pt-3.5 px-3 sm:px-6 lg:px-8 pointer-events-none"
           : "pt-0 px-0 pointer-events-auto"
           }`}
       >
         <div
-          className={`mx-auto pointer-events-auto transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${mobileMenuOpen
-            ? "max-w-7xl rounded-2xl bg-[#0B1E38]/90 backdrop-blur-2xl border border-white/20 shadow-[0_16px_40px_rgba(0,0,0,0.4)]"
+          className={`mx-auto pointer-events-auto transition-[background-color,border-color,border-radius,box-shadow] duration-200 ease-out ${mobileMenuOpen
+            ? "max-w-7xl rounded-2xl bg-[#0B1E38]/95 backdrop-blur-md border border-white/20 shadow-[0_16px_40px_rgba(0,0,0,0.4)]"
             : isScrolled
               ? "max-w-7xl rounded-full bg-[#0B1E38]/70 backdrop-blur-md border border-white/20 shadow-[0_8px_32px_rgba(11,30,56,0.18)]"
               : `w-full max-w-full rounded-none border-b border-white/10 ${pathname === "/"
@@ -714,10 +736,11 @@ function HeaderContent() {
                   setServicesDropdownOpen(false);
                 }}
                 aria-label="القائمة الرئيسية"
-                className="md:hidden rounded-lg p-2 text-white/90 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                aria-expanded={mobileMenuOpen}
+                className="md:hidden rounded-xl p-2.5 text-white/90 hover:text-white hover:bg-white/10 active:bg-white/15 active:scale-90 touch-manipulation transition-all cursor-pointer"
               >
                 <svg
-                  className="h-6 w-6"
+                  className="h-6 w-6 transition-transform duration-200"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -733,9 +756,15 @@ function HeaderContent() {
             </div>
           </div>
 
-          {/* Mobile Navigation Drawer */}
-          {mobileMenuOpen && (
-            <div className="md:hidden border-t border-white/10 bg-[#0B1E38]/95 backdrop-blur-xl px-4 pt-3 pb-5 rounded-b-2xl shadow-[0_16px_36px_rgba(0,0,0,0.4)] animate-in slide-in-from-top-2 duration-150">
+          {/* Mobile Navigation Drawer — always mounted, toggled via CSS for instant GPU animation */}
+          <div
+            className={`md:hidden overflow-hidden will-change-[max-height,opacity] transition-[max-height,opacity] duration-200 ease-out ${
+              mobileMenuOpen
+                ? "max-h-[calc(100dvh-5rem)] opacity-100 pointer-events-auto"
+                : "max-h-0 opacity-0 pointer-events-none"
+            }`}
+          >
+            <div className="border-t border-white/10 bg-[#0B1E38]/98 backdrop-blur-2xl px-4 pt-3 pb-6 rounded-b-2xl shadow-[0_16px_36px_rgba(0,0,0,0.5)] overflow-y-auto overscroll-contain max-h-[calc(100dvh-5rem)]">
               {isPending ? (
                 <div className="mb-3 pb-3 border-b border-white/10 flex items-center gap-3">
                   <SkeletonAvatar size={36} className="bg-white/20" />
@@ -879,7 +908,7 @@ function HeaderContent() {
                 </div>
               )}
             </div>
-          )}
+          </div>
         </div>
       </header>
 
