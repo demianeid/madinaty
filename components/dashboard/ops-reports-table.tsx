@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, Fragment } from "react";
 import Link from "next/link";
 import { ReportStatus, UserRole } from "@prisma/client";
+import type { AlexandriaSector } from "@prisma/client";
 import { REPORT_STATUS_METADATA, ALLOWED_TRANSITIONS } from "@/lib/reports/lifecycle";
 import { ReportPreviewDrawer } from "./report-preview-drawer";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,6 +17,9 @@ export interface OpsReport {
   title: string;
   description?: string;
   status: ReportStatus;
+  priority?: string;
+  sector?: AlexandriaSector | null;
+  serviceAreaId?: string | null;
   createdAt: string;
   latitude: number | null;
   longitude: number | null;

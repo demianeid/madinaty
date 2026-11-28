@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import { generatePublicReference, validateTransition } from "@/lib/reports/lifecycle";
 import { AuthenticatedUser, ForbiddenError, NotFoundError } from "@/lib/auth/guards";
 import { validateReportCoordinates, DEFAULT_SERVICE_BOUNDARY, fuzzCoordinates } from "@/lib/reports/bounds";
+import { findNearestAlexandriaDistrict } from "@/lib/alexandria/sectors";
 import { inspectReportWithGemini } from "@/lib/ai/gemini";
 import { readStoredMedia } from "@/lib/media/storage";
 import { notifyStaffAndAdmins } from "@/lib/notifications/service";
@@ -84,7 +85,14 @@ export async function createReport(
     collisionCheck = await prisma.report.findUnique({ where: { publicReference } });
   }
 
+  const nearestDistrict = findNearestAlexandriaDistrict(input.latitude, input.longitude);
+
   const createdReport = await prisma.$transaction(async (tx) => {
+    const matchedArea = await tx.serviceArea?.findUnique({
+      where: { id: nearestDistrict.id },
+      select: { id: true, sector: true },
+    });
+
     // 1. Create Report
     const report = await tx.report.create({
       data: {
@@ -92,6 +100,8 @@ export async function createReport(
         createdById: actor.id,
         categoryId: category.id,
         authorityId: category.defaultAuthorityId,
+        serviceAreaId: matchedArea?.id ?? null,
+        sector: matchedArea?.sector ?? nearestDistrict.sector,
         title: input.title,
         description: input.description,
         latitude: input.latitude,
@@ -165,21 +175,23 @@ export async function createReport(
       },
     });
 
-    // 6. In-App Notification: Notify operations staff and admins of new incoming report
-    await notifyStaffAndAdmins(
-      {
-        reportId: report.id,
-        type: "REPORT_CREATED",
-        title: `بلاغ وارد جديد #${report.publicReference}`,
-        body: `ورد بلاغ جديد في قطاع ${category.labelAr}: "${report.title}" بانتظار الفرز والمراجعة الميدانية.`,
-        authorityId: report.authorityId,
-        excludeUserId: actor.id,
-      },
-      tx
-    );
-
     return report;
   });
+
+  // 6. Post-commit In-App Notification: Notify relevant authority/sector staff and admins
+  try {
+    await notifyStaffAndAdmins({
+      reportId: createdReport.id,
+      type: "REPORT_CREATED",
+      title: `بلاغ وارد جديد #${createdReport.publicReference}`,
+      body: `ورد بلاغ جديد في قطاع ${category.labelAr}: "${createdReport.title}" بانتظار الفرز والمراجعة الميدانية.`,
+      authorityId: createdReport.authorityId,
+      sector: createdReport.sector,
+      excludeUserId: actor.id,
+    });
+  } catch (notifErr) {
+    console.error("[createReport] Failed to notify staff/admins:", notifErr);
+  }
 
   // 7. Post-creation Gemini validation (Blueprint §8, Backlog Task 3.3.2 & 3.3.3)
   try {

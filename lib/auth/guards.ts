@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/db/prisma";
-import { UserRole, MembershipRole, UserStatus } from "@prisma/client";
+import { UserRole, MembershipRole, UserStatus, AlexandriaSector } from "@prisma/client";
 
 export class UnauthorizedError extends Error {
   readonly status = 401;
@@ -223,4 +223,54 @@ export async function requireReportAccess(
   }
 
   throw new ForbiddenError("تم رفض الوصول إلى هذا البلاغ.");
+}
+
+export interface StaffManagementScope {
+  user: AuthenticatedUser;
+  isSuperAdmin: boolean;
+  membership: {
+    id: string;
+    authorityId: string;
+    sector: AlexandriaSector | null;
+    authority: { id: string; nameAr: string; slug: string; isActive: boolean };
+  } | null;
+}
+
+/**
+ * Guard for Staff Management endpoints:
+ * - Allows Super Admin (UserRole.ADMIN) across all authorities & sectors.
+ * - Allows Sector Authority Admin (MembershipRole.AUTHORITY_ADMIN) strictly within their authority & sector.
+ */
+export async function requireStaffManagementScope(
+  customHeaders?: Headers
+): Promise<StaffManagementScope> {
+  const user = await requireUser(customHeaders);
+
+  if (user.role === UserRole.ADMIN) {
+    return { user, isSuperAdmin: true, membership: null };
+  }
+
+  if (user.role === UserRole.STAFF) {
+    const membership = await prisma.authorityMembership.findFirst({
+      where: {
+        userId: user.id,
+        isActive: true,
+        membershipRole: MembershipRole.AUTHORITY_ADMIN,
+      },
+      select: {
+        id: true,
+        authorityId: true,
+        sector: true,
+        authority: {
+          select: { id: true, nameAr: true, slug: true, isActive: true },
+        },
+      },
+    });
+
+    if (membership && membership.authority.isActive) {
+      return { user, isSuperAdmin: false, membership };
+    }
+  }
+
+  throw new ForbiddenError("يتطلب هذا الإجراء صلاحيات مدير النظام أو المدير الإداري للقطاع.");
 }

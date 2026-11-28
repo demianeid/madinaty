@@ -36,32 +36,37 @@ const CANDIDATE_MODELS = [
 
 const DEFAULT_TIMEOUT_MS = serverEnv.GEMINI_TIMEOUT_MS || 15000;
 
-// Standard municipal taxonomy for fallback if not passed dynamically
+// Standard Alexandria municipal taxonomy for fallback if not passed dynamically
 const DEFAULT_MUNICIPAL_TAXONOMY: CategoryTaxonomyItem[] = [
   {
-    key: "road-hazards",
-    labelAr: "حفر وتصدعات الطرق والأرصفة",
-    descriptionAr: "الحفر الوعائية، هبوط وتشققات الأسفلت، تلف بلاط الأرصفة العامة، والمطبات العشوائية غير المرخصة",
+    key: "sewage-flooding",
+    labelAr: "طفح الصرف الصحي وتجمعات الأمطار",
+    descriptionAr: "انسداد الشنايش ومطابق الصرف، طفح مياه الصرف الصحي، وتجمعات مياه الأمطار والنوّات في الأنفاق والشوارع",
   },
   {
-    key: "street-lighting",
-    labelAr: "أعطال إنارة الشوارع",
-    descriptionAr: "أعمدة الإنارة المطفأة أو المكسورة، كوابل وأسلاك الكهرباء المكشوفة في الشارع، كشافات الطرق التالفة",
+    key: "water-pipeline-burst",
+    labelAr: "كسور خطوط مياه الشرب والتسريبات",
+    descriptionAr: "كسر أنابيب ومواسير مياه الشرب العمومية، تسريبات المياه الأرضية، وضعف أو تلوث المياه",
   },
   {
-    key: "waste-management",
-    labelAr: "تراكم النفايات والحاويات",
-    descriptionAr: "تراكم أكوام القمامة، تلف أو فيضان حاويات النظافة، مخلفات البناء والهدم المتناثرة في الطرق العامة",
+    key: "waste-accumulation",
+    labelAr: "تراكم القمامة وتلف حاويات النفايات",
+    descriptionAr: "تراكم أكوام القمامة، فيضان أو تلف حاويات النظافة، ومخلفات الردش والبناء المتناثرة في الطرق العامة",
   },
   {
-    key: "water-sewage",
-    labelAr: "تسربات المياه والصرف الصحي",
-    descriptionAr: "كسر خطوط وأنابيب مياه الشرب، طفح مياه الصرف الصحي، وانسداد بالوعات تصريف الأمطار",
+    key: "street-lighting-faults",
+    labelAr: "أعطال إنارة الشوارع والأسلاك المكشوفة",
+    descriptionAr: "أعمدة الإنارة المطفأة أو المتآكلة بفعل الرطوبة، كوابل وأسلاك الكهرباء المكشوفة، وكشافات الطرق التالفة",
   },
   {
-    key: "public-parks",
-    labelAr: "صيانة الحدائق والمساحات الخضراء",
-    descriptionAr: "تلف ألعاب الأطفال، جفاف أو سقوط الأشجار في الطرق العامة، وتلف المقاعد والمرافق بالحدائق العامة",
+    key: "pavement-road-hazards",
+    labelAr: "حفر الطرق والهبوطات الأسفلتية",
+    descriptionAr: "الحفر الوعائية، هبوط وتشققات الأسفلت، تلف بلاط الأرصفة العامة، والمطبات العشوائية",
+  },
+  {
+    key: "coastal-corniche-issues",
+    labelAr: "إشغالات وتلفيات الكورنيش والشواطئ",
+    descriptionAr: "إشغالات الممشى الساحلي وطريق الكورنيش، تلفيات الشواطئ العامة، وأسوار وحواجز الكورنيش",
   },
 ];
 

@@ -172,8 +172,8 @@ function buildClusterHtml(count: number): string {
   `;
 }
 
-// Madinaty, Cairo default center
-const DEFAULT_CENTER: [number, number] = [30.071, 31.634];
+// Alexandria Governorate default center (Sidi Gaber / Smouha)
+const DEFAULT_CENTER: [number, number] = [31.2001, 29.9187];
 const DEFAULT_ZOOM = 13;
 
 export function FieldMap({
