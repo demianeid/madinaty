@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
-import { Prisma, UserRole } from "@prisma/client";
+import { Prisma, UserRole, AlexandriaSector } from "@prisma/client";
 
 export type NotificationType =
   | "REPORT_CREATED"
@@ -149,11 +149,12 @@ export interface NotifyStaffAndAdminsInput {
   title: string;
   body: string;
   authorityId?: string | null;
+  sector?: AlexandriaSector | null;
   excludeUserId?: string | null;
 }
 
 /**
- * Broadcasts an in-app notification to all active operations staff and administrators.
+ * Broadcasts an in-app notification to relevant operations staff (scoped by authority & sector) and administrators.
  */
 export async function notifyStaffAndAdmins(
   input: NotifyStaffAndAdminsInput,
@@ -161,29 +162,43 @@ export async function notifyStaffAndAdmins(
 ) {
   const opsUsers = await client.user.findMany({
     where: {
-      role: { in: [UserRole.ADMIN, UserRole.STAFF] },
       status: "ACTIVE",
       deletedAt: null,
       ...(input.excludeUserId ? { id: { not: input.excludeUserId } } : {}),
+      OR: [
+        { role: UserRole.ADMIN },
+        {
+          role: UserRole.STAFF,
+          memberships: {
+            some: {
+              isActive: true,
+              ...(input.authorityId ? { authorityId: input.authorityId } : {}),
+              ...(input.sector ? { OR: [{ sector: input.sector }, { sector: null }] } : {}),
+            },
+          },
+        },
+      ],
     },
     select: { id: true },
   });
 
   if (opsUsers.length === 0) return [];
 
-  return Promise.all(
-    opsUsers.map((u) =>
-      createNotification(
-        {
-          userId: u.id,
-          reportId: input.reportId,
-          type: input.type,
-          title: input.title,
-          body: input.body,
-        },
-        client
-      )
-    )
-  );
+  // Create notifications sequentially to avoid saturating transaction/pool connections
+  const created = [];
+  for (const u of opsUsers) {
+    const notif = await createNotification(
+      {
+        userId: u.id,
+        reportId: input.reportId,
+        type: input.type,
+        title: input.title,
+        body: input.body,
+      },
+      client
+    );
+    created.push(notif);
+  }
+  return created;
 }
 

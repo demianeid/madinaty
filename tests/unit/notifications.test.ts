@@ -197,7 +197,17 @@ describe("In-App Notification Center Service Tests (Phase 4)", () => {
 
     expect(mockTx.user.findMany).toHaveBeenCalledWith({
       where: {
-        role: { in: ["ADMIN", "STAFF"] },
+        OR: [
+          { role: "ADMIN" },
+          {
+            role: "STAFF",
+            memberships: {
+              some: {
+                isActive: true,
+              },
+            },
+          },
+        ],
         status: "ACTIVE",
         deletedAt: null,
         id: { not: "citizen_1" },

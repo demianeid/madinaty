@@ -39,7 +39,13 @@ export async function GET(
             actorType: true,
             createdAt: true,
             metadata: true,
+            changedBy: {
+              select: { id: true, name: true, role: true },
+            },
           },
+        },
+        createdBy: {
+          select: { id: true, name: true, role: true },
         },
         updates: {
           orderBy: { createdAt: "asc" },
@@ -99,10 +105,19 @@ export async function GET(
       }
     }
 
-    // Sanitize: Citizens must NEVER receive internal staff notes
+    // Sanitize: Citizens must NEVER receive internal staff notes or changedBy identities
     if (user.role === UserRole.CITIZEN) {
       // @ts-expect-error sanitize internal notes
       delete report.internalNotes;
+      // Strip changedBy from each status history entry
+      if (Array.isArray(report.statusHistory)) {
+        // @ts-expect-error sanitize changedBy
+        report.statusHistory = report.statusHistory.map((h) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { changedBy: _cb, ...rest } = h;
+          return rest;
+        });
+      }
     }
 
     return NextResponse.json({ success: true, report });

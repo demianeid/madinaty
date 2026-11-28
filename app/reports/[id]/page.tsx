@@ -37,6 +37,7 @@ interface StatusHistoryItem {
   actorType: string;
   createdAt: string;
   metadata?: Record<string, unknown> | null;
+  changedBy?: { id: string; name: string | null; role: UserRole } | null;
 }
 
 interface UpdateItem {
@@ -93,6 +94,7 @@ interface ReportDetail {
   updatedAt: string;
   resolvedAt: string | null;
   closedAt: string | null;
+  createdBy: { id: string; name: string | null; role: UserRole };
   category: {
     id: string;
     key: string;
@@ -114,6 +116,24 @@ interface ReportDetail {
   aiValidationResult?: string | null;
   aiConfidence?: number | null;
   aiReviewState?: string | null;
+}
+
+function roleLabel(role: UserRole): string {
+  switch (role) {
+    case UserRole.ADMIN:    return "مدير النظام";
+    case UserRole.STAFF:    return "موظف";
+    case UserRole.CITIZEN:  return "مواطن";
+    default:                return "مواطن";
+  }
+}
+
+function roleBadgeClass(role: UserRole): string {
+  switch (role) {
+    case UserRole.ADMIN:   return "bg-purple-50 text-purple-800 border border-purple-200";
+    case UserRole.STAFF:   return "bg-cyan-50 text-[#0891B2] border border-cyan-200";
+    case UserRole.CITIZEN: return "bg-slate-100 text-slate-600";
+    default:               return "bg-slate-100 text-slate-600";
+  }
 }
 
 function statusBadgeClass(status: ReportStatus): string {
@@ -719,7 +739,13 @@ function ReportDetailContent({
 
             {/* Field Description Box */}
             <div className="rounded-xl bg-slate-50/90 border border-slate-200/80 p-3.5 sm:p-4 text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">
-              <span className="text-[11px] font-bold text-slate-400 block mb-1">الوصف الميداني المقدم من المواطن:</span>
+              <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1.5 mb-1 flex-wrap">
+                <span>الوصف الميداني المقدم من</span>
+                <span className="font-bold text-slate-700">{report.createdBy?.name || "غير محدد"}</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${roleBadgeClass(report.createdBy?.role ?? UserRole.CITIZEN)}`}>
+                  {roleLabel(report.createdBy?.role ?? UserRole.CITIZEN)}
+                </span>
+              </span>
               <p className="text-slate-800 font-medium">{report.description || "لا يوجد وصف كتابي إضافي مرفق."}</p>
             </div>
 
@@ -1009,6 +1035,19 @@ function ReportDetailContent({
                         </span>
                       </time>
                     </div>
+
+                    {/* Staff name badge — visible to staff/admin only */}
+                    {isStaffOrAdmin && item.changedBy && (
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <svg className="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span className="text-[11px] text-slate-600 font-medium">{item.changedBy.name || "موظف"}</span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${roleBadgeClass(item.changedBy.role)}`}>
+                          {roleLabel(item.changedBy.role)}
+                        </span>
+                      </div>
+                    )}
 
                     {item.reason && (
                       <p className="text-xs text-slate-600 bg-slate-50 rounded-xl p-2.5 mt-1 border border-slate-100 leading-relaxed">

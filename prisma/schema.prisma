@@ -32,6 +32,13 @@ enum MembershipRole {
   AUTHORITY_ADMIN
 }
 
+enum AlexandriaSector {
+  ALX_EAST
+  ALX_CENTRAL
+  ALX_WEST
+  ALX_SOUTH
+}
+
 enum ReportStatus {
   NEW
   UNDER_REVIEW
@@ -111,13 +118,14 @@ model User {
   memberships     AuthorityMembership[]
   reports         Report[]               @relation("CitizenReports")
   assignedReports Report[]               @relation("AssignedStaffReports")
-  updates         ReportUpdate[]
-  internalNotes   InternalNote[]
-  appeals         Appeal[]               @relation("CitizenAppeals")
-  reviewedAppeals Appeal[]               @relation("StaffReviewedAppeals")
-  ratings         Rating[]
-  notifications   Notification[]
-  auditLogs       AuditLog[]
+  updates              ReportUpdate[]
+  internalNotes        InternalNote[]
+  appeals              Appeal[]               @relation("CitizenAppeals")
+  reviewedAppeals      Appeal[]               @relation("StaffReviewedAppeals")
+  ratings              Rating[]
+  notifications        Notification[]
+  auditLogs            AuditLog[]
+  statusHistoryChanges ReportStatusHistory[]  @relation("StatusHistoryChanger")
 
   @@index([email])
   @@index([role, status])
@@ -194,35 +202,47 @@ model Authority {
 }
 
 model AuthorityMembership {
-  id             String         @id @default(cuid())
+  id             String            @id @default(cuid())
   userId         String
-  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   authorityId    String
-  authority      Authority      @relation(fields: [authorityId], references: [id], onDelete: Cascade)
-  membershipRole MembershipRole @default(OPERATOR)
-  isActive       Boolean        @default(true)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  authority      Authority         @relation(fields: [authorityId], references: [id], onDelete: Cascade)
+  membershipRole MembershipRole    @default(OPERATOR)
+  sector         AlexandriaSector?
+  assignedAreaId String?
+  assignedArea   ServiceArea?      @relation(fields: [assignedAreaId], references: [id], onDelete: SetNull)
+  isActive       Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
 
   @@unique([userId, authorityId])
   @@index([userId, isActive])
   @@index([authorityId, isActive])
+  @@index([authorityId, sector, isActive])
 }
 
 model ServiceArea {
-  id          String        @id @default(cuid())
-  authorityId String
-  authority   Authority     @relation(fields: [authorityId], references: [id], onDelete: Cascade)
+  id          String            @id @default(cuid())
+  authorityId String?
+  authority   Authority?        @relation(fields: [authorityId], references: [id], onDelete: SetNull)
+  code        String?           // e.g. "ALX-MON1", "ALX-AGM"
+  sector      AlexandriaSector?
   name        String
   nameAr      String
-  polygon     Json?         // GeoJSON geometry boundary
-  isActive    Boolean       @default(true)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  centerLat   Float?
+  centerLng   Float?
+  polygon     Json?             // GeoJSON geometry boundary
+  isActive    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 
   routingRules RoutingRule[]
+  memberships  AuthorityMembership[]
+  reports      Report[]
 
   @@index([authorityId, isActive])
+  @@index([sector, isActive])
+  @@index([code])
 }
 
 model Category {
@@ -276,9 +296,12 @@ model Report {
   categoryId         String
   category           Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   authorityId        String?
-  authority          Authority?       @relation(fields: [authorityId], references: [id], onDelete: SetNull)
+  authority          Authority?        @relation(fields: [authorityId], references: [id], onDelete: SetNull)
+  serviceAreaId      String?
+  serviceArea        ServiceArea?      @relation(fields: [serviceAreaId], references: [id], onDelete: SetNull)
+  sector             AlexandriaSector?
   assignedToId       String?
-  assignedTo         User?            @relation("AssignedStaffReports", fields: [assignedToId], references: [id], onDelete: SetNull)
+  assignedTo         User?             @relation("AssignedStaffReports", fields: [assignedToId], references: [id], onDelete: SetNull)
 
   title              String
   description        String
@@ -324,6 +347,8 @@ model Report {
   @@index([publicReference])
   @@index([createdById, createdAt(sort: Desc)])
   @@index([authorityId, status, createdAt(sort: Desc)])
+  @@index([authorityId, sector, status, createdAt(sort: Desc)])
+  @@index([serviceAreaId, createdAt(sort: Desc)])
   @@index([status, createdAt(sort: Desc)])
   @@index([categoryId, createdAt(sort: Desc)])
   @@index([latitude, longitude])
@@ -356,6 +381,7 @@ model ReportStatusHistory {
   toStatus    ReportStatus
   reason      String?
   changedById String?
+  changedBy   User?        @relation("StatusHistoryChanger", fields: [changedById], references: [id], onDelete: SetNull)
   actorType   String       @default("USER") // "USER", "SYSTEM_CRON", "ADMIN_OVERRIDE"
   metadata    Json?
   createdAt   DateTime     @default(now())
